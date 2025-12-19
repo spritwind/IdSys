@@ -2,21 +2,21 @@
   "IdentityData": {
     "Roles": [
       {
-        "Name": "SkorubaIdentityAdminAdministrator"
+        "Name": "UCCapitalAdministrator"
       }
     ],
     "Users": [
       {
         "Username": "admin",
         "Password": "Pa$$word123",
-        "Email": "admin@skoruba.com",
+        "Email": "admin@uccapital.com",
         "Roles": [
-          "SkorubaIdentityAdminAdministrator"
+          "UCCapitalAdministrator"
         ],
         "Claims": [
           {
             "Type": "name",
-            "Value": "admin"
+            "Value": "UC Capital 管理員"
           }
         ]
       }

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>OAuth 回呼處理中 - UC Capital</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+        }
+        .loader {
+            text-align: center;
+            color: white;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .error {
+            background: #dc3545;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+        }
+        .brand {
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <h2><span class="brand">UC Capital</span></h2>
+        <p>正在處理驗證，請稍候...</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/oidc-client-ts@3.0.1/dist/browser/oidc-client-ts.min.js"></script>
+    <script>
+        const config = {
+            authority: 'https://localhost:44310',
+            client_id: 'uc_capital_demo_client',
+            redirect_uri: 'https://localhost:44310/demo/callback.html',
+            post_logout_redirect_uri: 'https://localhost:44310/demo/',
+            silent_redirect_uri: 'https://localhost:44310/demo/silent-renew.html',
+            response_type: 'code',
+            scope: 'openid profile email roles offline_access uc_capital_admin_api'
+        };
+
+        const userManager = new oidc.UserManager(config);
+
+        userManager.signinRedirectCallback()
+            .then(function(user) {
+                console.log('登入成功：', user);
+                window.location.href = '/demo/';
+            })
+            .catch(function(err) {
+                console.error('回呼錯誤：', err);
+                document.getElementById('loader').innerHTML = `
+                    <div class="error">
+                        <h2>驗證錯誤</h2>
+                        <p>${err.message || '發生未知錯誤'}</p>
+                        <p><a href="/demo/" style="color: white;">返回展示頁面</a></p>
+                    </div>
+                `;
+            });
+    </script>
+</body>
+</html>

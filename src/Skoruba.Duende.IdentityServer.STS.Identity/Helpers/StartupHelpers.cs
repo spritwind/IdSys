@@ -422,6 +422,18 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.Helpers
                       options.CallbackPath = externalProviderConfiguration.AzureAdCallbackPath;
                   }, cookieScheme: null);
             }
+
+            if (externalProviderConfiguration.UseGoogleProvider)
+            {
+                authenticationBuilder.AddGoogle(options =>
+                {
+                    options.ClientId = externalProviderConfiguration.GoogleClientId;
+                    options.ClientSecret = externalProviderConfiguration.GoogleClientSecret;
+                    options.CallbackPath = externalProviderConfiguration.GoogleCallbackPath;
+                    options.Scope.Add("email");
+                    options.Scope.Add("profile");
+                });
+            }
         }
 
         /// <summary>

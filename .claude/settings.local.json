@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet restore:*)",
+      "Bash(npm install:*)",
+      "Bash(npx gulp build)",
+      "Bash(dotnet build:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(dotnet run:*)",
+      "Bash(netstat:*)",
+      "Bash(sqllocaldb info:*)",
+      "Bash(cat:*)",
+      "Bash(copy \"c:\\\\Users\\\\User\\\\SideProject\\\\Duende.IdentityServer.Admin\\\\Img\\\\fkpu2-y9krp-001.ico\" \"c:\\\\Users\\\\User\\\\SideProject\\\\Duende.IdentityServer.Admin\\\\src\\\\Skoruba.Duende.IdentityServer.STS.Identity\\\\wwwroot\\\\favicon.ico\" /Y)",
+      "Bash(copy:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: 整合 UC Capital 品牌與 Google OAuth 驗證\n\n- 新增 Google OAuth 外部驗證提供者\n- 建立 OAuth 2.0 / OIDC 展示用戶端 \\(demo\\)\n- 更新所有品牌名稱為 UC Capital\n- 將介面語言轉換為繁體中文\n- 升級 node-sass 至 dart-sass 以支援 Node.js 22\n- 新增 CLAUDE.md 專案文件\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+    ]
+  }
+}

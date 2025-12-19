@@ -13,7 +13,7 @@
             {
                 "Name": "File",
                 "Args": {
-                    "path": "Log/skoruba_admin.txt",
+                    "path": "Log/uc_capital_api.txt",
                     "rollingInterval": "Day"
                 }
             },

@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth 2.0 / OIDC 展示用戶端 - UC Capital</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .token-box {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .token-box pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .json-key { color: #9cdcfe; }
+        .json-string { color: #ce9178; }
+        .json-number { color: #b5cea8; }
+        .json-boolean { color: #569cd6; }
+        .section-card {
+            border-left: 4px solid #0d6efd;
+        }
+        .status-badge { font-size: 0.9rem; }
+        .btn-action { min-width: 140px; }
+        .header-gradient {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+        }
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+        }
+        .brand-logo {
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .brand-icon {
+            height: 48px;
+            margin-right: 12px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-gradient text-white py-4 mb-4">
+        <div class="container">
+            <h1 class="mb-1"><img src="logo.png" alt="UC Capital" class="brand-icon"><span class="brand-logo">UC Capital</span> OAuth 2.0 / OIDC 展示</h1>
+            <p class="mb-0 opacity-75">驗證伺服器 Token 流程展示</p>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <!-- 狀態區塊 -->
+        <div class="card mb-4 section-card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-person-circle me-2"></i>驗證狀態</h5>
+                <span id="statusBadge" class="badge bg-secondary status-badge">尚未登入</span>
+            </div>
+            <div class="card-body">
+                <div id="userInfo" class="d-none">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>姓名：</strong> <span id="userName">-</span></p>
+                            <p class="mb-1"><strong>電子郵件：</strong> <span id="userEmail">-</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>使用者識別碼 (sub)：</strong> <span id="userSub">-</span></p>
+                            <p class="mb-1"><strong>Token 到期時間：</strong> <span id="tokenExpires">-</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div id="loginPrompt">
+                    <p class="text-muted mb-0">請先登入以檢視 Token 資訊。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 操作按鈕 -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2">
+                    <button id="btnLogin" class="btn btn-primary btn-action">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> 登入
+                    </button>
+                    <button id="btnLogout" class="btn btn-outline-danger btn-action" disabled>
+                        <i class="bi bi-box-arrow-right me-1"></i> 登出
+                    </button>
+                    <button id="btnRefresh" class="btn btn-success btn-action" disabled>
+                        <i class="bi bi-arrow-clockwise me-1"></i> 換發 Token
+                    </button>
+                    <button id="btnSilentRenew" class="btn btn-info btn-action" disabled>
+                        <i class="bi bi-arrow-repeat me-1"></i> 靜默更新
+                    </button>
+                    <button id="btnCallApi" class="btn btn-warning btn-action" disabled>
+                        <i class="bi bi-cloud-arrow-up me-1"></i> 呼叫 API
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Token 區塊 -->
+        <div class="row">
+            <!-- Access Token -->
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100 section-card">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0"><i class="bi bi-key me-2"></i>存取權杖 (Access Token)</h6>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('accessTokenRaw')">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="token-box p-3 position-relative">
+                            <pre id="accessTokenRaw">尚無資料</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Access Token 解碼 -->
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100 section-card">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0"><i class="bi bi-code-square me-2"></i>存取權杖（解碼後）</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="token-box p-3">
+                            <pre id="accessTokenDecoded">尚無資料</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ID Token -->
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100 section-card">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0"><i class="bi bi-person-badge me-2"></i>身分權杖 (ID Token)</h6>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('idTokenRaw')">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="token-box p-3">
+                            <pre id="idTokenRaw">尚無資料</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ID Token 解碼 -->
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100 section-card">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0"><i class="bi bi-code-square me-2"></i>身分權杖（解碼後）</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="token-box p-3">
+                            <pre id="idTokenDecoded">尚無資料</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Refresh Token -->
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100 section-card">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0"><i class="bi bi-arrow-repeat me-2"></i>更新權杖 (Refresh Token)</h6>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('refreshTokenRaw')">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="token-box p-3">
+                            <pre id="refreshTokenRaw">尚無資料</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 使用者資料 -->
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100 section-card">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0"><i class="bi bi-person-lines-fill me-2"></i>使用者資料（來自 ID Token）</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="token-box p-3">
+                            <pre id="userProfile">尚無資料</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API 回應 -->
+        <div class="card mb-4 section-card">
+            <div class="card-header bg-white">
+                <h6 class="mb-0"><i class="bi bi-cloud-check me-2"></i>API 回應</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">API 端點：</label>
+                    <div class="input-group">
+                        <input type="text" id="apiEndpoint" class="form-control"
+                               value="https://localhost:44302/api/Dashboard/IdentityServerSummary">
+                        <button class="btn btn-outline-secondary" onclick="testApiCall()">
+                            <i class="bi bi-send"></i> 送出
+                        </button>
+                    </div>
+                </div>
+                <div class="token-box p-3">
+                    <pre id="apiResponse">尚未呼叫 API</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- 事件紀錄 -->
+        <div class="card section-card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><i class="bi bi-journal-text me-2"></i>事件紀錄</h6>
+                <button class="btn btn-sm btn-outline-secondary" onclick="clearLog()">
+                    <i class="bi bi-trash"></i> 清除
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="token-box p-3" style="max-height: 200px;">
+                    <pre id="eventLog"></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- 頁尾 -->
+        <div class="text-center text-muted mt-4">
+            <small>UC Capital 驗證伺服器 - OAuth 2.0 / OpenID Connect 展示用戶端</small>
+        </div>
+    </div>
+
+    <!-- oidc-client-ts from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/oidc-client-ts@3.0.1/dist/browser/oidc-client-ts.min.js"></script>
+    <script>
+        // 設定
+        const config = {
+            authority: 'https://localhost:44310',
+            client_id: 'uc_capital_demo_client',
+            redirect_uri: 'https://localhost:44310/demo/callback.html',
+            post_logout_redirect_uri: 'https://localhost:44310/demo/',
+            silent_redirect_uri: 'https://localhost:44310/demo/silent-renew.html',
+            response_type: 'code',
+            scope: 'openid profile email roles offline_access uc_capital_admin_api',
+            automaticSilentRenew: false,
+            loadUserInfo: true
+        };
+
+        const userManager = new oidc.UserManager(config);
+
+        // 事件紀錄
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('eventLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '[錯誤]' : type === 'success' ? '[成功]' : '[資訊]';
+            logEl.textContent = `${timestamp} ${prefix} ${message}\n` + logEl.textContent;
+        }
+
+        // JWT 解碼
+        function decodeJwt(token) {
+            try {
+                const parts = token.split('.');
+                if (parts.length !== 3) return null;
+
+                const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+                const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+
+                return { header, payload };
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // JSON 語法高亮
+        function syntaxHighlight(json) {
+            if (typeof json !== 'string') {
+                json = JSON.stringify(json, null, 2);
+            }
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                let cls = 'json-number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    } else {
+                        cls = 'json-string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-boolean';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+
+        // 更新介面
+        function updateUI(user) {
+            const isAuthenticated = !!user && !user.expired;
+
+            document.getElementById('statusBadge').textContent = isAuthenticated ? '已登入' : '尚未登入';
+            document.getElementById('statusBadge').className = `badge status-badge ${isAuthenticated ? 'bg-success' : 'bg-secondary'}`;
+
+            document.getElementById('btnLogin').disabled = isAuthenticated;
+            document.getElementById('btnLogout').disabled = !isAuthenticated;
+            document.getElementById('btnRefresh').disabled = !isAuthenticated || !user?.refresh_token;
+            document.getElementById('btnSilentRenew').disabled = !isAuthenticated;
+            document.getElementById('btnCallApi').disabled = !isAuthenticated;
+
+            document.getElementById('userInfo').classList.toggle('d-none', !isAuthenticated);
+            document.getElementById('loginPrompt').classList.toggle('d-none', isAuthenticated);
+
+            if (isAuthenticated) {
+                document.getElementById('userName').textContent = user.profile?.name || user.profile?.preferred_username || '-';
+                document.getElementById('userEmail').textContent = user.profile?.email || '-';
+                document.getElementById('userSub').textContent = user.profile?.sub || '-';
+                document.getElementById('tokenExpires').textContent = user.expires_at ?
+                    new Date(user.expires_at * 1000).toLocaleString('zh-TW') : '-';
+
+                // 存取權杖
+                document.getElementById('accessTokenRaw').textContent = user.access_token || '尚無資料';
+                const decodedAccess = decodeJwt(user.access_token);
+                document.getElementById('accessTokenDecoded').innerHTML = decodedAccess ?
+                    syntaxHighlight(JSON.stringify(decodedAccess, null, 2)) : '非有效的 JWT';
+
+                // 身分權杖
+                document.getElementById('idTokenRaw').textContent = user.id_token || '尚無資料';
+                const decodedId = decodeJwt(user.id_token);
+                document.getElementById('idTokenDecoded').innerHTML = decodedId ?
+                    syntaxHighlight(JSON.stringify(decodedId, null, 2)) : '非有效的 JWT';
+
+                // 更新權杖
+                document.getElementById('refreshTokenRaw').textContent = user.refresh_token || '尚無資料（需要 offline_access 範圍）';
+
+                // 使用者資料
+                document.getElementById('userProfile').innerHTML = syntaxHighlight(JSON.stringify(user.profile, null, 2));
+            } else {
+                document.getElementById('accessTokenRaw').textContent = '尚無資料';
+                document.getElementById('accessTokenDecoded').textContent = '尚無資料';
+                document.getElementById('idTokenRaw').textContent = '尚無資料';
+                document.getElementById('idTokenDecoded').textContent = '尚無資料';
+                document.getElementById('refreshTokenRaw').textContent = '尚無資料';
+                document.getElementById('userProfile').textContent = '尚無資料';
+            }
+        }
+
+        // 複製到剪貼簿
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                log('已複製到剪貼簿', 'success');
+            });
+        }
+
+        // 清除紀錄
+        function clearLog() {
+            document.getElementById('eventLog').textContent = '';
+        }
+
+        // 登入
+        document.getElementById('btnLogin').addEventListener('click', async () => {
+            log('開始登入流程...');
+            try {
+                await userManager.signinRedirect();
+            } catch (err) {
+                log(`登入錯誤：${err.message}`, 'error');
+            }
+        });
+
+        // 登出
+        document.getElementById('btnLogout').addEventListener('click', async () => {
+            log('開始登出流程...');
+            try {
+                await userManager.signoutRedirect();
+            } catch (err) {
+                log(`登出錯誤：${err.message}`, 'error');
+            }
+        });
+
+        // 換發 Token
+        document.getElementById('btnRefresh').addEventListener('click', async () => {
+            log('使用更新權杖換發新 Token...');
+            try {
+                const user = await userManager.signinSilent();
+                log('Token 換發成功！', 'success');
+                updateUI(user);
+            } catch (err) {
+                log(`換發錯誤：${err.message}`, 'error');
+            }
+        });
+
+        // 靜默更新
+        document.getElementById('btnSilentRenew').addEventListener('click', async () => {
+            log('嘗試透過 iframe 靜默更新...');
+            try {
+                const user = await userManager.signinSilent();
+                log('靜默更新成功！', 'success');
+                updateUI(user);
+            } catch (err) {
+                log(`靜默更新錯誤：${err.message}`, 'error');
+            }
+        });
+
+        // 呼叫 API
+        document.getElementById('btnCallApi').addEventListener('click', testApiCall);
+
+        async function testApiCall() {
+            const endpoint = document.getElementById('apiEndpoint').value;
+            log(`呼叫 API：${endpoint}`);
+
+            try {
+                const user = await userManager.getUser();
+                if (!user || !user.access_token) {
+                    throw new Error('沒有可用的存取權杖');
+                }
+
+                const response = await fetch(endpoint, {
+                    headers: {
+                        'Authorization': `Bearer ${user.access_token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const contentType = response.headers.get('content-type');
+                let data;
+
+                if (contentType && contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    data = await response.text();
+                }
+
+                document.getElementById('apiResponse').innerHTML = syntaxHighlight(
+                    JSON.stringify({
+                        status: response.status,
+                        statusText: response.statusText,
+                        data: data
+                    }, null, 2)
+                );
+
+                log(`API 呼叫完成，狀態碼：${response.status}`, response.ok ? 'success' : 'error');
+            } catch (err) {
+                document.getElementById('apiResponse').innerHTML = syntaxHighlight(
+                    JSON.stringify({ error: err.message }, null, 2)
+                );
+                log(`API 呼叫失敗：${err.message}`, 'error');
+            }
+        }
+
+        // 初始化
+        async function init() {
+            log('展示用戶端已初始化');
+            log(`驗證伺服器：${config.authority}`);
+            log(`用戶端 ID：${config.client_id}`);
+
+            try {
+                const user = await userManager.getUser();
+                if (user) {
+                    log('找到現有的登入階段', 'success');
+                    updateUI(user);
+                } else {
+                    log('沒有現有的登入階段');
+                    updateUI(null);
+                }
+            } catch (err) {
+                log(`初始化錯誤：${err.message}`, 'error');
+                updateUI(null);
+            }
+
+            // 註冊事件
+            userManager.events.addUserLoaded((user) => {
+                log('使用者已載入', 'success');
+                updateUI(user);
+            });
+
+            userManager.events.addUserUnloaded(() => {
+                log('使用者已登出');
+                updateUI(null);
+            });
+
+            userManager.events.addAccessTokenExpiring(() => {
+                log('存取權杖即將到期...', 'info');
+            });
+
+            userManager.events.addAccessTokenExpired(() => {
+                log('存取權杖已到期！', 'error');
+            });
+
+            userManager.events.addSilentRenewError((err) => {
+                log(`靜默更新錯誤：${err.message}`, 'error');
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>

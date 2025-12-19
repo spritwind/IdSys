@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>靜默更新 - UC Capital</title>
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/oidc-client-ts@3.0.1/dist/browser/oidc-client-ts.min.js"></script>
+    <script>
+        const config = {
+            authority: 'https://localhost:44310',
+            client_id: 'uc_capital_demo_client',
+            redirect_uri: 'https://localhost:44310/demo/callback.html',
+            silent_redirect_uri: 'https://localhost:44310/demo/silent-renew.html',
+            response_type: 'code',
+            scope: 'openid profile email roles offline_access uc_capital_admin_api'
+        };
+
+        const userManager = new oidc.UserManager(config);
+
+        userManager.signinSilentCallback()
+            .then(() => {
+                console.log('靜默更新回呼完成');
+            })
+            .catch((err) => {
+                console.error('靜默更新回呼錯誤：', err);
+            });
+    </script>
+</body>
+</html>

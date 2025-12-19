@@ -1,10 +1,10 @@
-﻿{
+{
     "IdentityServerData": {
         "IdentityResources": [
             {
                 "Name": "roles",
                 "Enabled": true,
-                "DisplayName": "Roles",
+                "DisplayName": "角色",
                 "UserClaims": [
                     "role"
                 ]
@@ -13,7 +13,7 @@
                 "Name": "openid",
                 "Enabled": true,
                 "Required": true,
-                "DisplayName": "Your user identifier",
+                "DisplayName": "使用者識別碼",
                 "UserClaims": [
                     "sub"
                 ]
@@ -21,8 +21,8 @@
             {
                 "Name": "profile",
                 "Enabled": true,
-                "DisplayName": "User profile",
-                "Description": "Your user profile information (first name, last name, etc.)",
+                "DisplayName": "使用者資料",
+                "Description": "您的使用者資料（姓名、暱稱等）",
                 "Emphasize": true,
                 "UserClaims": [
                     "name",
@@ -44,7 +44,7 @@
             {
                 "Name": "email",
                 "Enabled": true,
-                "DisplayName": "Your email address",
+                "DisplayName": "電子郵件",
                 "Emphasize": true,
                 "UserClaims": [
                     "email",
@@ -54,7 +54,7 @@
             {
                 "Name": "address",
                 "Enabled": true,
-                "DisplayName": "Your address",
+                "DisplayName": "地址",
                 "Emphasize": true,
                 "UserClaims": [
                     "address"
@@ -63,8 +63,8 @@
         ],
         "ApiScopes": [
             {
-                "Name": "skoruba_identity_admin_api",
-                "DisplayName": "skoruba_identity_admin_api",
+                "Name": "uc_capital_admin_api",
+                "DisplayName": "UC Capital 管理 API",
                 "Required": true,
                 "UserClaims": [
                     "role",
@@ -74,16 +74,16 @@
         ],
         "ApiResources": [
             {
-                "Name": "skoruba_identity_admin_api",
+                "Name": "uc_capital_admin_api",
                 "Scopes": [
-                    "skoruba_identity_admin_api"
+                    "uc_capital_admin_api"
                 ]
             }
         ],
         "Clients": [
             {
-                "ClientId": "skoruba_identity_admin",
-                "ClientName": "skoruba_identity_admin",
+                "ClientId": "uc_capital_admin",
+                "ClientName": "UC Capital 管理介面",
                 "ClientUri": "https://localhost:44303",
                 "AllowedGrantTypes": [
                     "authorization_code"
@@ -91,7 +91,7 @@
                 "RequirePkce": true,
                 "ClientSecrets": [
                     {
-                        "Value": "skoruba_admin_client_secret"
+                        "Value": "uc_capital_admin_secret"
                     }
                 ],
                 "RedirectUris": [
@@ -112,8 +112,8 @@
                 ]
             },
             {
-                "ClientId": "skoruba_identity_admin_api_swaggerui",
-                "ClientName": "skoruba_identity_admin_api_swaggerui",
+                "ClientId": "uc_capital_admin_api_swaggerui",
+                "ClientName": "UC Capital API Swagger 測試介面",
                 "AllowedGrantTypes": [
                     "authorization_code"
                 ],
@@ -123,10 +123,42 @@
                     "https://localhost:44302/swagger/oauth2-redirect.html"
                 ],
                 "AllowedScopes": [
-                    "skoruba_identity_admin_api"
+                    "uc_capital_admin_api"
                 ],
                 "AllowedCorsOrigins": [
                     "https://localhost:44302"
+                ]
+            },
+            {
+                "ClientId": "uc_capital_demo_client",
+                "ClientName": "UC Capital OAuth 展示用戶端",
+                "ClientUri": "https://localhost:44310",
+                "AllowedGrantTypes": [
+                    "authorization_code"
+                ],
+                "RequireClientSecret": false,
+                "RequirePkce": true,
+                "AllowOfflineAccess": true,
+                "RefreshTokenUsage": 1,
+                "RefreshTokenExpiration": 1,
+                "AccessTokenLifetime": 3600,
+                "RedirectUris": [
+                    "https://localhost:44310/demo/callback.html",
+                    "https://localhost:44310/demo/silent-renew.html"
+                ],
+                "PostLogoutRedirectUris": [
+                    "https://localhost:44310/demo/"
+                ],
+                "AllowedCorsOrigins": [
+                    "https://localhost:44310"
+                ],
+                "AllowedScopes": [
+                    "openid",
+                    "email",
+                    "profile",
+                    "roles",
+                    "offline_access",
+                    "uc_capital_admin_api"
                 ]
             }
         ]
