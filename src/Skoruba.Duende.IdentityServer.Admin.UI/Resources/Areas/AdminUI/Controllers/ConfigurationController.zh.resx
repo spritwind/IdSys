@@ -118,78 +118,78 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="SuccessAddApiResource" xml:space="preserve">
-    <value>Api 资源 {0} 已成功创建！</value>
+    <value>Api 資源 {0} 已成功建立！</value>
   </data>
   <data name="SuccessAddApiResourceProperty" xml:space="preserve">
-    <value>Api 资源 {1} 的 Api 资源属性 {0} 已成功保存！</value>
+    <value>Api 資源 {1} 的 Api 資源屬性 {0} 已成功儲存！</value>
   </data>
   <data name="SuccessAddApiScope" xml:space="preserve">
-    <value>Api 作用域 {0} 已成功创建！</value>
+    <value>Api 範圍 {0} 已成功建立！</value>
   </data>
   <data name="SuccessAddApiScopeProperty" xml:space="preserve">
     <value>Api Scope property {0} for api scope {1} is successfully saved!</value>
   </data>
   <data name="SuccessAddApiSecret" xml:space="preserve">
-    <value>Api 密钥已成功创建！</value>
+    <value>Api 金鑰已成功建立！</value>
   </data>
   <data name="SuccessAddClient" xml:space="preserve">
-    <value>客户端 {0} 已成功创建！</value>
+    <value>用戶端 {0} 已成功建立！</value>
   </data>
   <data name="SuccessAddClientClaim" xml:space="preserve">
-    <value>客户端 {1} 的客户端声明 {0} 已成功保存！</value>
+    <value>用戶端 {1} 的用戶端宣告 {0} 已成功儲存！</value>
   </data>
   <data name="SuccessAddClientProperty" xml:space="preserve">
-    <value>客户端 {1} 的客户端属性 {0} 已成功保存！</value>
+    <value>用戶端 {1} 的用戶端屬性 {0} 已成功儲存！</value>
   </data>
   <data name="SuccessAddClientSecret" xml:space="preserve">
-    <value>客户端 {0} 的客户端密钥已成功保存！</value>
+    <value>用戶端 {0} 的用戶端金鑰已成功儲存！</value>
   </data>
   <data name="SuccessAddIdentityResource" xml:space="preserve">
-    <value>身份资源 {0} 已成功保存！</value>
+    <value>身分資源 {0} 已成功儲存！</value>
   </data>
   <data name="SuccessAddIdentityResourceProperty" xml:space="preserve">
-    <value>Api 资源 {1} 的身份资源属性 {0} 已成功保存！</value>
+    <value>Api 資源 {1} 的身分資源屬性 {0} 已成功儲存！</value>
   </data>
   <data name="SuccessClientClone" xml:space="preserve">
-    <value>客户端 {0} 已成功克隆！</value>
+    <value>用戶端 {0} 已成功複製！</value>
   </data>
   <data name="SuccessClientDelete" xml:space="preserve">
-    <value>客户端已成功删除！</value>
+    <value>用戶端已成功刪除！</value>
   </data>
   <data name="SuccessDeleteApiResource" xml:space="preserve">
-    <value>Api 资源已成功删除！</value>
+    <value>Api 資源已成功刪除！</value>
   </data>
   <data name="SuccessDeleteApiResourceProperty" xml:space="preserve">
-    <value>Api 资源属性已成功删除！</value>
+    <value>Api 資源屬性已成功刪除！</value>
   </data>
   <data name="SuccessDeleteApiScope" xml:space="preserve">
-    <value>Api 作用域已成功删除！</value>
+    <value>Api 範圍已成功刪除！</value>
   </data>
   <data name="SuccessDeleteApiScopeProperty" xml:space="preserve">
     <value>Api Scope property is successfully deleted!</value>
   </data>
   <data name="SuccessDeleteApiSecret" xml:space="preserve">
-    <value>Api 密钥已成功删除！</value>
+    <value>Api 金鑰已成功刪除！</value>
   </data>
   <data name="SuccessDeleteClientClaim" xml:space="preserve">
-    <value>客户端声明已成功删除！</value>
+    <value>用戶端宣告已成功刪除！</value>
   </data>
   <data name="SuccessDeleteClientProperty" xml:space="preserve">
-    <value>客户端属性已成功删除！</value>
+    <value>用戶端屬性已成功刪除！</value>
   </data>
   <data name="SuccessDeleteClientSecret" xml:space="preserve">
-    <value>客户端密钥已成功删除！</value>
+    <value>用戶端金鑰已成功刪除！</value>
   </data>
   <data name="SuccessDeleteIdentityResource" xml:space="preserve">
-    <value>身份资源已成功删除！</value>
+    <value>身分資源已成功刪除！</value>
   </data>
   <data name="SuccessDeleteIdentityResourceProperty" xml:space="preserve">
-    <value>身份资源属性已成功删除！</value>
+    <value>身分資源屬性已成功刪除！</value>
   </data>
   <data name="SuccessTitle" xml:space="preserve">
     <value>成功</value>
   </data>
   <data name="SuccessUpdateClient" xml:space="preserve">
-    <value>客户端 {0} 已成功更新！</value>
+    <value>用戶端 {0} 已成功更新！</value>
   </data>
 </root>

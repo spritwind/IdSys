@@ -118,9 +118,9 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="SubTitle" xml:space="preserve">
-    <value>完成后，您可以关闭此选项卡</value>
+    <value>完成後，您可以關閉此選項卡</value>
   </data>
   <data name="Title" xml:space="preserve">
-    <value>您现在正在返回该应用程序。</value>
+    <value>您現在正在返回該應用程式。</value>
   </data>
 </root>

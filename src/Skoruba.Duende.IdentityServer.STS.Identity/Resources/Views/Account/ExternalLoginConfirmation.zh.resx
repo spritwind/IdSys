@@ -121,19 +121,19 @@
     <value>Email</value>
   </data>
   <data name="Info" xml:space="preserve">
-    <value>您已使用 {0} 成功通过身份验证。
-        请在下面输入此站点的电子邮件地址，然后单击“注册”按钮完成登录。</value>
+    <value>您已使用 {0} 成功通過身分驗證。
+        請在下面輸入此站點的電子郵件地址，然後點擊“註冊”按鈕完成登入。</value>
   </data>
   <data name="Register" xml:space="preserve">
-    <value>注册</value>
+    <value>註冊</value>
   </data>
   <data name="SubTitle" xml:space="preserve">
-    <value>关联您的 {0} 帐户。</value>
+    <value>關聯您的 {0} 帳戶。</value>
   </data>
   <data name="Title" xml:space="preserve">
-    <value>注册</value>
+    <value>註冊</value>
   </data>
   <data name="UserName" xml:space="preserve">
-    <value>用户名</value>
+    <value>使用者名稱</value>
   </data>
 </root>

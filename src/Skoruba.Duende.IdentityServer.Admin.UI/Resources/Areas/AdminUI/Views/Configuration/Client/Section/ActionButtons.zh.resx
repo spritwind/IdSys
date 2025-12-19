@@ -118,12 +118,12 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ButtonClone" xml:space="preserve">
-    <value>克隆客户端</value>
+    <value>複製用戶端</value>
   </data>
   <data name="ButtonDelete" xml:space="preserve">
-    <value>删除客户端</value>
+    <value>刪除用戶端</value>
   </data>
   <data name="ButtonSave" xml:space="preserve">
-    <value>保存客户端</value>
+    <value>儲存用戶端</value>
   </data>
 </root>

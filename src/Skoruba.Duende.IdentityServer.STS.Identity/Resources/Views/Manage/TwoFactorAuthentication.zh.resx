@@ -118,54 +118,54 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AddAuthenticator" xml:space="preserve">
-    <value>添加身份验证器应用</value>
+    <value>新增身分驗證器應用</value>
   </data>
   <data name="AuthenticatorApp" xml:space="preserve">
-    <value>身份验证器应用</value>
+    <value>身分驗證器應用</value>
   </data>
   <data name="BeforeLogin" xml:space="preserve">
-    <value>在您使用恢复码登录之前</value>
+    <value>在您使用還原碼登入之前</value>
   </data>
   <data name="Disable2FA" xml:space="preserve">
-    <value>禁用 2FA</value>
+    <value>停用 2FA</value>
   </data>
   <data name="ForgetBrowser" xml:space="preserve">
-    <value>忘记这个浏览器</value>
+    <value>忘記這個瀏覽器</value>
   </data>
   <data name="GenerateNewCodes" xml:space="preserve">
-    <value>生成一组新的恢复码</value>
+    <value>產生一組新的還原碼</value>
   </data>
   <data name="NoCodes" xml:space="preserve">
-    <value>您还没有恢复码</value>
+    <value>您還沒有還原碼</value>
   </data>
   <data name="OneCode" xml:space="preserve">
-    <value>您还剩 1 个恢复码</value>
+    <value>您還剩 1 個還原碼</value>
   </data>
   <data name="RecoveryCodeLeft" xml:space="preserve">
-    <value>个剩余恢复代码</value>
+    <value>個剩余復原代碼</value>
   </data>
   <data name="ResetAuthenticator" xml:space="preserve">
-    <value>重置身份验证器应用</value>
+    <value>重設身分驗證器應用</value>
   </data>
   <data name="ResetCodes" xml:space="preserve">
-    <value>重置恢复码</value>
+    <value>重設還原碼</value>
   </data>
   <data name="SetupAuthenticator" xml:space="preserve">
-    <value>设置身份验证器应用</value>
+    <value>設定身分驗證器應用</value>
   </data>
   <data name="Title" xml:space="preserve">
-    <value>双因素身份验证 (2FA)</value>
+    <value>雙重因素身分驗證 (2FA)</value>
   </data>
   <data name="YouCanGenerateCodes" xml:space="preserve">
-    <value>您可以生成一组新的恢复码</value>
+    <value>您可以產生一組新的還原碼</value>
   </data>
   <data name="YouHave" xml:space="preserve">
     <value>你有</value>
   </data>
   <data name="YouMust" xml:space="preserve">
-    <value>你必须</value>
+    <value>你必須</value>
   </data>
   <data name="YouShould" xml:space="preserve">
-    <value>你应该</value>
+    <value>你應該</value>
   </data>
 </root>

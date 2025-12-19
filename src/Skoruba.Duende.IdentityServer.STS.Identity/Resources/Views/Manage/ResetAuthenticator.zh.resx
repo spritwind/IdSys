@@ -118,15 +118,15 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Info" xml:space="preserve">
-    <value>在您验证身份验证器应用之前，此过程会禁用2FA。如果您未完成身份验证器应用配置，则可能会失去对您帐户的访问权限。</value>
+    <value>在您驗證身分驗證器應用之前，此過程會停用2FA。如果您未完成身分驗證器應用設定，則可能會失去對您帳戶的存取權限。</value>
   </data>
   <data name="Reset" xml:space="preserve">
-    <value>重置验证器密钥</value>
+    <value>重設驗證器金鑰</value>
   </data>
   <data name="SubTitle" xml:space="preserve">
-    <value>如果重置验证器密钥，则在重新配置验证程序之前，验证程序应用程序将无法运行。</value>
+    <value>如果重設驗證器金鑰，則在重新設定驗證程式之前，驗證程式應用程式將無法執行。</value>
   </data>
   <data name="Title" xml:space="preserve">
-    <value>重置验证器密钥</value>
+    <value>重設驗證器金鑰</value>
   </data>
 </root>

@@ -118,42 +118,42 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="PanelTitle" xml:space="preserve">
-    <value>名称</value>
+    <value>名稱</value>
   </data>
   <data name="TitleCode" xml:space="preserve">
     <value>Authorization Code Flow with PKCE</value>
   </data>
   <data name="TitleDevice" xml:space="preserve">
-    <value>电视和限制输入设备应用程序</value>
+    <value>電视和限制輸入裝置應用程式</value>
   </data>
   <data name="TitleDeviceFlow" xml:space="preserve">
-    <value>设备流程</value>
+    <value>裝置流程</value>
   </data>
   <data name="TitleEmpty" xml:space="preserve">
-    <value>空 - 默认</value>
+    <value>空 - 預設</value>
   </data>
   <data name="TitleHybrid" xml:space="preserve">
     <value>混合流</value>
   </data>
   <data name="TitleImplicit" xml:space="preserve">
-    <value>隐含流</value>
+    <value>隱含流</value>
   </data>
   <data name="TitleMachine" xml:space="preserve">
-    <value>机械/机器人</value>
+    <value>機械/機器人</value>
   </data>
   <data name="TitleNative" xml:space="preserve">
-    <value>原生应用程序 - 移动/桌面</value>
+    <value>原生應用程式 - 移動/桌面</value>
   </data>
   <data name="TitlePasswordAndClient" xml:space="preserve">
-    <value>资源所有者密码和客户端凭据流</value>
+    <value>資源所有者密碼和用戶端憑據流</value>
   </data>
   <data name="TitleSpa" xml:space="preserve">
-    <value>单页应用程序 - Javascript</value>
+    <value>單页應用程式 - Javascript</value>
   </data>
   <data name="TitleWebHybrid" xml:space="preserve">
-    <value>Web 应用程序 - 服务器端</value>
+    <value>Web 應用程式 - 伺服器端</value>
   </data>
   <data name="TitleWebImplicit" xml:space="preserve">
-    <value>Web 应用程序 - 服务器端</value>
+    <value>Web 應用程式 - 伺服器端</value>
   </data>
 </root>

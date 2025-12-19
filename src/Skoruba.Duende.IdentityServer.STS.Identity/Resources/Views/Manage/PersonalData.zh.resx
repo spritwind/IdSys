@@ -118,18 +118,18 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Delete" xml:space="preserve">
-    <value>删除</value>
+    <value>刪除</value>
   </data>
   <data name="Download" xml:space="preserve">
-    <value>下载</value>
+    <value>下載</value>
   </data>
   <data name="Info" xml:space="preserve">
-    <value>您的帐户包含您提供给我们的个人数据。 此页面允许您下载或删除该数据。</value>
+    <value>您的帳戶包含您提供給我們的個人資料。 此頁面允許您下載或刪除該資料。</value>
   </data>
   <data name="Title" xml:space="preserve">
-    <value>个人数据</value>
+    <value>個人資料</value>
   </data>
   <data name="Warning" xml:space="preserve">
-    <value>删除此数据会永久删除您的帐户，并无法恢复。</value>
+    <value>刪除此資料會永久刪除您的帳戶，並無法還原。</value>
   </data>
 </root>

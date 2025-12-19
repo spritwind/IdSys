@@ -118,63 +118,63 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="IdentityErrorKey" xml:space="preserve">
-    <value>错误</value>
+    <value>錯誤</value>
   </data>
   <data name="RoleClaimDoesNotExist" xml:space="preserve">
-    <value>标识为 {0} 的角色声明不存在</value>
+    <value>識別碼為 {0} 的角色宣告不存在</value>
   </data>
   <data name="RoleClaimsCreateFailed" xml:space="preserve">
-    <value>角色声明创建失败</value>
+    <value>角色宣告建立失敗</value>
   </data>
   <data name="RoleClaimsDeleteFailed" xml:space="preserve">
-    <value>角色声明删除失败</value>
+    <value>角色宣告刪除失敗</value>
   </data>
   <data name="RoleCreateFailed" xml:space="preserve">
-    <value>角色创建失败</value>
+    <value>角色建立失敗</value>
   </data>
   <data name="RoleDeleteFailed" xml:space="preserve">
-    <value>角色删除失败</value>
+    <value>角色刪除失敗</value>
   </data>
   <data name="RoleDoesNotExist" xml:space="preserve">
-    <value>标识为 {0} 的角色不存在</value>
+    <value>識別碼為 {0} 的角色不存在</value>
   </data>
   <data name="RoleUpdateFailed" xml:space="preserve">
-    <value>角色更新失败</value>
+    <value>角色更新失敗</value>
   </data>
   <data name="UserChangePasswordFailed" xml:space="preserve">
-    <value>用户更改密码失败</value>
+    <value>使用者更改密碼失敗</value>
   </data>
   <data name="UserClaimDoesNotExist" xml:space="preserve">
-    <value>标识为 {0} 的用户声明不存在</value>
+    <value>識別碼為 {0} 的使用者宣告不存在</value>
   </data>
   <data name="UserClaimsCreateFailed" xml:space="preserve">
-    <value>用户声明创建失败</value>
+    <value>使用者宣告建立失敗</value>
   </data>
   <data name="UserClaimsDeleteFailed" xml:space="preserve">
-    <value>用户声明删除失败</value>
+    <value>使用者宣告刪除失敗</value>
   </data>
   <data name="UserCreateFailed" xml:space="preserve">
-    <value>用户创建失败</value>
+    <value>使用者建立失敗</value>
   </data>
   <data name="UserDeleteFailed" xml:space="preserve">
-    <value>用户删除失败</value>
+    <value>使用者刪除失敗</value>
   </data>
   <data name="UserDoesNotExist" xml:space="preserve">
-    <value>标识为 {0} 的用户不存在</value>
+    <value>識別碼為 {0} 的使用者不存在</value>
   </data>
   <data name="UserProviderDeleteFailed" xml:space="preserve">
-    <value>用户提供程序删除失败</value>
+    <value>使用者提供程式刪除失敗</value>
   </data>
   <data name="UserProviderDoesNotExist" xml:space="preserve">
-    <value>标识为 {0} 的用户提供程序不存在</value>
+    <value>識別碼為 {0} 的使用者提供程式不存在</value>
   </data>
   <data name="UserRoleCreateFailed" xml:space="preserve">
-    <value>用户角色创建失败</value>
+    <value>使用者角色建立失敗</value>
   </data>
   <data name="UserRoleDeleteFailed" xml:space="preserve">
-    <value>用户角色上传失败</value>
+    <value>使用者角色上傳失敗</value>
   </data>
   <data name="UserUpdateFailed" xml:space="preserve">
-    <value>用户更新失败</value>
+    <value>使用者更新失敗</value>
   </data>
 </root>

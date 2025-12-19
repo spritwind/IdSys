@@ -118,18 +118,18 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Click" xml:space="preserve">
-    <value>点击</value>
+    <value>點擊</value>
   </data>
   <data name="Here" xml:space="preserve">
-    <value>这里</value>
+    <value>這裡</value>
   </data>
   <data name="Return" xml:space="preserve">
     <value>回到</value>
   </data>
   <data name="SubTitle" xml:space="preserve">
-    <value>您现在已退出</value>
+    <value>您現在已登出</value>
   </data>
   <data name="Title" xml:space="preserve">
-    <value>注销</value>
+    <value>登出</value>
   </data>
 </root>

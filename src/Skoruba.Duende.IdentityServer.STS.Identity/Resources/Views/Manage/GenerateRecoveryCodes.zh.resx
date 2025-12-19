@@ -118,21 +118,21 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="GenerateCodes" xml:space="preserve">
-    <value>生成恢复码</value>
+    <value>產生還原碼</value>
   </data>
   <data name="GenerateRecoveryCodeInfo" xml:space="preserve">
-    <value>生成新的恢复码不会更改身份验证器应用程序中使用的密钥。 如果您希望更改身份验证器应用程序中使用的密钥，则应</value>
+    <value>產生新的還原碼不會更改身分驗證器應用程式中使用的金鑰。 如果您希望更改身分驗證器應用程式中使用的金鑰，則應</value>
   </data>
   <data name="LostInfo" xml:space="preserve">
-    <value>如果您丢失了设备并且没有恢复码，您将无法访问自己的帐户。</value>
+    <value>如果您遺失了裝置並且沒有還原碼，您將無法存取自己的帳戶。</value>
   </data>
   <data name="ResetKeys" xml:space="preserve">
-    <value>重置身份验证器密钥。</value>
+    <value>重設身分驗證器金鑰。</value>
   </data>
   <data name="SubTitle" xml:space="preserve">
-    <value>将这些代码放在安全的地方。</value>
+    <value>將這些代碼放在安全的地方。</value>
   </data>
   <data name="Title" xml:space="preserve">
-    <value>生成双因素身份验证（2FA）恢复码</value>
+    <value>產生雙重因素身分驗證（2FA）還原碼</value>
   </data>
 </root>

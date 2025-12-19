@@ -118,18 +118,18 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Disable2FA" xml:space="preserve">
-    <value>禁用 2FA</value>
+    <value>停用 2FA</value>
   </data>
   <data name="Info" xml:space="preserve">
-    <value>禁用 2FA 不会更改身份验证器应用中使用的密钥。 如果您希望更改身份验证器应用程序中使用的密钥，则应</value>
+    <value>停用 2FA 不會更改身分驗證器應用中使用的金鑰。 如果您希望更改身分驗證器應用程式中使用的金鑰，則應</value>
   </data>
   <data name="ResetLink" xml:space="preserve">
-    <value>重置您的身份验证器密钥</value>
+    <value>重設您的身分驗證器金鑰</value>
   </data>
   <data name="SubTitle" xml:space="preserve">
-    <value>此操作仅禁用 2FA。</value>
+    <value>此操作僅停用 2FA。</value>
   </data>
   <data name="Title" xml:space="preserve">
-    <value>禁用双因素身份验证 (2FA)</value>
+    <value>停用雙重因素身分驗證 (2FA)</value>
   </data>
 </root>

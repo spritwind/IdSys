@@ -118,15 +118,15 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Code" xml:space="preserve">
-    <value>恢复码</value>
+    <value>還原碼</value>
   </data>
   <data name="Info" xml:space="preserve">
-    <value>您已请求使用恢复码登录。 在您登录时提供身份验证器应用程序代码或禁用2FA并再次登录之前，将不会记住此登录信息。</value>
+    <value>您已請求使用還原碼登入。 在您登入時提供身分驗證器應用程式代碼或停用2FA並再次登入之前，將不會記住此登入資訊。</value>
   </data>
   <data name="LogIn" xml:space="preserve">
-    <value>登录</value>
+    <value>登入</value>
   </data>
   <data name="Title" xml:space="preserve">
-    <value>恢复码验证</value>
+    <value>還原碼驗證</value>
   </data>
 </root>

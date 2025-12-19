@@ -118,42 +118,42 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="SuccessCreateRole" xml:space="preserve">
-    <value>角色 {0} 已成功保存！</value>
+    <value>角色 {0} 已成功儲存！</value>
   </data>
   <data name="SuccessCreateRoleClaims" xml:space="preserve">
-    <value>声明 {0} - {1} 已成功保存！</value>
+    <value>宣告 {0} - {1} 已成功儲存！</value>
   </data>
   <data name="SuccessCreateUser" xml:space="preserve">
-    <value>用户 {0} 已成功保存！</value>
+    <value>使用者 {0} 已成功儲存！</value>
   </data>
   <data name="SuccessCreateUserClaims" xml:space="preserve">
-    <value>声明 {0} - {1} 已成功保存！</value>
+    <value>宣告 {0} - {1} 已成功儲存！</value>
   </data>
   <data name="SuccessCreateUserRole" xml:space="preserve">
-    <value>角色已成功保存！</value>
+    <value>角色已成功儲存！</value>
   </data>
   <data name="SuccessDeleteRole" xml:space="preserve">
-    <value>角色已成功删除！</value>
+    <value>角色已成功刪除！</value>
   </data>
   <data name="SuccessDeleteRoleClaims" xml:space="preserve">
-    <value>声明已成功删除！</value>
+    <value>宣告已成功刪除！</value>
   </data>
   <data name="SuccessDeleteUser" xml:space="preserve">
-    <value>用户已成功删除！</value>
+    <value>使用者已成功刪除！</value>
   </data>
   <data name="SuccessDeleteUserClaims" xml:space="preserve">
-    <value>声明已成功删除！</value>
+    <value>宣告已成功刪除！</value>
   </data>
   <data name="SuccessDeleteUserProviders" xml:space="preserve">
-    <value>用户提供商已成功删除！</value>
+    <value>使用者提供商已成功刪除！</value>
   </data>
   <data name="SuccessDeleteUserRole" xml:space="preserve">
-    <value>角色已成功删除！</value>
+    <value>角色已成功刪除！</value>
   </data>
   <data name="SuccessTitle" xml:space="preserve">
     <value>成功</value>
   </data>
   <data name="SuccessUserChangePassword" xml:space="preserve">
-    <value>新密码已成功更改！</value>
+    <value>新密碼已成功更改！</value>
   </data>
 </root>

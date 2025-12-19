@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="RoleName_Info" xml:space="preserve">
-    <value>角色的名称</value>
+    <value>角色的名稱</value>
   </data>
   <data name="RoleName_Label" xml:space="preserve">
     <value>角色名</value>
@@ -127,12 +127,12 @@
     <value />
   </data>
   <data name="Type_Label" xml:space="preserve">
-    <value>声明类型</value>
+    <value>宣告類型</value>
   </data>
   <data name="Value_Info" xml:space="preserve">
     <value />
   </data>
   <data name="Value_Label" xml:space="preserve">
-    <value>声明值</value>
+    <value>宣告值</value>
   </data>
 </root>

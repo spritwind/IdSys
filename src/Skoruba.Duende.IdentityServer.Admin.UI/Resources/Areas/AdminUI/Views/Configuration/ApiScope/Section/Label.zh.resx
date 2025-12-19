@@ -118,16 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Properties_Info" xml:space="preserve">
-    <value>需要保留任何自定义 Api 资源特定值的字典。</value>
+    <value>需要保留任何自訂 Api 資源特定值的字典。</value>
   </data>
   <data name="Properties_Label" xml:space="preserve">
-    <value>属性</value>
+    <value>屬性</value>
   </data>
   <data name="PropertyKey_Info" xml:space="preserve">
-    <value>键</value>
+    <value>鍵</value>
   </data>
   <data name="PropertyKey_Label" xml:space="preserve">
-    <value>键</value>
+    <value>鍵</value>
   </data>
   <data name="PropertyValue_Info" xml:space="preserve">
     <value>值</value>

@@ -118,33 +118,33 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ApiResourceDoesNotExist" xml:space="preserve">
-    <value>标识为 {0} 的 Api 资源不存在</value>
+    <value>識別碼為 {0} 的 Api 資源不存在</value>
   </data>
   <data name="ApiResourceExistsKey" xml:space="preserve">
-    <value>Api 资源已经存在</value>
+    <value>Api 資源已經存在</value>
   </data>
   <data name="ApiResourceExistsValue" xml:space="preserve">
-    <value>Api 资源 ({0}) 已经存在</value>
+    <value>Api 資源 ({0}) 已經存在</value>
   </data>
   <data name="ApiResourcePropertyDoesNotExist" xml:space="preserve">
-    <value>标识为 {0} 的 Api 资源属性不存在</value>
+    <value>識別碼為 {0} 的 Api 資源屬性不存在</value>
   </data>
   <data name="ApiResourcePropertyExistsKey" xml:space="preserve">
-    <value>Api 资源属性已存在</value>
+    <value>Api 資源屬性已存在</value>
   </data>
   <data name="ApiResourcePropertyExistsValue" xml:space="preserve">
-    <value>键为（{0}）的 Api 资源属性已存在</value>
+    <value>鍵為（{0}）的 Api 資源屬性已存在</value>
   </data>
   <data name="ApiScopeDoesNotExist" xml:space="preserve">
-    <value>标识为 {0} 的 Api 作用域不存在</value>
+    <value>識別碼為 {0} 的 Api 範圍不存在</value>
   </data>
   <data name="ApiScopeExistsKey" xml:space="preserve">
-    <value>Api 作用域已经存在</value>
+    <value>Api 範圍已經存在</value>
   </data>
   <data name="ApiScopeExistsValue" xml:space="preserve">
-    <value>Api 作用域 ({0}) 已经存在</value>
+    <value>Api 範圍 ({0}) 已經存在</value>
   </data>
   <data name="ApiSecretDoesNotExist" xml:space="preserve">
-    <value>标识为 {0} 的 Api 密钥不存在</value>
+    <value>識別碼為 {0} 的 Api 金鑰不存在</value>
   </data>
 </root>

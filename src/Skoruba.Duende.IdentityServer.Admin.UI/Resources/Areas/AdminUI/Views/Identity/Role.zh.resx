@@ -118,16 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ActionAddClaims" xml:space="preserve">
-    <value>添加角色声明</value>
+    <value>新增角色宣告</value>
   </data>
   <data name="ActionDeleteRole" xml:space="preserve">
-    <value>删除角色</value>
+    <value>刪除角色</value>
   </data>
   <data name="ActionRoleUsers" xml:space="preserve">
-    <value>用户</value>
+    <value>使用者</value>
   </data>
   <data name="ActionSaveRole" xml:space="preserve">
-    <value>保存角色</value>
+    <value>儲存角色</value>
   </data>
   <data name="NavigationRoles" xml:space="preserve">
     <value>角色</value>

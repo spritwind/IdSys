@@ -118,45 +118,45 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ButtonClone" xml:space="preserve">
-    <value>克隆客户端</value>
+    <value>複製用戶端</value>
   </data>
   <data name="InfoDescription" xml:space="preserve">
-    <value>客户端密钥不会被克隆。</value>
+    <value>用戶端金鑰不會被複製。</value>
   </data>
   <data name="InfoTitle" xml:space="preserve">
-    <value>信息：</value>
+    <value>資訊：</value>
   </data>
   <data name="LabelCloneClientClaims" xml:space="preserve">
-    <value>客户端声明</value>
+    <value>用戶端宣告</value>
   </data>
   <data name="LabelCloneClientCorsOrigins" xml:space="preserve">
-    <value>客户端跨域来源</value>
+    <value>用戶端跨網域來源</value>
   </data>
   <data name="LabelCloneClientGrantTypes" xml:space="preserve">
-    <value>客户端授权类型</value>
+    <value>用戶端授權類型</value>
   </data>
   <data name="LabelCloneClientIdPRestrictions" xml:space="preserve">
-    <value>客户端 IdP 限制</value>
+    <value>用戶端 IdP 限制</value>
   </data>
   <data name="LabelCloneClientPostLogoutRedirectUris" xml:space="preserve">
-    <value>客户端注销重定向 Uri</value>
+    <value>用戶端登出重新導向 Uri</value>
   </data>
   <data name="LabelCloneClientProperties" xml:space="preserve">
-    <value>客户端属性</value>
+    <value>用戶端屬性</value>
   </data>
   <data name="LabelCloneClientRedirectUris" xml:space="preserve">
-    <value>客户端重定向 Uri</value>
+    <value>用戶端重新導向 Uri</value>
   </data>
   <data name="LabelCloneClientScopes" xml:space="preserve">
-    <value>客户端作用域</value>
+    <value>用戶端範圍</value>
   </data>
   <data name="NavigationClients" xml:space="preserve">
-    <value>客户端</value>
+    <value>用戶端</value>
   </data>
   <data name="PageTitle" xml:space="preserve">
-    <value>克隆客户端</value>
+    <value>複製用戶端</value>
   </data>
   <data name="PanelTitle" xml:space="preserve">
-    <value>客户端</value>
+    <value>用戶端</value>
   </data>
 </root>

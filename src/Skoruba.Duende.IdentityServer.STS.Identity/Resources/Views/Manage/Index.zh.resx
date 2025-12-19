@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Country" xml:space="preserve">
-    <value>国家</value>
+    <value>國家</value>
   </data>
   <data name="Email" xml:space="preserve">
     <value>Email</value>
@@ -130,33 +130,33 @@
     <value>全名</value>
   </data>
   <data name="PhoneNumber" xml:space="preserve">
-    <value>电话号码</value>
+    <value>電話號碼</value>
   </data>
   <data name="PostalCode" xml:space="preserve">
-    <value>邮政编码</value>
+    <value>郵政編碼</value>
   </data>
   <data name="Profile" xml:space="preserve">
-    <value>个人资料 URL</value>
+    <value>個人資料 URL</value>
   </data>
   <data name="Region" xml:space="preserve">
-    <value>地区</value>
+    <value>地區</value>
   </data>
   <data name="Save" xml:space="preserve">
-    <value>保存</value>
+    <value>儲存</value>
   </data>
   <data name="SendVerificationEmail" xml:space="preserve">
-    <value>发送验证邮件</value>
+    <value>傳送驗證郵件</value>
   </data>
   <data name="StreetAddress" xml:space="preserve">
     <value>街道地址</value>
   </data>
   <data name="Title" xml:space="preserve">
-    <value>资料</value>
+    <value>資料</value>
   </data>
   <data name="UserName" xml:space="preserve">
-    <value>用户名</value>
+    <value>使用者名稱</value>
   </data>
   <data name="Website" xml:space="preserve">
-    <value>网站 URL</value>
+    <value>網站 URL</value>
   </data>
 </root>

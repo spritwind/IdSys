@@ -118,15 +118,15 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="PageTitle" xml:space="preserve">
-    <value>持久授权</value>
+    <value>持續授權</value>
   </data>
   <data name="TableButtonDetail" xml:space="preserve">
-    <value>详情</value>
+    <value>詳情</value>
   </data>
   <data name="TableSubjectId" xml:space="preserve">
-    <value>主体标识</value>
+    <value>主体識別碼</value>
   </data>
   <data name="TableSubjectName" xml:space="preserve">
-    <value>主体名称</value>
+    <value>主体名稱</value>
   </data>
 </root>

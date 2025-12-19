@@ -118,46 +118,46 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Description_Info" xml:space="preserve">
-    <value>该值将用于例如 在同意屏幕上。</value>
+    <value>該值將用於例如 在同意畫面上。</value>
   </data>
   <data name="Description_Label" xml:space="preserve">
     <value>描述</value>
   </data>
   <data name="DisplayName_Info" xml:space="preserve">
-    <value>该值将用于例如 在同意屏幕上。</value>
+    <value>該值將用於例如 在同意畫面上。</value>
   </data>
   <data name="DisplayName_Label" xml:space="preserve">
-    <value>显示名称</value>
+    <value>顯示名稱</value>
   </data>
   <data name="Emphasize_Info" xml:space="preserve">
-    <value>指定同意屏幕是否会强调此作用域（如果同意屏幕要实现此类功能）。 将此设置用于敏感或重要作用域。 默认为 false。</value>
+    <value>指定同意畫面是否會強調此範圍（如果同意畫面要實現此類功能）。 將此設定用於敏感或重要範圍。 預設為 false。</value>
   </data>
   <data name="Emphasize_Label" xml:space="preserve">
-    <value>强调</value>
+    <value>強調</value>
   </data>
   <data name="Enabled_Info" xml:space="preserve">
-    <value>指示此资源是否已启用且可以请求。 默认为 true。</value>
+    <value>指示此資源是否已啟用且可以請求。 預設為 true。</value>
   </data>
   <data name="Enabled_Label" xml:space="preserve">
-    <value>启用</value>
+    <value>啟用</value>
   </data>
   <data name="Name_Info" xml:space="preserve">
-    <value>身份资源的唯一名称。 这是客户端将用于授权请求中的作用域参数的值。</value>
+    <value>身分資源的唯一名稱。 這是用戶端將用於授權請求中的範圍參數的值。</value>
   </data>
   <data name="Name_Label" xml:space="preserve">
-    <value>名称</value>
+    <value>名稱</value>
   </data>
   <data name="Properties_Info" xml:space="preserve">
-    <value>需要保留任何自定义身份资源特定值的字典。</value>
+    <value>需要保留任何自訂身分資源特定值的字典。</value>
   </data>
   <data name="Properties_Label" xml:space="preserve">
-    <value>属性</value>
+    <value>屬性</value>
   </data>
   <data name="PropertyKey_Info" xml:space="preserve">
-    <value>键</value>
+    <value>鍵</value>
   </data>
   <data name="PropertyKey_Label" xml:space="preserve">
-    <value>键</value>
+    <value>鍵</value>
   </data>
   <data name="PropertyValue_Info" xml:space="preserve">
     <value>值</value>
@@ -166,21 +166,21 @@
     <value>值</value>
   </data>
   <data name="Required_Info" xml:space="preserve">
-    <value>指定用户是否可以在同意屏幕上取消选择作用域（如果同意屏幕要实现此类功能）。 默认为 false。</value>
+    <value>指定使用者是否可以在同意畫面上取消選擇範圍（如果同意畫面要實現此類功能）。 預設為 false。</value>
   </data>
   <data name="Required_Label" xml:space="preserve">
-    <value>必须</value>
+    <value>必須</value>
   </data>
   <data name="ShowInDiscoveryDocument_Info" xml:space="preserve">
-    <value>指定此作用域是否显示在发现文档中。 默认为 true。</value>
+    <value>指定此範圍是否顯示在探索文件中。預設為 true。</value>
   </data>
   <data name="ShowInDiscoveryDocument_Label" xml:space="preserve">
-    <value>在发现文档中显示</value>
+    <value>在探索文件中顯示</value>
   </data>
   <data name="UserClaims_Info" xml:space="preserve">
-    <value>应包含在身份令牌 id_token 中的关联用户声明类型的列表。</value>
+    <value>應包含在身分權杖 id_token 中的關聯使用者宣告類型清單。</value>
   </data>
   <data name="UserClaims_Label" xml:space="preserve">
-    <value>用户声明</value>
+    <value>使用者宣告</value>
   </data>
 </root>

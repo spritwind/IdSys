@@ -118,22 +118,22 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Description_Info" xml:space="preserve">
-    <value>该值可以用于例如 在同意屏幕上。</value>
+    <value>該值可以用於例如 在同意畫面上。</value>
   </data>
   <data name="Description_Label" xml:space="preserve">
     <value>描述</value>
   </data>
   <data name="DisplayName_Info" xml:space="preserve">
-    <value>该值可以用于例如 在同意屏幕上。</value>
+    <value>該值可以用於例如 在同意畫面上。</value>
   </data>
   <data name="DisplayName_Label" xml:space="preserve">
-    <value>显示名称</value>
+    <value>顯示名稱</value>
   </data>
   <data name="Enabled_Info" xml:space="preserve">
-    <value>指示此资源是否已启用且可以请求。 默认为 true。</value>
+    <value>指示此資源是否已啟用且可以請求。 預設為 true。</value>
   </data>
   <data name="Enabled_Label" xml:space="preserve">
-    <value>启用</value>
+    <value>啟用</value>
   </data>
   <data name="Expiration_Info" xml:space="preserve">
     <value>到期</value>
@@ -142,22 +142,22 @@
     <value>到期</value>
   </data>
   <data name="Name_Info" xml:space="preserve">
-    <value>API 的唯一名称。 此值用于自我认证，并将添加到传给受众的访问令牌 access_token 中。</value>
+    <value>API 的唯一名稱。 此值用於自我驗證，並將新增到傳給受眾的存取權杖 access_token 中。</value>
   </data>
   <data name="Name_Label" xml:space="preserve">
-    <value>名称</value>
+    <value>名稱</value>
   </data>
   <data name="Properties_Info" xml:space="preserve">
-    <value>需要保留任何自定义 Api 资源特定值的字典。</value>
+    <value>需要保留任何自訂 Api 資源特定值的字典。</value>
   </data>
   <data name="Properties_Label" xml:space="preserve">
-    <value>属性</value>
+    <value>屬性</value>
   </data>
   <data name="PropertyKey_Info" xml:space="preserve">
-    <value>键</value>
+    <value>鍵</value>
   </data>
   <data name="PropertyKey_Label" xml:space="preserve">
-    <value>键</value>
+    <value>鍵</value>
   </data>
   <data name="PropertyValue_Info" xml:space="preserve">
     <value>值</value>
@@ -172,10 +172,10 @@
     <value>Require Resource Indicator</value>
   </data>
   <data name="Scopes_Info" xml:space="preserve">
-    <value>API 必须至少有一个作用域。 每个作用域可以有不同的设置。</value>
+    <value>API 必須至少有一個範圍。 每個範圍可以有不同的設定。</value>
   </data>
   <data name="Scopes_Label" xml:space="preserve">
-    <value>作用域</value>
+    <value>範圍</value>
   </data>
   <data name="SecretDescription_Info" xml:space="preserve">
     <value>描述</value>
@@ -184,10 +184,10 @@
     <value>描述</value>
   </data>
   <data name="Secrets_Info" xml:space="preserve">
-    <value>API 密钥用于内省端点。 API 可以使用 API 名称和密钥进行内省验证。</value>
+    <value>API 金鑰用於內省端點。 API 可以使用 API 名稱和金鑰進行內省驗證。</value>
   </data>
   <data name="Secrets_Label" xml:space="preserve">
-    <value>密钥</value>
+    <value>金鑰</value>
   </data>
   <data name="SigningAlgorithms_Info" xml:space="preserve">
     <value>List of allowed signing algorithms for access token. If empty, will use the server default signing algorithm.</value>
@@ -196,9 +196,9 @@
     <value>Allowed Access Token Signing Algorithms</value>
   </data>
   <data name="UserClaims_Info" xml:space="preserve">
-    <value>应包含在访问令牌中的关联用户声明类型的列表。</value>
+    <value>應包含在存取權杖中的關聯使用者宣告類型的清單。</value>
   </data>
   <data name="UserClaims_Label" xml:space="preserve">
-    <value>用户声明</value>
+    <value>使用者宣告</value>
   </data>
 </root>

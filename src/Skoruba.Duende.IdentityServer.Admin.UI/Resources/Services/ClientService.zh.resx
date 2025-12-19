@@ -118,21 +118,21 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ClientClaimDoesNotExist" xml:space="preserve">
-    <value>标识为 {0} 的客户端声明不存在</value>
+    <value>識別碼為 {0} 的用戶端宣告不存在</value>
   </data>
   <data name="ClientDoesNotExist" xml:space="preserve">
-    <value>标识为 {0} 的客户端不存在</value>
+    <value>識別碼為 {0} 的用戶端不存在</value>
   </data>
   <data name="ClientExistsKey" xml:space="preserve">
-    <value>客户端已存在</value>
+    <value>用戶端已存在</value>
   </data>
   <data name="ClientExistsValue" xml:space="preserve">
-    <value>客户端标识 ({0}) 已存在</value>
+    <value>用戶端識別碼 ({0}) 已存在</value>
   </data>
   <data name="ClientPropertyDoesNotExist" xml:space="preserve">
-    <value>标识为 {0} 的客户端属性不存在</value>
+    <value>識別碼為 {0} 的用戶端屬性不存在</value>
   </data>
   <data name="ClientSecretDoesNotExist" xml:space="preserve">
-    <value>标识为 {0} 的客户端密钥不存在</value>
+    <value>識別碼為 {0} 的用戶端金鑰不存在</value>
   </data>
 </root>

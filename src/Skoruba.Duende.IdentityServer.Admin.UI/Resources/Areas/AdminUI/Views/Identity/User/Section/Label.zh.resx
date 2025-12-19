@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="RoleName_Info" xml:space="preserve">
-    <value>角色的名称</value>
+    <value>角色的名稱</value>
   </data>
   <data name="RoleName_Label" xml:space="preserve">
     <value>角色名</value>
@@ -133,37 +133,37 @@
     <value />
   </data>
   <data name="Type_Label" xml:space="preserve">
-    <value>声明类型</value>
+    <value>宣告類型</value>
   </data>
   <data name="UserAccessFailedCount_Info" xml:space="preserve">
-    <value>用户访问失败计数</value>
+    <value>使用者存取失敗計数</value>
   </data>
   <data name="UserAccessFailedCount_Label" xml:space="preserve">
-    <value>用户访问失败计数</value>
+    <value>使用者存取失敗計数</value>
   </data>
   <data name="UserChangePasswordConfirmPassword_Info" xml:space="preserve">
-    <value>确认密码</value>
+    <value>確認密碼</value>
   </data>
   <data name="UserChangePasswordConfirmPassword_Label" xml:space="preserve">
-    <value>确认密码</value>
+    <value>確認密碼</value>
   </data>
   <data name="UserChangePasswordPassword_Info" xml:space="preserve">
-    <value>密码</value>
+    <value>密碼</value>
   </data>
   <data name="UserChangePasswordPassword_Label" xml:space="preserve">
-    <value>密码</value>
+    <value>密碼</value>
   </data>
   <data name="UserChangePasswordUserName_Info" xml:space="preserve">
-    <value>用户名</value>
+    <value>使用者名稱</value>
   </data>
   <data name="UserChangePasswordUserName_Label" xml:space="preserve">
-    <value>用户名</value>
+    <value>使用者名稱</value>
   </data>
   <data name="UserEmailConfirmed_Info" xml:space="preserve">
-    <value>用户 Email 码已确认</value>
+    <value>使用者 Email 碼已確認</value>
   </data>
   <data name="UserEmailConfirmed_Label" xml:space="preserve">
-    <value>用户 Email 码已确认</value>
+    <value>使用者 Email 碼已確認</value>
   </data>
   <data name="UserEmail_Info" xml:space="preserve">
     <value>Email</value>
@@ -172,63 +172,63 @@
     <value>Email</value>
   </data>
   <data name="UserLockoutEnabled_Info" xml:space="preserve">
-    <value>用户锁定已启用</value>
+    <value>使用者鎖定已啟用</value>
   </data>
   <data name="UserLockoutEnabled_Label" xml:space="preserve">
-    <value>用户锁定已启用</value>
+    <value>使用者鎖定已啟用</value>
   </data>
   <data name="UserLockoutEnd_Info" xml:space="preserve">
-    <value>用户锁定结束</value>
+    <value>使用者鎖定結束</value>
   </data>
   <data name="UserLockoutEnd_Label" xml:space="preserve">
-    <value>用户锁定结束</value>
+    <value>使用者鎖定結束</value>
   </data>
   <data name="UserPhoneNumberConfirmed_Info" xml:space="preserve">
-    <value>用户手机号码已确认</value>
+    <value>使用者手機號碼已確認</value>
   </data>
   <data name="UserPhoneNumberConfirmed_Label" xml:space="preserve">
-    <value>用户手机号码已确认</value>
+    <value>使用者手機號碼已確認</value>
   </data>
   <data name="UserPhoneNumber_Info" xml:space="preserve">
-    <value>用户手机号码</value>
+    <value>使用者手機號碼</value>
   </data>
   <data name="UserPhoneNumber_Label" xml:space="preserve">
-    <value>用户手机号码</value>
+    <value>使用者手機號碼</value>
   </data>
   <data name="UserProviderLoginProvider_Info" xml:space="preserve">
-    <value>登录提供程序</value>
+    <value>登入提供程式</value>
   </data>
   <data name="UserProviderLoginProvider_Label" xml:space="preserve">
-    <value>登录提供程序</value>
+    <value>登入提供程式</value>
   </data>
   <data name="UserProviderProviderDisplayName_Info" xml:space="preserve">
-    <value>显示名称</value>
+    <value>顯示名稱</value>
   </data>
   <data name="UserProviderProviderDisplayName_Label" xml:space="preserve">
-    <value>显示名称</value>
+    <value>顯示名稱</value>
   </data>
   <data name="UserProviderProviderKey_Info" xml:space="preserve">
-    <value>提供程序密钥</value>
+    <value>提供程式金鑰</value>
   </data>
   <data name="UserProviderProviderKey_Label" xml:space="preserve">
-    <value>提供程序密钥</value>
+    <value>提供程式金鑰</value>
   </data>
   <data name="UserTwoFactorEnabled_Info" xml:space="preserve">
-    <value>用户二次验证已启用</value>
+    <value>使用者二次驗證已啟用</value>
   </data>
   <data name="UserTwoFactorEnabled_Label" xml:space="preserve">
-    <value>用户二次验证已启用</value>
+    <value>使用者二次驗證已啟用</value>
   </data>
   <data name="UserUserName_Info" xml:space="preserve">
-    <value>用户名</value>
+    <value>使用者名稱</value>
   </data>
   <data name="UserUserName_Label" xml:space="preserve">
-    <value>用户名</value>
+    <value>使用者名稱</value>
   </data>
   <data name="Value_Info" xml:space="preserve">
     <value />
   </data>
   <data name="Value_Label" xml:space="preserve">
-    <value>声明值</value>
+    <value>宣告值</value>
   </data>
 </root>

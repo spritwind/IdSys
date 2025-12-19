@@ -118,24 +118,24 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Code" xml:space="preserve">
-    <value>验证码</value>
+    <value>驗證碼</value>
   </data>
   <data name="Info" xml:space="preserve">
-    <value>您的登录使用身份验证器应用程序进行保护。 在下面输入您的验证码。</value>
+    <value>您的登入使用身分驗證器應用程式進行保護。 在下面輸入您的驗證碼。</value>
   </data>
   <data name="LogIn" xml:space="preserve">
-    <value>登录</value>
+    <value>登入</value>
   </data>
   <data name="LoginWithRecoveryCode" xml:space="preserve">
-    <value>使用恢复码登录</value>
+    <value>使用還原碼登入</value>
   </data>
   <data name="NoAuthenticatorDevice" xml:space="preserve">
-    <value>无权访问您的身份验证设备？ 您可以</value>
+    <value>無權存取您的身分驗證裝置？ 您可以</value>
   </data>
   <data name="Remember" xml:space="preserve">
-    <value>记住这台机器</value>
+    <value>記住這台機器</value>
   </data>
   <data name="Title" xml:space="preserve">
-    <value>双因素身份验证</value>
+    <value>雙重因素身分驗證</value>
   </data>
 </root>

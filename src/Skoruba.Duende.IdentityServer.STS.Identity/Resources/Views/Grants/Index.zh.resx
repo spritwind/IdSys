@@ -118,27 +118,27 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ApiGrants" xml:space="preserve">
-    <value>API 授权</value>
+    <value>API 授權</value>
   </data>
   <data name="Created" xml:space="preserve">
-    <value>创建:</value>
+    <value>建立:</value>
   </data>
   <data name="Expires" xml:space="preserve">
-    <value>过期:</value>
+    <value>到期:</value>
   </data>
   <data name="IdentityGrants" xml:space="preserve">
-    <value>身份授权</value>
+    <value>身分授權</value>
   </data>
   <data name="NoGrants" xml:space="preserve">
-    <value>您尚未授权访问任何应用程序</value>
+    <value>您尚未授權存取任何應用程式</value>
   </data>
   <data name="RevokeAccess" xml:space="preserve">
-    <value>撤消访问权限</value>
+    <value>撤消存取權限</value>
   </data>
   <data name="SubTitle" xml:space="preserve">
-    <value>以下是您可以访问的应用程序列表以及他们有权访问的资源的名称。</value>
+    <value>以下是您可以存取的應用程式清單以及他們有權存取的資源的名稱。</value>
   </data>
   <data name="Title" xml:space="preserve">
-    <value>客户端应用访问</value>
+    <value>用戶端應用存取</value>
   </data>
 </root>

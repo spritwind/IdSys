@@ -54,7 +54,7 @@
             authority: 'https://localhost:44310',
             client_id: 'uc_capital_demo_client',
             redirect_uri: 'https://localhost:44310/demo/callback.html',
-            post_logout_redirect_uri: 'https://localhost:44310/demo/',
+            post_logout_redirect_uri: 'https://localhost:44310/demo/index.html',
             silent_redirect_uri: 'https://localhost:44310/demo/silent-renew.html',
             response_type: 'code',
             scope: 'openid profile email roles offline_access uc_capital_admin_api'
@@ -65,7 +65,7 @@
         userManager.signinRedirectCallback()
             .then(function(user) {
                 console.log('登入成功：', user);
-                window.location.href = '/demo/';
+                window.location.href = '/demo/index.html';
             })
             .catch(function(err) {
                 console.error('回呼錯誤：', err);
@@ -73,7 +73,7 @@
                     <div class="error">
                         <h2>驗證錯誤</h2>
                         <p>${err.message || '發生未知錯誤'}</p>
-                        <p><a href="/demo/" style="color: white;">返回展示頁面</a></p>
+                        <p><a href="/demo/index.html" style="color: white;">返回展示頁面</a></p>
                     </div>
                 `;
             });

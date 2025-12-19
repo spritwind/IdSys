@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="FirstButtonText" xml:space="preserve">
-    <value>首页</value>
+    <value>首頁</value>
   </data>
   <data name="LastButtonText" xml:space="preserve">
     <value>末页</value>

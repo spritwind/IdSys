@@ -118,18 +118,18 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ButtonDeleteClaim" xml:space="preserve">
-    <value>删除客户端声明</value>
+    <value>刪除用戶端宣告</value>
   </data>
   <data name="NavigationClientClaims" xml:space="preserve">
-    <value>客户端声明</value>
+    <value>用戶端宣告</value>
   </data>
   <data name="NavigationClients" xml:space="preserve">
-    <value>客户端</value>
+    <value>用戶端</value>
   </data>
   <data name="PageTitle" xml:space="preserve">
-    <value>删除客户端声明</value>
+    <value>刪除用戶端宣告</value>
   </data>
   <data name="PanelTitle" xml:space="preserve">
-    <value>删除客户端声明</value>
+    <value>刪除用戶端宣告</value>
   </data>
 </root>

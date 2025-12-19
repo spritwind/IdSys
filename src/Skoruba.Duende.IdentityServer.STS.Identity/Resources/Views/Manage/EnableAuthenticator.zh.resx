@@ -118,30 +118,30 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Code" xml:space="preserve">
-    <value>验证码</value>
+    <value>驗證碼</value>
   </data>
   <data name="DownloadTitle" xml:space="preserve">
-    <value>下载双因素验证器应用程序，如适用于</value>
+    <value>下載雙重因素驗證器應用程式，如適用於</value>
   </data>
   <data name="GoogleAuthenticatorTitle" xml:space="preserve">
-    <value>Google Authenticator 适用于</value>
+    <value>Google Authenticator 適用於</value>
   </data>
   <data name="Info" xml:space="preserve">
-    <value>扫描完二维码或输入上述密钥后，您的双因素身份验证应用程序将为您提供唯一的代码。 在下面的确认框中输入代码。</value>
+    <value>扫描完二维碼或輸入上述金鑰後，您的雙重因素身分驗證應用程式將為您提供唯一的代碼。 在下面的確認框中輸入代碼。</value>
   </data>
   <data name="ScanQR" xml:space="preserve">
-    <value>在您的双因素验证器应用程序中扫描二维码或输入此密钥</value>
+    <value>在您的雙重因素驗證器應用程式中扫描二维碼或輸入此金鑰</value>
   </data>
   <data name="ScanQRSubTitle" xml:space="preserve">
-    <value>空格和大小写无关紧要。</value>
+    <value>空格和大小写無關緊要。</value>
   </data>
   <data name="SubTitle" xml:space="preserve">
-    <value>要使用身份验证器应用程序，请执行以下步骤：</value>
+    <value>要使用身分驗證器應用程式，請執行以下步驟：</value>
   </data>
   <data name="Title" xml:space="preserve">
-    <value>配置身份验证器应用</value>
+    <value>設定身分驗證器應用</value>
   </data>
   <data name="Verify" xml:space="preserve">
-    <value>验证</value>
+    <value>驗證</value>
   </data>
 </root>

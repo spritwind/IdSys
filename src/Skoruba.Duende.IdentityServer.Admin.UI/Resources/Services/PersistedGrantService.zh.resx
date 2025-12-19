@@ -118,9 +118,9 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="PersistedGrantDoesNotExist" xml:space="preserve">
-    <value>标识为 {0} 的持久授权不存在</value>
+    <value>識別碼為 {0} 的持續授權不存在</value>
   </data>
   <data name="PersistedGrantWithSubjectIdDoesNotExist" xml:space="preserve">
-    <value>主体标识为 {0} 的持久授权不存在</value>
+    <value>主体識別碼為 {0} 的持續授權不存在</value>
   </data>
 </root>
