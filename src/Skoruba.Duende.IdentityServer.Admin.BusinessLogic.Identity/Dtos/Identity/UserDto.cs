@@ -11,7 +11,7 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Identity.Dtos.Identi
     public class UserDto<TKey> : BaseUserDto<TKey>, IUserDto
     {        
         [Required]
-        [RegularExpression(@"^[a-zA-Z0-9_@\-\.\+]+$")]
+        [RegularExpression(@"^[a-zA-Z0-9_@\-\.\+\u4e00-\u9fa5]+$")]
         public string UserName { get; set; }
 
         [Required]

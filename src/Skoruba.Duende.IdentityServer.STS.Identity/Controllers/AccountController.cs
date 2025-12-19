@@ -413,12 +413,43 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.Controllers
                 return View("Lockout");
             }
 
-            // If the user does not have an account, then ask the user to create an account.
+            // 自動使用外部登入資訊建立帳號
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            var userName = info.Principal.Identity.Name ?? email?.Split('@')[0];
+
+            var user = new TUser
+            {
+                UserName = userName,
+                Email = email,
+                EmailConfirmed = true // 外部登入的 Email 已驗證
+            };
+
+            var createResult = await _userManager.CreateAsync(user);
+            if (createResult.Succeeded)
+            {
+                createResult = await _userManager.AddLoginAsync(user, info);
+                if (createResult.Succeeded)
+                {
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+
+                    // 儲存註冊成功訊息到 TempData，以便在目標頁面顯示
+                    TempData["RegistrationSuccess"] = true;
+                    TempData["RegistrationUserName"] = userName;
+                    TempData["RegistrationEmail"] = email;
+                    TempData["RegistrationProvider"] = info.LoginProvider;
+
+                    // 直接跳轉避免 PAR 過期
+                    return RedirectToLocal(returnUrl);
+                }
+            }
+
+            // 如果自動註冊失敗，回到手動確認頁面
+            foreach (var error in createResult.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
             ViewData["ReturnUrl"] = returnUrl;
             ViewData["LoginProvider"] = info.LoginProvider;
-            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-            var userName = info.Principal.Identity.Name;
-
             return View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel { Email = email, UserName = userName });
         }
 

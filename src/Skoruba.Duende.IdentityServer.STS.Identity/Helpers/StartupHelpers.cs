@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using Duende.IdentityServer.Configuration;
 using Duende.IdentityServer.EntityFramework.Storage;
 using Microsoft.AspNetCore.Authentication;
@@ -432,6 +433,13 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.Helpers
                     options.CallbackPath = externalProviderConfiguration.GoogleCallbackPath;
                     options.Scope.Add("email");
                     options.Scope.Add("profile");
+                    options.Events.OnRedirectToAuthorizationEndpoint = context =>
+                    {
+                        // 添加 hl=zh-TW 參數設定語言，prompt=select_account 強制選擇帳號
+                        var redirectUri = context.RedirectUri + "&hl=zh-TW&prompt=select_account";
+                        context.Response.Redirect(redirectUri);
+                        return Task.CompletedTask;
+                    };
                 });
             }
         }

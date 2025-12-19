@@ -1,0 +1,42 @@
+@inject IViewLocalizer Localizer
+@using Microsoft.AspNetCore.Mvc.Localization
+@{
+    ViewData["Title"] = "註冊成功";
+    var returnUrl = ViewData["ReturnUrl"]?.ToString() ?? "~/";
+}
+
+<div class="card mt-4">
+    <div class="card-header bg-success text-white">
+        <h4 class="mb-0"><i class="fas fa-check-circle"></i> 註冊成功</h4>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-success" role="alert">
+            <h5>歡迎加入 UC Capital！</h5>
+            <p>您已透過 <strong>@ViewData["LoginProvider"]</strong> 成功註冊並登入。</p>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-3"><strong>使用者名稱：</strong></div>
+            <div class="col-md-9">@ViewData["UserName"]</div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-3"><strong>電子郵件：</strong></div>
+            <div class="col-md-9">@ViewData["Email"]</div>
+        </div>
+
+        <hr />
+
+        <div class="text-center">
+            <a href="@returnUrl" class="btn btn-primary btn-lg">
+                <i class="fas fa-arrow-right"></i> 繼續
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 3 秒後自動跳轉
+    setTimeout(function() {
+        window.location.href = '@Html.Raw(returnUrl)';
+    }, 3000);
+</script>

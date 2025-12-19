@@ -44,8 +44,30 @@
     }
 
     @await RenderSectionAsync("styles", required: false)
+    <link rel="stylesheet" href="~/css/modern-theme.css" asp-append-version="true" />
 </head>
 <body>
+    @if (TempData["RegistrationSuccess"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show position-fixed" role="alert"
+             style="top: 20px; right: 20px; z-index: 9999; min-width: 350px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h5 class="alert-heading"><i class="fas fa-check-circle"></i> 註冊成功！</h5>
+            <p class="mb-1">歡迎加入 UC Capital，<strong>@TempData["RegistrationUserName"]</strong>！</p>
+            <small class="text-muted">您已透過 @TempData["RegistrationProvider"] 成功註冊</small>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <script>
+            setTimeout(function() {
+                var alert = document.querySelector('.alert-success');
+                if (alert) {
+                    alert.classList.remove('show');
+                    setTimeout(function() { alert.remove(); }, 150);
+                }
+            }, 5000);
+        </script>
+    }
 
     <div class="menu d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 border-bottom box-shadow">
         <!--Site name -->

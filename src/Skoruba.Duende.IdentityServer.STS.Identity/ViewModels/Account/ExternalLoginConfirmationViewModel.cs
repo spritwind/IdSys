@@ -5,7 +5,7 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.ViewModels.Account
     public class ExternalLoginConfirmationViewModel
     {
         [Required]
-        [RegularExpression(@"^[a-zA-Z0-9_@\-\.\+]+$")]
+        [RegularExpression(@"^[a-zA-Z0-9_@\-\.\+\u4e00-\u9fa5]+$")]
         public string UserName { get; set; }
 
         [Required]
