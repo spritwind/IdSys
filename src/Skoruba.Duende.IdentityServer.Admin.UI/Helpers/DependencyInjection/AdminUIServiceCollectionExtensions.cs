@@ -164,6 +164,9 @@ namespace Skoruba.Duende.IdentityServer.Admin.UI.Helpers.DependencyInjection
             // Add all dependencies for IdentityServer Admin
             services.AddAdminServices<TIdentityServerDbContext, TPersistedGrantDbContext, TLogDbContext>();
 
+            // Add Organization services (UC Capital)
+            services.AddOrganizationServices(options.ConnectionStrings.ConfigurationDbConnection);
+
             // Add all dependencies for Asp.Net Core Identity
             // If you want to change primary keys or use another db model for Asp.Net Core Identity:
             services.AddAdminAspNetIdentityServices<TIdentityDbContext, TPersistedGrantDbContext,

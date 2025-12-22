@@ -1,0 +1,1517 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Skoruba.Duende.IdentityServer.Admin.UI.Configuration
+@using Skoruba.Duende.IdentityServer.Admin.UI.Configuration.Constants
+@using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Dtos.Organization
+@inject AdminConfiguration AdminConfiguration
+@inject IViewLocalizer Localizer
+@{
+    ViewBag.Title = "組織架構";
+    Layout = "_Layout";
+    var stats = ViewBag.Stats as OrganizationStatsDto;
+}
+
+@section styles {
+    <style>
+        /* UC Capital 組織架構樣式 - 頂尖設計 */
+        :root {
+            --uc-primary: #1e3a5f;
+            --uc-primary-light: #2d5a87;
+            --uc-primary-dark: #0f1f33;
+            --uc-accent: #c9a227;
+            --uc-accent-light: #e8d48a;
+            --uc-success: #28a745;
+            --uc-info: #17a2b8;
+            --uc-ceo: linear-gradient(135deg, #c9a227 0%, #f4e4a6 50%, #c9a227 100%);
+            --shadow-soft: 0 4px 20px rgba(30, 58, 95, 0.15);
+            --shadow-medium: 0 8px 30px rgba(30, 58, 95, 0.2);
+            --shadow-strong: 0 12px 40px rgba(30, 58, 95, 0.25);
+        }
+
+        /* 頁面標題 */
+        .page-header {
+            background: linear-gradient(135deg, var(--uc-primary) 0%, var(--uc-primary-light) 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow-medium);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .page-header h2 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 1.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .page-header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        /* 統計卡片 */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: var(--shadow-soft);
+            border-left: 4px solid var(--uc-primary);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(30, 58, 95, 0.02) 100%);
+            pointer-events: none;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: var(--shadow-medium);
+            border-left-color: var(--uc-accent);
+        }
+
+        .stat-card .stat-icon {
+            font-size: 2.25rem;
+            color: var(--uc-primary);
+            margin-bottom: 12px;
+            opacity: 0.9;
+        }
+
+        .stat-card .stat-value {
+            font-size: 2.75rem;
+            font-weight: 800;
+            color: var(--uc-primary);
+            line-height: 1;
+            background: linear-gradient(135deg, var(--uc-primary) 0%, var(--uc-primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+
+        /* 工具列 */
+        .toolbar-card {
+            background: white;
+            border-radius: 16px;
+            padding: 18px 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .view-toggle {
+            display: flex;
+            background: #f0f2f5;
+            border-radius: 10px;
+            padding: 4px;
+        }
+
+        .view-toggle .btn {
+            border: none;
+            background: transparent;
+            padding: 10px 18px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .view-toggle .btn.active {
+            background: var(--uc-primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(30, 58, 95, 0.3);
+        }
+
+        .view-toggle .btn:hover:not(.active) {
+            background: #e0e4e8;
+        }
+
+        /* 縮放控制 */
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f0f2f5;
+            border-radius: 10px;
+            padding: 4px 12px;
+        }
+
+        .zoom-controls .btn {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            transition: all 0.2s ease;
+        }
+
+        .zoom-controls .btn:hover {
+            background: var(--uc-primary);
+            color: white;
+        }
+
+        .zoom-level {
+            min-width: 50px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--uc-primary);
+            font-size: 0.9rem;
+        }
+
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 18px 12px 45px;
+            border: 2px solid #e8eaed;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--uc-primary);
+            box-shadow: 0 0 0 4px rgba(30, 58, 95, 0.1);
+        }
+
+        .search-box .search-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+        }
+
+        /* 組織圖容器 */
+        .chart-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chart-wrapper {
+            width: 100%;
+            height: 650px;
+            overflow: auto;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(30, 58, 95, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(201, 162, 39, 0.03) 0%, transparent 50%),
+                linear-gradient(180deg, #f8fafc 0%, #eef1f5 100%);
+            position: relative;
+            cursor: grab;
+        }
+
+        .chart-wrapper:active {
+            cursor: grabbing;
+        }
+
+        #orgChartContainer {
+            transform-origin: center top;
+            transition: transform 0.3s ease;
+            padding: 50px 30px 80px;
+            display: inline-block;
+            min-width: 100%;
+        }
+
+        /* 純 CSS 組織圖樣式 */
+        .org-tree {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .org-tree ul {
+            padding-top: 30px;
+            position: relative;
+            transition: all 0.5s ease;
+            display: flex;
+            justify-content: center;
+            flex-wrap: nowrap;
+            margin: 0;
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .org-tree li {
+            list-style-type: none;
+            position: relative;
+            padding: 30px 8px 0 8px;
+            transition: all 0.5s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 連接線 - 精緻版 */
+        .org-tree li::before,
+        .org-tree li::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 50%;
+            border-top: 3px solid var(--uc-primary);
+            width: 50%;
+            height: 30px;
+            opacity: 0.6;
+        }
+
+        .org-tree li::after {
+            right: auto;
+            left: 50%;
+            border-left: 3px solid var(--uc-primary);
+        }
+
+        .org-tree li:only-child::after,
+        .org-tree li:only-child::before {
+            display: none;
+        }
+
+        .org-tree li:only-child {
+            padding-top: 0;
+        }
+
+        .org-tree li:first-child::before,
+        .org-tree li:last-child::after {
+            border: 0 none;
+        }
+
+        .org-tree li:last-child::before {
+            border-right: 3px solid var(--uc-primary);
+            border-radius: 0 8px 0 0;
+        }
+
+        .org-tree li:first-child::after {
+            border-radius: 8px 0 0 0;
+        }
+
+        /* 父節點連接線 */
+        .org-tree ul ul::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            border-left: 3px solid var(--uc-primary);
+            width: 0;
+            height: 30px;
+            opacity: 0.6;
+        }
+
+        /* 頂層節點（根節點 UC CEO）不需要上方連接線 */
+        .org-tree > li {
+            padding-top: 0;
+        }
+
+        .org-tree > li::before,
+        .org-tree > li::after {
+            display: none !important;
+        }
+
+        /* 根節點下方的子節點容器需要連接線到父節點 */
+        .org-tree > li > ul::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            border-left: 3px solid var(--uc-primary);
+            width: 0;
+            height: 30px;
+            opacity: 0.6;
+        }
+
+        /* 根節點下的直接子節點（如管理處、投資處、資訊處）需要水平連接線 */
+        .org-tree > li > ul > li::before,
+        .org-tree > li > ul > li::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            border-top: 3px solid var(--uc-primary);
+            opacity: 0.6;
+        }
+
+        .org-tree > li > ul > li::before {
+            right: 50%;
+            width: 50%;
+            height: 30px;
+        }
+
+        .org-tree > li > ul > li::after {
+            left: 50%;
+            width: 50%;
+            height: 30px;
+            border-left: 3px solid var(--uc-primary);
+        }
+
+        /* 第一個和最後一個子節點的邊線處理 */
+        .org-tree > li > ul > li:first-child::before {
+            border: 0 none;
+        }
+
+        .org-tree > li > ul > li:first-child::after {
+            border-radius: 8px 0 0 0;
+        }
+
+        .org-tree > li > ul > li:last-child::after {
+            border: 0 none;
+            border-top: none;
+        }
+
+        .org-tree > li > ul > li:last-child::before {
+            border-right: 3px solid var(--uc-primary);
+            border-radius: 0 8px 0 0;
+        }
+
+        /* 節點卡片 - 基礎樣式 */
+        .org-node {
+            background: white;
+            border: 2px solid var(--uc-primary);
+            border-radius: 14px;
+            padding: 18px 24px;
+            min-width: 180px;
+            max-width: 220px;
+            text-align: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .org-node:hover {
+            transform: translateY(-5px) scale(1.03);
+            box-shadow: var(--shadow-strong);
+            border-color: var(--uc-accent);
+        }
+
+        /* CEO 特殊樣式 - 金色尊榮 */
+        .org-node.ceo {
+            background: var(--uc-ceo);
+            border: 3px solid #b8860b;
+            min-width: 220px;
+            max-width: 260px;
+            padding: 24px 30px;
+            box-shadow:
+                0 8px 32px rgba(201, 162, 39, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+
+        .org-node.ceo::before {
+            content: '👑';
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .org-node.ceo .node-title {
+            color: var(--uc-primary-dark);
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .org-node.ceo .node-subtitle {
+            color: var(--uc-primary);
+            font-weight: 600;
+        }
+
+        .org-node.ceo .node-manager {
+            border-top-color: rgba(30, 58, 95, 0.2);
+            color: var(--uc-primary);
+            font-weight: 500;
+        }
+
+        /* 頂層主管樣式 */
+        .org-node.root {
+            background: linear-gradient(135deg, var(--uc-primary) 0%, var(--uc-primary-light) 100%);
+            color: white;
+            border-color: var(--uc-primary-dark);
+            min-width: 190px;
+        }
+
+        .org-node.root .node-title {
+            color: white;
+        }
+
+        .org-node.root .node-subtitle {
+            color: rgba(255,255,255,0.9);
+        }
+
+        .org-node.root .node-manager {
+            border-top-color: rgba(255,255,255,0.3);
+            color: rgba(255,255,255,0.85);
+        }
+
+        .org-node .node-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--uc-primary);
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .org-node .node-subtitle {
+            font-size: 0.85rem;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .org-node .node-manager {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        /* 展開/收合按鈕 */
+        .org-node .toggle-btn {
+            position: absolute;
+            bottom: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--uc-primary) 0%, var(--uc-primary-light) 100%);
+            color: white;
+            border: 3px solid white;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(30, 58, 95, 0.3);
+        }
+
+        .org-node .toggle-btn:hover {
+            background: linear-gradient(135deg, var(--uc-accent) 0%, #dab942 100%);
+            transform: translateX(-50%) scale(1.15);
+        }
+
+        .org-node.collapsed .toggle-btn::before {
+            content: '+';
+        }
+
+        .org-node:not(.collapsed) .toggle-btn::before {
+            content: '−';
+        }
+
+        .org-node.collapsed + ul {
+            display: none;
+        }
+
+        .org-node.highlight {
+            animation: glow 1.5s ease-in-out infinite;
+            border-color: var(--uc-accent);
+            box-shadow: 0 0 0 6px rgba(201, 162, 39, 0.3);
+        }
+
+        @@keyframes glow {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 6px rgba(201, 162, 39, 0.3);
+            }
+            50% {
+                transform: scale(1.02);
+                box-shadow: 0 0 0 10px rgba(201, 162, 39, 0.2);
+            }
+        }
+
+        /* 載入動畫 */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.98);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #e8eaed;
+            border-top: 4px solid var(--uc-primary);
+            border-right: 4px solid var(--uc-accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            color: var(--uc-primary);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        @@keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 表格視圖 */
+        .table-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+            display: none;
+        }
+
+        .table-container.active {
+            display: block;
+        }
+
+        .chart-container.hidden {
+            display: none;
+        }
+
+        .org-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .org-table thead {
+            background: linear-gradient(135deg, var(--uc-primary) 0%, var(--uc-primary-light) 100%);
+            color: white;
+        }
+
+        .org-table th {
+            padding: 16px 18px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+        }
+
+        .org-table td {
+            padding: 14px 18px;
+            border-bottom: 1px solid #eef1f5;
+            vertical-align: middle;
+        }
+
+        .org-table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .org-table tbody tr:hover {
+            background: linear-gradient(90deg, rgba(30, 58, 95, 0.02) 0%, rgba(201, 162, 39, 0.02) 100%);
+        }
+
+        .org-table tbody tr.highlight {
+            background: linear-gradient(90deg, rgba(201, 162, 39, 0.15) 0%, rgba(201, 162, 39, 0.05) 100%) !important;
+        }
+
+        /* 層級指示器 */
+        .depth-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .depth-0 { background: linear-gradient(135deg, var(--uc-accent) 0%, #dab942 100%); }
+        .depth-1 { background: linear-gradient(135deg, var(--uc-primary) 0%, var(--uc-primary-light) 100%); }
+        .depth-2 { background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); }
+        .depth-3 { background: linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%); }
+        .depth-4 { background: linear-gradient(135deg, #93c5fd 0%, #bfdbfe 100%); color: var(--uc-primary); }
+
+        /* 部門名稱縮排 */
+        .dept-name {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dept-name .indent {
+            display: inline-block;
+        }
+
+        .dept-name .name-text {
+            font-weight: 600;
+            color: var(--uc-primary);
+        }
+
+        .dept-name .zh-name {
+            color: #666;
+            font-size: 0.85em;
+        }
+
+        /* 主管標籤 */
+        .manager-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            color: #2e7d32;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .no-manager {
+            color: #999;
+            font-style: italic;
+        }
+
+        /* 路徑顯示 */
+        .path-text {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85em;
+            color: #666;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            background: #f5f7fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        /* 操作按鈕 */
+        .action-btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, var(--uc-primary) 0%, var(--uc-primary-light) 100%);
+            color: white;
+            font-weight: 500;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 4px 12px rgba(30, 58, 95, 0.3);
+        }
+
+        /* 詳細資訊 Modal */
+        .detail-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 31, 51, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .detail-modal.active {
+            display: flex;
+        }
+
+        .detail-content {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 520px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+            animation: modalIn 0.3s ease;
+        }
+
+        @@keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .detail-header {
+            background: linear-gradient(135deg, var(--uc-primary) 0%, var(--uc-primary-light) 100%);
+            color: white;
+            padding: 28px;
+            position: relative;
+        }
+
+        .detail-header h4 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .detail-header .close-btn {
+            position: absolute;
+            right: 18px;
+            top: 18px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .detail-header .close-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+
+        .detail-body {
+            padding: 28px;
+        }
+
+        .detail-item {
+            display: flex;
+            padding: 14px 0;
+            border-bottom: 1px solid #eef1f5;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-item .label {
+            width: 120px;
+            color: #666;
+            font-size: 0.9em;
+            flex-shrink: 0;
+            font-weight: 500;
+        }
+
+        .detail-item .value {
+            flex: 1;
+            color: var(--uc-primary);
+            font-weight: 600;
+        }
+
+        /* 空狀態 */
+        .empty-state {
+            text-align: center;
+            padding: 80px 30px;
+            color: #666;
+        }
+
+        .empty-state .icon {
+            font-size: 5rem;
+            color: #ddd;
+            margin-bottom: 25px;
+        }
+
+        .empty-state h4 {
+            color: var(--uc-primary);
+            margin-bottom: 10px;
+        }
+
+        /* 響應式 */
+        @@media (max-width: 992px) {
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+
+            .toolbar-card {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .toolbar-left {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+        }
+    </style>
+}
+
+<!-- 頁面標題 -->
+<div class="page-header">
+    <h2><span class="oi oi-project mr-2"></span> 組織架構管理</h2>
+    <p>視覺化呈現 UC Capital 組織結構，支援互動式瀏覽、縮放與搜尋</p>
+</div>
+
+<!-- 統計資訊 -->
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-icon"><span class="oi oi-layers"></span></div>
+        <div class="stat-value" id="statTotal">@(stats?.TotalGroups ?? 0)</div>
+        <div class="stat-label">總部門數</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon"><span class="oi oi-home"></span></div>
+        <div class="stat-value" id="statRoot">@(stats?.TotalRootGroups ?? 0)</div>
+        <div class="stat-label">頂層組織</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon"><span class="oi oi-graph"></span></div>
+        <div class="stat-value" id="statDepth">@(stats?.MaxDepth ?? 0)</div>
+        <div class="stat-label">最大層級</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon"><span class="oi oi-person"></span></div>
+        <div class="stat-value" id="statManagers">@(stats?.GroupsWithManagers ?? 0)</div>
+        <div class="stat-label">已設定主管</div>
+    </div>
+</div>
+
+<!-- 工具列 -->
+<div class="toolbar-card">
+    <div class="toolbar-left">
+        <div class="view-toggle">
+            <button class="btn active" id="btnChartView" onclick="switchView('chart')">
+                <span class="oi oi-project"></span> 組織圖
+            </button>
+            <button class="btn" id="btnTableView" onclick="switchView('table')">
+                <span class="oi oi-list"></span> 列表
+            </button>
+        </div>
+        <div class="zoom-controls">
+            <button class="btn" onclick="zoomOut()" title="縮小">
+                <span class="oi oi-minus"></span>
+            </button>
+            <span class="zoom-level" id="zoomLevel">100%</span>
+            <button class="btn" onclick="zoomIn()" title="放大">
+                <span class="oi oi-plus"></span>
+            </button>
+            <button class="btn" onclick="resetZoom()" title="重置">
+                <span class="oi oi-action-undo"></span>
+            </button>
+        </div>
+        <button class="btn btn-outline-primary" onclick="expandAll()">
+            <span class="oi oi-chevron-bottom"></span> 展開全部
+        </button>
+        <button class="btn btn-outline-primary" onclick="collapseAll()">
+            <span class="oi oi-chevron-top"></span> 收合全部
+        </button>
+    </div>
+    <div class="search-box">
+        <span class="search-icon oi oi-magnifying-glass"></span>
+        <input type="text" id="searchInput" placeholder="搜尋部門名稱或代碼..." oninput="handleSearch(this.value)">
+    </div>
+</div>
+
+<!-- 組織圖視圖 -->
+<div class="chart-container" id="chartView">
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">載入組織架構中...</div>
+    </div>
+    <div class="chart-wrapper" id="chartWrapper">
+        <div id="orgChartContainer"></div>
+    </div>
+</div>
+
+<!-- 表格視圖 -->
+<div class="table-container" id="tableView">
+    <table class="org-table">
+        <thead>
+            <tr>
+                <th style="width: 70px;">層級</th>
+                <th>部門名稱</th>
+                <th>部門代碼</th>
+                <th>路徑</th>
+                <th>主管</th>
+                <th style="width: 90px;">操作</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+    </table>
+</div>
+
+<!-- 詳細資訊 Modal -->
+<div class="detail-modal" id="detailModal" onclick="closeModal(event)">
+    <div class="detail-content" onclick="event.stopPropagation()">
+        <div class="detail-header">
+            <h4 id="modalTitle">部門詳細資訊</h4>
+            <button class="close-btn" onclick="closeModal()">
+                <span class="oi oi-x"></span>
+            </button>
+        </div>
+        <div class="detail-body">
+            <div class="detail-item">
+                <div class="label">部門名稱</div>
+                <div class="value" id="detailName">-</div>
+            </div>
+            <div class="detail-item">
+                <div class="label">中文名稱</div>
+                <div class="value" id="detailZhName">-</div>
+            </div>
+            <div class="detail-item">
+                <div class="label">英文名稱</div>
+                <div class="value" id="detailEName">-</div>
+            </div>
+            <div class="detail-item">
+                <div class="label">部門代碼</div>
+                <div class="value" id="detailCode">-</div>
+            </div>
+            <div class="detail-item">
+                <div class="label">完整路徑</div>
+                <div class="value" id="detailPath">-</div>
+            </div>
+            <div class="detail-item">
+                <div class="label">主管</div>
+                <div class="value" id="detailManager">-</div>
+            </div>
+            <div class="detail-item">
+                <div class="label">層級深度</div>
+                <div class="value" id="detailDepth">-</div>
+            </div>
+            <div class="detail-item">
+                <div class="label">說明</div>
+                <div class="value" id="detailDesc">-</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        // 全域變數
+        let treeData = [];
+        let flatData = [];
+        let currentView = 'chart';
+        let currentZoom = 1;
+        const ZOOM_STEP = 0.1;
+        const ZOOM_MIN = 0.3;
+        const ZOOM_MAX = 2;
+
+        // 頁面載入
+        document.addEventListener('DOMContentLoaded', function() {
+            loadOrganizationData();
+            initZoomEvents();
+        });
+
+        // 初始化縮放事件
+        function initZoomEvents() {
+            const wrapper = document.getElementById('chartWrapper');
+
+            // 滑鼠滾輪縮放
+            wrapper.addEventListener('wheel', function(e) {
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    if (e.deltaY < 0) {
+                        zoomIn();
+                    } else {
+                        zoomOut();
+                    }
+                }
+            }, { passive: false });
+
+            // 拖曳平移
+            let isDragging = false;
+            let startX, startY, scrollLeft, scrollTop;
+
+            wrapper.addEventListener('mousedown', function(e) {
+                if (e.target.closest('.org-node')) return;
+                isDragging = true;
+                startX = e.pageX - wrapper.offsetLeft;
+                startY = e.pageY - wrapper.offsetTop;
+                scrollLeft = wrapper.scrollLeft;
+                scrollTop = wrapper.scrollTop;
+            });
+
+            wrapper.addEventListener('mouseleave', () => isDragging = false);
+            wrapper.addEventListener('mouseup', () => isDragging = false);
+
+            wrapper.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+                const x = e.pageX - wrapper.offsetLeft;
+                const y = e.pageY - wrapper.offsetTop;
+                wrapper.scrollLeft = scrollLeft - (x - startX);
+                wrapper.scrollTop = scrollTop - (y - startY);
+            });
+        }
+
+        // 縮放功能
+        function zoomIn() {
+            if (currentZoom < ZOOM_MAX) {
+                currentZoom = Math.min(currentZoom + ZOOM_STEP, ZOOM_MAX);
+                applyZoom();
+            }
+        }
+
+        function zoomOut() {
+            if (currentZoom > ZOOM_MIN) {
+                currentZoom = Math.max(currentZoom - ZOOM_STEP, ZOOM_MIN);
+                applyZoom();
+            }
+        }
+
+        function resetZoom() {
+            currentZoom = 1;
+            applyZoom();
+        }
+
+        function applyZoom() {
+            const container = document.getElementById('orgChartContainer');
+            container.style.transform = `scale(${currentZoom})`;
+            document.getElementById('zoomLevel').textContent = Math.round(currentZoom * 100) + '%';
+        }
+
+        // 載入組織資料
+        async function loadOrganizationData() {
+            try {
+                showLoading(true);
+
+                const [treeResponse, flatResponse] = await Promise.all([
+                    fetch('@Url.Action("GetOrganizationTree", "Organization", new { area = CommonConsts.AdminUIArea })'),
+                    fetch('@Url.Action("GetAllGroups", "Organization", new { area = CommonConsts.AdminUIArea })')
+                ]);
+
+                if (!treeResponse.ok || !flatResponse.ok) {
+                    throw new Error('API 回應錯誤');
+                }
+
+                treeData = await treeResponse.json();
+                flatData = await flatResponse.json();
+
+                // 重新排序：CEO 放最前面
+                sortTreeWithCeoFirst(treeData);
+                sortFlatDataWithCeoFirst();
+
+                // 渲染組織圖
+                renderOrgChart();
+
+                // 渲染表格
+                renderTable();
+
+            } catch (error) {
+                console.error('載入失敗:', error);
+                showError('無法載入組織架構資料，請稍後再試');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // 排序：CEO 置頂
+        function sortTreeWithCeoFirst(nodes) {
+            nodes.sort((a, b) => {
+                const aIsCeo = isCeoNode(a);
+                const bIsCeo = isCeoNode(b);
+                if (aIsCeo && !bIsCeo) return -1;
+                if (!aIsCeo && bIsCeo) return 1;
+                return (a.name || '').localeCompare(b.name || '');
+            });
+
+            nodes.forEach(node => {
+                if (node.children && node.children.length > 0) {
+                    sortTreeWithCeoFirst(node.children);
+                }
+            });
+        }
+
+        function sortFlatDataWithCeoFirst() {
+            flatData.sort((a, b) => {
+                // 先按 depth 排序
+                if (a.depth !== b.depth) return a.depth - b.depth;
+                // 同層級中 CEO 優先
+                const aIsCeo = isCeoNode(a);
+                const bIsCeo = isCeoNode(b);
+                if (aIsCeo && !bIsCeo) return -1;
+                if (!aIsCeo && bIsCeo) return 1;
+                return (a.name || '').localeCompare(b.name || '');
+            });
+        }
+
+        // 判斷是否為 CEO 節點
+        function isCeoNode(node) {
+            const name = (node.name || '').toLowerCase();
+            const code = (node.deptCode || '').toLowerCase();
+            const zhName = (node.deptZhName || '').toLowerCase();
+            return name.includes('ceo') ||
+                   code.includes('ceo') ||
+                   zhName.includes('執行長') ||
+                   zhName.includes('總裁') ||
+                   zhName.includes('董事長') ||
+                   name.includes('chief executive');
+        }
+
+        // 渲染組織圖
+        function renderOrgChart() {
+            const container = document.getElementById('orgChartContainer');
+
+            if (treeData.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon"><span class="oi oi-inbox"></span></div>
+                        <h4>暫無組織架構資料</h4>
+                        <p>請先在資料庫中新增組織資料</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const treeHtml = buildTreeHtml(treeData, true);
+            container.innerHTML = `<ul class="org-tree">${treeHtml}</ul>`;
+
+            bindTreeEvents();
+        }
+
+        // 遞迴建立樹狀結構 HTML
+        function buildTreeHtml(nodes, isRoot = false) {
+            if (!nodes || nodes.length === 0) return '';
+
+            let html = isRoot ? '' : '<ul>';
+
+            nodes.forEach((node, index) => {
+                const hasChildren = node.children && node.children.length > 0;
+                const isCeo = isCeoNode(node);
+                const isTopLevel = node.depth === 0 || node.depth === 1;
+
+                let nodeClass = '';
+                if (isCeo) {
+                    nodeClass = 'ceo';
+                } else if (isTopLevel && !isCeo) {
+                    nodeClass = 'root';
+                }
+
+                html += `<li>`;
+                html += `<div class="org-node ${nodeClass}" data-id="${escapeHtml(node.id)}" data-name="${escapeHtml(node.name || '')}" data-code="${escapeHtml(node.deptCode || '')}">`;
+                html += `<div class="node-title" title="${escapeHtml(node.name)}">${escapeHtml(node.name)}</div>`;
+
+                if (node.deptZhName || node.deptCode) {
+                    html += `<div class="node-subtitle" title="${escapeHtml(node.deptZhName || node.deptCode)}">${escapeHtml(node.deptZhName || node.deptCode)}</div>`;
+                }
+
+                if (node.manager) {
+                    html += `<div class="node-manager"><span class="oi oi-person"></span> ${escapeHtml(node.manager)}</div>`;
+                }
+
+                if (hasChildren) {
+                    html += `<button class="toggle-btn" onclick="toggleNode(event, this)"></button>`;
+                }
+
+                html += `</div>`;
+
+                if (hasChildren) {
+                    html += buildTreeHtml(node.children);
+                }
+
+                html += `</li>`;
+            });
+
+            html += isRoot ? '' : '</ul>';
+            return html;
+        }
+
+        // 綁定樹節點事件
+        function bindTreeEvents() {
+            document.querySelectorAll('.org-node').forEach(node => {
+                node.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('toggle-btn')) return;
+                    const id = this.dataset.id;
+                    const item = flatData.find(d => d.id === id);
+                    if (item) {
+                        showNodeDetail(item);
+                    }
+                });
+            });
+        }
+
+        // 切換節點展開/收合
+        function toggleNode(event, btn) {
+            event.stopPropagation();
+            const node = btn.parentElement;
+            node.classList.toggle('collapsed');
+        }
+
+        // 展開全部
+        function expandAll() {
+            document.querySelectorAll('.org-node.collapsed').forEach(node => {
+                node.classList.remove('collapsed');
+            });
+        }
+
+        // 收合全部
+        function collapseAll() {
+            document.querySelectorAll('.org-node .toggle-btn').forEach(btn => {
+                btn.parentElement.classList.add('collapsed');
+            });
+        }
+
+        // 顯示節點詳細資訊
+        function showNodeDetail(item) {
+            document.getElementById('modalTitle').textContent = item.name || '部門詳細資訊';
+            document.getElementById('detailName').textContent = item.name || '-';
+            document.getElementById('detailZhName').textContent = item.deptZhName || '-';
+            document.getElementById('detailEName').textContent = item.deptEName || '-';
+            document.getElementById('detailCode').textContent = item.deptCode || '-';
+            document.getElementById('detailPath').textContent = item.path || '-';
+            document.getElementById('detailManager').textContent = item.manager || '-';
+            document.getElementById('detailDepth').textContent = item.depth !== undefined ? item.depth : '-';
+            document.getElementById('detailDesc').textContent = item.description || '-';
+
+            document.getElementById('detailModal').classList.add('active');
+        }
+
+        // 關閉 Modal
+        function closeModal(event) {
+            if (!event || event.target.id === 'detailModal') {
+                document.getElementById('detailModal').classList.remove('active');
+            }
+        }
+
+        // 渲染表格
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            if (flatData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">暫無資料</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            flatData.forEach(item => {
+                const depth = item.depth || 0;
+                const depthClass = `depth-${Math.min(depth, 4)}`;
+                const indent = depth * 20;
+
+                const row = document.createElement('tr');
+                row.dataset.id = item.id;
+                row.dataset.name = (item.name || '').toLowerCase();
+                row.dataset.code = (item.deptCode || '').toLowerCase();
+
+                row.innerHTML = `
+                    <td>
+                        <span class="depth-badge ${depthClass}">${depth}</span>
+                    </td>
+                    <td>
+                        <div class="dept-name">
+                            <span class="indent" style="width: ${indent}px;"></span>
+                            <div>
+                                <div class="name-text">${escapeHtml(item.name)}${isCeoNode(item) ? ' 👑' : ''}</div>
+                                ${item.deptZhName ? `<div class="zh-name">${escapeHtml(item.deptZhName)}</div>` : ''}
+                            </div>
+                        </div>
+                    </td>
+                    <td>${item.deptCode ? `<code>${escapeHtml(item.deptCode)}</code>` : '<span class="text-muted">-</span>'}</td>
+                    <td><span class="path-text" title="${escapeHtml(item.path)}">${escapeHtml(item.path)}</span></td>
+                    <td>
+                        ${item.manager
+                            ? `<span class="manager-badge"><span class="oi oi-person"></span> ${escapeHtml(item.manager)}</span>`
+                            : '<span class="no-manager">未設定</span>'}
+                    </td>
+                    <td>
+                        <button class="action-btn" onclick="viewDetail('${escapeHtml(item.id)}')" title="查看詳細">
+                            <span class="oi oi-eye"></span>
+                        </button>
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        }
+
+        // 查看詳細（表格）
+        function viewDetail(id) {
+            const item = flatData.find(d => d.id === id);
+            if (item) {
+                showNodeDetail(item);
+            }
+        }
+
+        // 切換視圖
+        function switchView(view) {
+            currentView = view;
+
+            document.getElementById('btnChartView').classList.toggle('active', view === 'chart');
+            document.getElementById('btnTableView').classList.toggle('active', view === 'table');
+
+            document.getElementById('chartView').classList.toggle('hidden', view !== 'chart');
+            document.getElementById('tableView').classList.toggle('active', view === 'table');
+        }
+
+        // 搜尋處理
+        function handleSearch(keyword) {
+            const lowerKeyword = keyword.toLowerCase().trim();
+
+            // 移除所有高亮
+            document.querySelectorAll('.org-node.highlight').forEach(n => n.classList.remove('highlight'));
+
+            // 組織圖搜尋
+            if (currentView === 'chart' && lowerKeyword) {
+                document.querySelectorAll('.org-node').forEach(node => {
+                    const name = (node.dataset.name || '').toLowerCase();
+                    const code = (node.dataset.code || '').toLowerCase();
+
+                    if (name.includes(lowerKeyword) || code.includes(lowerKeyword)) {
+                        node.classList.add('highlight');
+                        // 確保父節點展開
+                        let parent = node.parentElement;
+                        while (parent) {
+                            if (parent.previousElementSibling && parent.previousElementSibling.classList.contains('org-node')) {
+                                parent.previousElementSibling.classList.remove('collapsed');
+                            }
+                            parent = parent.parentElement?.parentElement;
+                        }
+                        // 滾動到第一個匹配項
+                        if (!document.querySelector('.org-node.highlight.scrolled')) {
+                            node.classList.add('scrolled');
+                            node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }
+                });
+
+                setTimeout(() => {
+                    document.querySelectorAll('.org-node.scrolled').forEach(n => n.classList.remove('scrolled'));
+                }, 100);
+            }
+
+            // 表格搜尋
+            const rows = document.querySelectorAll('#tableBody tr');
+            rows.forEach(row => {
+                const name = row.dataset.name || '';
+                const code = row.dataset.code || '';
+
+                if (!lowerKeyword) {
+                    row.classList.remove('highlight');
+                    row.style.display = '';
+                } else {
+                    const isMatch = name.includes(lowerKeyword) || code.includes(lowerKeyword);
+                    row.classList.toggle('highlight', isMatch);
+                    row.style.display = '';
+                }
+            });
+        }
+
+        // 顯示/隱藏載入動畫
+        function showLoading(show) {
+            document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+        }
+
+        // 顯示錯誤
+        function showError(message) {
+            document.getElementById('orgChartContainer').innerHTML = `
+                <div class="empty-state">
+                    <div class="icon"><span class="oi oi-warning text-danger"></span></div>
+                    <h4>${escapeHtml(message)}</h4>
+                    <button class="btn btn-primary mt-3" onclick="loadOrganizationData()">重新載入</button>
+                </div>
+            `;
+        }
+
+        // HTML 跳脫
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 鍵盤事件
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+            // Ctrl/Cmd + 加號/減號 縮放
+            if ((e.ctrlKey || e.metaKey) && currentView === 'chart') {
+                if (e.key === '=' || e.key === '+') {
+                    e.preventDefault();
+                    zoomIn();
+                } else if (e.key === '-') {
+                    e.preventDefault();
+                    zoomOut();
+                } else if (e.key === '0') {
+                    e.preventDefault();
+                    resetZoom();
+                }
+            }
+        });
+    </script>
+}

@@ -1,0 +1,429 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ========================================
+       UC Capital Identity Admin - Design System
+       ======================================== */
+
+    /* 主色調 - 深色背景 */
+    --color-bg-primary: #0a0a0f;
+    --color-bg-secondary: #13131f;
+    --color-bg-tertiary: #1a1a2e;
+    --color-bg-elevated: #1f1f35;
+
+    /* 強調色 */
+    --color-accent-primary: #6366f1;
+    --color-accent-secondary: #ec4899;
+    --color-accent-gold: #fbbf24;
+
+    /* 狀態色 */
+    --color-success: #22c55e;
+    --color-warning: #f59e0b;
+    --color-error: #ef4444;
+    --color-info: #3b82f6;
+
+    /* 文字色 */
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #94a3b8;
+    --color-text-muted: #64748b;
+    --color-text-disabled: #475569;
+
+    /* 邊框色 */
+    --color-border: rgba(255, 255, 255, 0.08);
+    --color-border-hover: rgba(255, 255, 255, 0.15);
+    --color-border-focus: rgba(99, 102, 241, 0.5);
+
+    /* 玻璃效果 */
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-bg-hover: rgba(255, 255, 255, 0.06);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-highlight: rgba(255, 255, 255, 0.15);
+    --glass-blur: 16px;
+
+    /* 陰影 */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.3);
+    --shadow-glow: 0 0 30px rgba(99, 102, 241, 0.15);
+    --shadow-glow-success: 0 0 20px rgba(34, 197, 94, 0.2);
+    --shadow-glow-error: 0 0 20px rgba(239, 68, 68, 0.2);
+
+    /* 圓角 */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 20px;
+    --radius-full: 9999px;
+
+    /* 間距 */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 48px;
+
+    /* 字體 */
+    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+
+    /* 動畫 */
+    --transition-fast: 150ms;
+    --transition-normal: 300ms;
+    --transition-slow: 500ms;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* 基礎重設 */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  body {
+    @apply bg-[var(--color-bg-primary)] text-white font-sans antialiased overflow-x-hidden;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  /* 選取樣式 */
+  ::selection {
+    background: rgba(99, 102, 241, 0.3);
+    color: white;
+  }
+
+  /* 焦點樣式 */
+  :focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
+  }
+
+  /* 連結樣式 */
+  a {
+    color: var(--color-accent-primary);
+    text-decoration: none;
+    transition: color var(--transition-fast) ease;
+  }
+
+  a:hover {
+    color: var(--color-accent-secondary);
+  }
+}
+
+/* ========================================
+   組件層 - 可重用樣式
+   ======================================== */
+@layer components {
+  /* 玻璃卡片 */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+  }
+
+  .glass-hover {
+    @apply glass transition-all duration-300;
+  }
+
+  .glass-hover:hover {
+    background: var(--glass-bg-hover);
+    border-color: var(--color-border-hover);
+  }
+
+  /* 標題漸層 */
+  .title-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-white via-[var(--color-accent-primary)] to-[var(--color-accent-secondary)];
+  }
+
+  .title-gradient-gold {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200;
+  }
+
+  /* 按鈕基礎 */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-medium transition-all duration-300;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn px-6 py-2.5 rounded-xl;
+    @apply bg-gradient-to-r from-[var(--color-accent-primary)] to-[#818cf8];
+    @apply text-white shadow-lg shadow-indigo-500/25;
+    @apply hover:shadow-xl hover:shadow-indigo-500/30 hover:-translate-y-0.5;
+    @apply active:translate-y-0;
+  }
+
+  .btn-secondary {
+    @apply btn px-6 py-2.5 rounded-xl;
+    @apply bg-white/5 border border-white/10;
+    @apply text-white;
+    @apply hover:bg-white/10 hover:border-white/20;
+  }
+
+  .btn-ghost {
+    @apply btn px-4 py-2 rounded-lg;
+    @apply text-[var(--color-text-secondary)];
+    @apply hover:text-white hover:bg-white/5;
+  }
+
+  .btn-danger {
+    @apply btn px-6 py-2.5 rounded-xl;
+    @apply bg-gradient-to-r from-red-500 to-red-600;
+    @apply text-white shadow-lg shadow-red-500/25;
+    @apply hover:shadow-xl hover:shadow-red-500/30 hover:-translate-y-0.5;
+  }
+
+  .btn-icon {
+    @apply btn p-2.5 rounded-xl;
+    @apply bg-white/5 border border-white/10;
+    @apply text-[var(--color-text-secondary)];
+    @apply hover:text-white hover:bg-white/10 hover:border-white/20;
+  }
+
+  /* 輸入框 */
+  .input {
+    @apply w-full px-4 py-2.5 rounded-xl;
+    @apply bg-white/5 border border-white/10;
+    @apply text-white placeholder-[var(--color-text-muted)];
+    @apply transition-all duration-300;
+    @apply focus:outline-none focus:border-[var(--color-accent-primary)] focus:ring-2;
+    --tw-ring-color: rgba(99, 102, 241, 0.2);
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .input-error {
+    @apply border-red-500/50 focus:border-red-500 focus:ring-2;
+    --tw-ring-color: rgba(239, 68, 68, 0.2);
+  }
+
+  /* 標籤 */
+  .label {
+    @apply block text-sm font-medium text-[var(--color-text-secondary)] mb-2;
+  }
+
+  /* Badge 標籤 */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium;
+  }
+
+  .badge-default {
+    @apply badge bg-white/10 text-[var(--color-text-secondary)];
+  }
+
+  .badge-primary {
+    @apply badge bg-indigo-500/20 text-indigo-300;
+  }
+
+  .badge-success {
+    @apply badge bg-green-500/20 text-green-300;
+  }
+
+  .badge-warning {
+    @apply badge bg-amber-500/20 text-amber-300;
+  }
+
+  .badge-error {
+    @apply badge bg-red-500/20 text-red-300;
+  }
+
+  .badge-info {
+    @apply badge bg-blue-500/20 text-blue-300;
+  }
+
+  /* 卡片 */
+  .card {
+    @apply glass rounded-2xl p-6;
+    @apply border border-[var(--glass-border)];
+  }
+
+  .card-interactive {
+    @apply card transition-all duration-300 cursor-pointer;
+    @apply hover:bg-[var(--glass-bg-hover)] hover:border-[var(--color-border-hover)];
+    @apply hover:-translate-y-1 hover:shadow-lg;
+  }
+
+  /* 表格 */
+  .table-container {
+    @apply glass rounded-2xl overflow-hidden;
+  }
+
+  .table {
+    @apply w-full;
+  }
+
+  .table th {
+    @apply px-6 py-4 text-left text-sm font-semibold text-[var(--color-text-secondary)];
+    @apply bg-white/5 border-b border-white/10;
+  }
+
+  .table td {
+    @apply px-6 py-4 text-sm;
+    @apply border-b border-white/5;
+  }
+
+  .table tbody tr {
+    @apply transition-colors duration-200;
+  }
+
+  .table tbody tr:hover {
+    @apply bg-white/[0.02];
+  }
+
+  .table tbody tr:last-child td {
+    @apply border-b-0;
+  }
+
+  /* 分頁 */
+  .pagination {
+    @apply flex items-center gap-2;
+  }
+
+  .pagination-btn {
+    @apply p-2 rounded-lg text-sm;
+    @apply bg-white/5 border border-white/10;
+    @apply text-[var(--color-text-secondary)];
+    @apply hover:text-white hover:bg-white/10;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply transition-all duration-200;
+  }
+
+  .pagination-btn.active {
+    @apply text-indigo-400;
+    background-color: rgba(99, 102, 241, 0.2);
+    border-color: rgba(99, 102, 241, 0.3);
+  }
+
+  /* Tooltip */
+  .tooltip {
+    @apply absolute z-50 px-3 py-1.5 text-xs font-medium;
+    @apply bg-[var(--color-bg-elevated)] text-white;
+    @apply rounded-lg shadow-lg;
+    @apply border border-white/10;
+    @apply pointer-events-none;
+  }
+
+  /* 骨架屏 */
+  .skeleton {
+    @apply bg-white/5 rounded-lg animate-pulse;
+  }
+
+  /* 分隔線 */
+  .divider {
+    @apply h-px bg-gradient-to-r from-transparent via-white/10 to-transparent;
+  }
+
+  /* 頁面標題區 */
+  .page-header {
+    @apply mb-8;
+  }
+
+  .page-title {
+    @apply text-2xl font-bold text-white;
+  }
+
+  .page-description {
+    @apply text-[var(--color-text-secondary)] mt-1;
+  }
+
+  /* 空狀態 */
+  .empty-state {
+    @apply flex flex-col items-center justify-center py-16 text-center;
+  }
+
+  .empty-state-icon {
+    @apply w-16 h-16 text-[var(--color-text-muted)] mb-4;
+  }
+
+  .empty-state-title {
+    @apply text-lg font-medium text-white mb-2;
+  }
+
+  .empty-state-description {
+    @apply text-[var(--color-text-secondary)] max-w-sm;
+  }
+
+  /* 載入狀態 */
+  .loading-spinner {
+    @apply w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin;
+  }
+}
+
+/* ========================================
+   工具層 - 自訂工具類
+   ======================================== */
+@layer utilities {
+  /* 文字截斷 */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* 隱藏滾動條但保持功能 */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 發光效果 */
+  .glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .glow-success {
+    box-shadow: var(--shadow-glow-success);
+  }
+
+  .glow-error {
+    box-shadow: var(--shadow-glow-error);
+  }
+
+  /* 漸層邊框 */
+  .gradient-border {
+    position: relative;
+  }
+
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-secondary));
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    pointer-events: none;
+  }
+
+  /* 動畫延遲 */
+  .animation-delay-100 { animation-delay: 100ms; }
+  .animation-delay-200 { animation-delay: 200ms; }
+  .animation-delay-300 { animation-delay: 300ms; }
+  .animation-delay-400 { animation-delay: 400ms; }
+  .animation-delay-500 { animation-delay: 500ms; }
+}

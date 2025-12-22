@@ -1,11 +1,13 @@
 ﻿// Copyright (c) Jan Škoruba. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0.
 
+using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Resources;
 using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services;
 using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services.Interfaces;
+using Skoruba.Duende.IdentityServer.Admin.EntityFramework.DbContexts;
 using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Interfaces;
 using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories;
 using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories.Interfaces;
@@ -59,6 +61,24 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Extensions
             services.AddScoped<IIdentityProviderServiceResources, IdentityProviderServiceResources>();
             services.AddScoped<IPersistedGrantServiceResources, PersistedGrantServiceResources>();
             services.AddScoped<IKeyServiceResources, KeyServiceResources>();
+
+            return services;
+        }
+
+        /// <summary>
+        /// 註冊組織架構管理服務 (UC Capital)
+        /// </summary>
+        public static IServiceCollection AddOrganizationServices(this IServiceCollection services, string connectionString)
+        {
+            // DbContext
+            services.AddDbContext<OrganizationDbContext>(options =>
+                options.UseSqlServer(connectionString));
+
+            // Repository
+            services.AddTransient<IOrganizationRepository, OrganizationRepository>();
+
+            // Service
+            services.AddTransient<IOrganizationService, OrganizationService>();
 
             return services;
         }

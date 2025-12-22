@@ -160,6 +160,40 @@
                     "offline_access",
                     "uc_capital_admin_api"
                 ]
+            },
+            {
+                "ClientId": "uc_capital_react_admin",
+                "ClientName": "UC Capital React 管理介面",
+                "ClientUri": "http://localhost:5173",
+                "AllowedGrantTypes": [
+                    "authorization_code"
+                ],
+                "RequireClientSecret": false,
+                "RequirePkce": true,
+                "AllowOfflineAccess": true,
+                "RefreshTokenUsage": 1,
+                "RefreshTokenExpiration": 1,
+                "AccessTokenLifetime": 3600,
+                "AbsoluteRefreshTokenLifetime": 86400,
+                "SlidingRefreshTokenLifetime": 43200,
+                "RedirectUris": [
+                    "http://localhost:5173/auth/callback",
+                    "http://localhost:5173/auth/silent-renew"
+                ],
+                "PostLogoutRedirectUris": [
+                    "http://localhost:5173/"
+                ],
+                "AllowedCorsOrigins": [
+                    "http://localhost:5173"
+                ],
+                "AllowedScopes": [
+                    "openid",
+                    "email",
+                    "profile",
+                    "roles",
+                    "offline_access",
+                    "uc_capital_admin_api"
+                ]
             }
         ]
     }
