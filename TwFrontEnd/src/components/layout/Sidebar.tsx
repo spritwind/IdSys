@@ -50,6 +50,7 @@ const menuItems: MenuItem[] = [
         children: [
             { icon: UserCog, label: '使用者', path: '/users' },
             { icon: Shield, label: '角色', path: '/roles' },
+            { icon: Lock, label: '舊權限控管', path: '/permissions' },
         ],
     },
     {

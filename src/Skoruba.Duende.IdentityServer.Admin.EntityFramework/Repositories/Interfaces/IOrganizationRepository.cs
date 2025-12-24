@@ -10,6 +10,8 @@ namespace Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories.Inter
 {
     public interface IOrganizationRepository
     {
+        #region 查詢方法
+
         /// <summary>
         /// 取得所有啟用的組織群組
         /// </summary>
@@ -34,5 +36,46 @@ namespace Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories.Inter
         /// 取得組織統計資料
         /// </summary>
         Task<(int totalGroups, int rootGroups, int maxDepth, int withManagers)> GetOrganizationStatsAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 遞迴取得所有子孫群組（用於刪除確認）
+        /// </summary>
+        Task<List<KeycloakGroup>> GetAllDescendantsAsync(string parentId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 檢查群組名稱是否已存在（同一層級內不可重複）
+        /// </summary>
+        Task<bool> ExistsAsync(string name, string parentId, string excludeId = null, CancellationToken cancellationToken = default);
+
+        #endregion
+
+        #region 新增/修改/刪除方法
+
+        /// <summary>
+        /// 新增組織群組
+        /// </summary>
+        Task<KeycloakGroup> CreateAsync(KeycloakGroup group, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 更新組織群組
+        /// </summary>
+        Task<KeycloakGroup> UpdateAsync(KeycloakGroup group, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 刪除組織群組（軟刪除，設定 Enabled = false）
+        /// </summary>
+        Task<bool> DeleteAsync(string id, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 遞迴刪除群組及其所有子孫群組
+        /// </summary>
+        Task<int> DeleteWithDescendantsAsync(string id, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 更新父層的子群組數量
+        /// </summary>
+        Task UpdateSubGroupCountAsync(string parentId, CancellationToken cancellationToken = default);
+
+        #endregion
     }
 }

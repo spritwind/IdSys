@@ -76,4 +76,133 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Dtos.Organization
         public int MaxDepth { get; set; }
         public int GroupsWithManagers { get; set; }
     }
+
+    /// <summary>
+    /// 新增組織群組 DTO
+    /// </summary>
+    public class CreateOrganizationGroupDto
+    {
+        /// <summary>
+        /// 部門名稱（必填）
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// 父群組 ID（null 表示根層級）
+        /// </summary>
+        public string ParentId { get; set; }
+
+        /// <summary>
+        /// 部門代碼
+        /// </summary>
+        public string DeptCode { get; set; }
+
+        /// <summary>
+        /// 中文名稱
+        /// </summary>
+        public string DeptZhName { get; set; }
+
+        /// <summary>
+        /// 英文名稱
+        /// </summary>
+        public string DeptEName { get; set; }
+
+        /// <summary>
+        /// 部門主管
+        /// </summary>
+        public string Manager { get; set; }
+
+        /// <summary>
+        /// 描述
+        /// </summary>
+        public string Description { get; set; }
+    }
+
+    /// <summary>
+    /// 更新組織群組 DTO
+    /// </summary>
+    public class UpdateOrganizationGroupDto
+    {
+        /// <summary>
+        /// 部門名稱（必填）
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// 父群組 ID（null 表示根層級）
+        /// </summary>
+        public string ParentId { get; set; }
+
+        /// <summary>
+        /// 部門代碼
+        /// </summary>
+        public string DeptCode { get; set; }
+
+        /// <summary>
+        /// 中文名稱
+        /// </summary>
+        public string DeptZhName { get; set; }
+
+        /// <summary>
+        /// 英文名稱
+        /// </summary>
+        public string DeptEName { get; set; }
+
+        /// <summary>
+        /// 部門主管
+        /// </summary>
+        public string Manager { get; set; }
+
+        /// <summary>
+        /// 描述
+        /// </summary>
+        public string Description { get; set; }
+    }
+
+    /// <summary>
+    /// 刪除確認資訊 DTO（包含待刪除的群組及子群組列表）
+    /// </summary>
+    public class DeleteConfirmationDto
+    {
+        /// <summary>
+        /// 待刪除的群組
+        /// </summary>
+        public OrganizationGroupDto Group { get; set; }
+
+        /// <summary>
+        /// 將被一同刪除的子群組列表
+        /// </summary>
+        public List<OrganizationGroupDto> Descendants { get; set; } = new List<OrganizationGroupDto>();
+
+        /// <summary>
+        /// 總計將刪除的群組數量（包含自身）
+        /// </summary>
+        public int TotalCount => 1 + (Descendants?.Count ?? 0);
+
+        /// <summary>
+        /// 是否有子群組
+        /// </summary>
+        public bool HasDescendants => Descendants?.Count > 0;
+    }
+
+    /// <summary>
+    /// 刪除結果 DTO
+    /// </summary>
+    public class DeleteResultDto
+    {
+        /// <summary>
+        /// 是否成功
+        /// </summary>
+        public bool Success { get; set; }
+
+        /// <summary>
+        /// 刪除的群組數量
+        /// </summary>
+        public int DeletedCount { get; set; }
+
+        /// <summary>
+        /// 訊息
+        /// </summary>
+        public string Message { get; set; }
+    }
 }

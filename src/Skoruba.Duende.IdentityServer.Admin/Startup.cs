@@ -78,6 +78,9 @@ namespace Skoruba.Duende.IdentityServer.Admin
             // UC Capital: 註冊組織架構服務
             var connectionString = Configuration.GetConnectionString("IdentityDbConnection");
             services.AddOrganizationServices(connectionString);
+
+            // UC Capital: 註冊權限控管服務
+            services.AddPermissionServices(connectionString);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)

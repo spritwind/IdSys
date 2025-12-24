@@ -84,9 +84,14 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.Helpers
 
                     try
                     {
-                        var bytes = File.ReadAllBytes(certificateConfiguration.SigningCertificatePfxFilePath);
-                        var cert = X509CertificateLoader.LoadPkcs12(bytes, certificateConfiguration.SigningCertificatePfxFilePassword);
-    
+                        // 使用舊的建構子載入 PFX，與 PowerShell 相同的方法
+                        #pragma warning disable SYSLIB0057
+                        var cert = new X509Certificate2(
+                            certificateConfiguration.SigningCertificatePfxFilePath,
+                            certificateConfiguration.SigningCertificatePfxFilePassword,
+                            X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+                        #pragma warning restore SYSLIB0057
+
                         builder.AddSigningCredential(cert);
                     }
                     catch (Exception e)
@@ -164,10 +169,13 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.Helpers
                 {
                     try
                     {
-                        var validationCertBytes = File.ReadAllBytes(certificateConfiguration.ValidationCertificatePfxFilePath);
-                        var validationCertificate = X509CertificateLoader.LoadPkcs12(
-                            validationCertBytes,
-                            certificateConfiguration.ValidationCertificatePfxFilePassword);
+                        // 使用舊的建構子載入 PFX
+                        #pragma warning disable SYSLIB0057
+                        var validationCertificate = new X509Certificate2(
+                            certificateConfiguration.ValidationCertificatePfxFilePath,
+                            certificateConfiguration.ValidationCertificatePfxFilePassword,
+                            X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+                        #pragma warning restore SYSLIB0057
 
                         builder.AddValidationKey(validationCertificate);
                     }

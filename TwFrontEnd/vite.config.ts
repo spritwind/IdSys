@@ -15,6 +15,7 @@ export default defineConfig({
     // 代理 API 請求到後端 Admin 應用程式
     // 路由格式：/{Controller}/{Action}（不含 Area 前綴）
     proxy: {
+      // Admin MVC 路由 (44303)
       '/Organization': {
         target: 'https://localhost:44303',
         changeOrigin: true,
@@ -35,6 +36,13 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      // Admin.Api RESTful API (44302)
+      '/api/organization': {
+        target: 'https://localhost:44302',
+        changeOrigin: true,
+        secure: false,
+      },
+      // 其他 Admin MVC API
       '/api': {
         target: 'https://localhost:44303',
         changeOrigin: true,

@@ -70,6 +70,13 @@ namespace Skoruba.Duende.IdentityServer.Admin.Api
                 IdentityUserClaimsDto, IdentityUserProviderDto, IdentityUserProvidersDto, IdentityUserChangePasswordDto,
                 IdentityRoleClaimsDto, IdentityUserClaimDto, IdentityRoleClaimDto>(Configuration, adminApiConfiguration);
 
+            // UC Capital - 組織架構服務
+            var connectionString = Configuration.GetConnectionString("ConfigurationDbConnection");
+            services.AddOrganizationServices(connectionString);
+
+            // UC Capital - 權限控管服務
+            services.AddPermissionServices(connectionString);
+
             services.AddSwaggerServices(adminApiConfiguration);
             
             services.AddIdSHealthChecks<IdentityServerConfigurationDbContext, IdentityServerPersistedGrantDbContext, AdminIdentityDbContext, AdminLogDbContext, AdminAuditLogDbContext, IdentityServerDataProtectionDbContext>(Configuration, adminApiConfiguration);

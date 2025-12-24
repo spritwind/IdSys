@@ -26,6 +26,7 @@
         .json-string { color: #ce9178; }
         .json-number { color: #b5cea8; }
         .json-boolean { color: #569cd6; }
+        .json-description { color: #6a9955; font-style: italic; }
         .section-card {
             border-left: 4px solid #0d6efd;
         }
@@ -272,14 +273,106 @@
             logEl.textContent = `${timestamp} ${prefix} ${message}\n` + logEl.textContent;
         }
 
+        // JWT 欄位說明
+        const claimDescriptions = {
+            // 標準 OIDC Claims
+            'iss': '發行者 (Issuer) - 簽發此 Token 的驗證伺服器',
+            'sub': '主體識別碼 (Subject) - 使用者的唯一識別碼',
+            'aud': '受眾 (Audience) - 此 Token 的目標接收者',
+            'exp': '到期時間 (Expiration) - Token 失效的時間',
+            'nbf': '生效時間 (Not Before) - Token 開始生效的時間',
+            'iat': '簽發時間 (Issued At) - Token 簽發的時間',
+            'jti': 'JWT 識別碼 (JWT ID) - 此 Token 的唯一識別碼',
+            'auth_time': '驗證時間 - 使用者完成身分驗證的時間',
+            'nonce': '隨機數 - 用於防止重放攻擊',
+            'at_hash': '存取權杖雜湊 - 用於驗證存取權杖',
+            'c_hash': '授權碼雜湊 - 用於驗證授權碼',
+            's_hash': '狀態雜湊 - 用於驗證狀態參數',
+            'acr': '驗證上下文類別 - 身分驗證的安全等級',
+            'amr': '驗證方法 - 使用的身分驗證方式',
+            'azp': '授權方 - 被授權使用此 Token 的用戶端',
+
+            // 使用者資訊 Claims
+            'name': '姓名 - 使用者的完整姓名',
+            'given_name': '名字 - 使用者的名',
+            'family_name': '姓氏 - 使用者的姓',
+            'middle_name': '中間名',
+            'nickname': '暱稱',
+            'preferred_username': '偏好使用者名稱',
+            'profile': '個人資料 URL',
+            'picture': '頭像 URL',
+            'website': '個人網站',
+            'email': '電子郵件地址',
+            'email_verified': '電子郵件已驗證',
+            'gender': '性別',
+            'birthdate': '生日',
+            'zoneinfo': '時區',
+            'locale': '語言區域',
+            'phone_number': '電話號碼',
+            'phone_number_verified': '電話號碼已驗證',
+            'address': '地址',
+            'updated_at': '資料更新時間',
+
+            // IdentityServer 特定 Claims
+            'client_id': '用戶端識別碼 - 發起請求的應用程式',
+            'scope': '授權範圍 - 此 Token 被授權存取的資源',
+            'sid': '工作階段識別碼 - 使用者登入工作階段的 ID',
+            'idp': '身分提供者 - 驗證使用者身分的提供者',
+            'role': '角色 - 使用者被指派的角色',
+            'typ': 'Token 類型',
+            'alg': '簽章演算法',
+            'kid': '金鑰識別碼 - 用於驗證簽章的金鑰 ID'
+        };
+
+        // 時間戳轉換為可讀格式
+        function formatTimestamp(value, key) {
+            const timeFields = ['exp', 'nbf', 'iat', 'auth_time', 'updated_at'];
+            if (timeFields.includes(key) && typeof value === 'number') {
+                const date = new Date(value * 1000);
+                return `${value} → ${date.toLocaleString('zh-TW', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                })}`;
+            }
+            return value;
+        }
+
+        // 為 JWT Payload 添加說明
+        function addClaimDescriptions(payload) {
+            const result = {};
+            for (const [key, value] of Object.entries(payload)) {
+                const formattedValue = formatTimestamp(value, key);
+                const description = claimDescriptions[key];
+                if (description) {
+                    result[`${key}`] = formattedValue;
+                    result[`  ↳ ${key} 說明`] = description;
+                } else {
+                    result[key] = formattedValue;
+                }
+            }
+            return result;
+        }
+
         // JWT 解碼
-        function decodeJwt(token) {
+        function decodeJwt(token, withDescriptions = false) {
             try {
                 const parts = token.split('.');
                 if (parts.length !== 3) return null;
 
                 const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
                 const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+
+                if (withDescriptions) {
+                    return {
+                        '【Header 標頭】': addClaimDescriptions(header),
+                        '【Payload 內容】': addClaimDescriptions(payload)
+                    };
+                }
 
                 return { header, payload };
             } catch (e) {
@@ -296,9 +389,26 @@
                 let cls = 'json-number';
                 if (/^"/.test(match)) {
                     if (/:$/.test(match)) {
-                        cls = 'json-key';
+                        // 檢查是否為說明行
+                        if (match.includes('↳') || match.includes('說明')) {
+                            cls = 'json-description';
+                        } else if (match.includes('【') && match.includes('】')) {
+                            cls = 'json-key';
+                        } else {
+                            cls = 'json-key';
+                        }
                     } else {
-                        cls = 'json-string';
+                        // 檢查值是否為說明文字
+                        if (match.includes('發行者') || match.includes('主體') || match.includes('受眾') ||
+                            match.includes('到期') || match.includes('生效') || match.includes('簽發') ||
+                            match.includes('識別碼') || match.includes('驗證') || match.includes('使用者') ||
+                            match.includes('用戶端') || match.includes('授權') || match.includes('範圍') ||
+                            match.includes('工作階段') || match.includes('提供者') || match.includes('角色') ||
+                            match.includes('類型') || match.includes('演算法') || match.includes('金鑰')) {
+                            cls = 'json-description';
+                        } else {
+                            cls = 'json-string';
+                        }
                     }
                 } else if (/true|false/.test(match)) {
                     cls = 'json-boolean';
@@ -324,21 +434,37 @@
             document.getElementById('loginPrompt').classList.toggle('d-none', isAuthenticated);
 
             if (isAuthenticated) {
-                document.getElementById('userName').textContent = user.profile?.name || user.profile?.preferred_username || '-';
-                document.getElementById('userEmail').textContent = user.profile?.email || '-';
-                document.getElementById('userSub').textContent = user.profile?.sub || '-';
+                // 先解碼 Token 以取得完整資訊
+                const decodedAccessRaw = decodeJwt(user.access_token, false);
+                const decodedIdRaw = decodeJwt(user.id_token, false);
+
+                // 從多個來源嘗試取得姓名和電子郵件
+                const userName = user.profile?.name ||
+                                 decodedIdRaw?.payload?.name ||
+                                 decodedAccessRaw?.payload?.name ||
+                                 user.profile?.preferred_username ||
+                                 decodedIdRaw?.payload?.preferred_username ||
+                                 '-';
+                const userEmail = user.profile?.email ||
+                                  decodedIdRaw?.payload?.email ||
+                                  decodedAccessRaw?.payload?.email ||
+                                  '-';
+
+                document.getElementById('userName').textContent = userName;
+                document.getElementById('userEmail').textContent = userEmail;
+                document.getElementById('userSub').textContent = user.profile?.sub || decodedIdRaw?.payload?.sub || '-';
                 document.getElementById('tokenExpires').textContent = user.expires_at ?
                     new Date(user.expires_at * 1000).toLocaleString('zh-TW') : '-';
 
                 // 存取權杖
                 document.getElementById('accessTokenRaw').textContent = user.access_token || '尚無資料';
-                const decodedAccess = decodeJwt(user.access_token);
+                const decodedAccess = decodeJwt(user.access_token, true);
                 document.getElementById('accessTokenDecoded').innerHTML = decodedAccess ?
                     syntaxHighlight(JSON.stringify(decodedAccess, null, 2)) : '非有效的 JWT';
 
                 // 身分權杖
                 document.getElementById('idTokenRaw').textContent = user.id_token || '尚無資料';
-                const decodedId = decodeJwt(user.id_token);
+                const decodedId = decodeJwt(user.id_token, true);
                 document.getElementById('idTokenDecoded').innerHTML = decodedId ?
                     syntaxHighlight(JSON.stringify(decodedId, null, 2)) : '非有效的 JWT';
 

@@ -82,5 +82,23 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Extensions
 
             return services;
         }
+
+        /// <summary>
+        /// 註冊權限控管服務 (UC Capital)
+        /// </summary>
+        public static IServiceCollection AddPermissionServices(this IServiceCollection services, string connectionString)
+        {
+            // DbContext
+            services.AddDbContext<PermissionDbContext>(options =>
+                options.UseSqlServer(connectionString));
+
+            // Repository
+            services.AddTransient<IPermissionRepository, PermissionRepository>();
+
+            // Service
+            services.AddTransient<IPermissionService, PermissionService>();
+
+            return services;
+        }
     }
 }

@@ -56,18 +56,19 @@ export function ProtectedRoute({
         }
     }, [isAuthenticated]);
 
-    // 除錯訊息
-    logRoute('ProtectedRoute render', {
-        path: location.pathname,
-        isLoading,
-        isAuthenticated,
-        hasUser: !!user,
-        loginTriggered: loginTriggered.current,
+    // 除錯訊息 - 使用 useEffect 避免在渲染期間觸發其他組件的 setState
+    useEffect(() => {
+        logRoute('ProtectedRoute render', {
+            path: location.pathname,
+            isLoading,
+            isAuthenticated,
+            hasUser: !!user,
+            loginTriggered: loginTriggered.current,
+        });
     });
 
     // 載入中顯示載入畫面
     if (isLoading) {
-        logRoute('Showing loading screen');
         return <LoadingScreen />;
     }
 
@@ -76,17 +77,17 @@ export function ProtectedRoute({
         // 防止重複觸發登入
         if (!loginTriggered.current) {
             loginTriggered.current = true;
-            logRoute('Not authenticated, triggering login', { path: location.pathname });
             // 儲存當前路徑以便登入後返回
             sessionStorage.setItem('returnUrl', location.pathname + location.search);
-            // 自動觸發登入
-            login();
+            // 使用 setTimeout 確保不在渲染期間觸發副作用
+            setTimeout(() => {
+                logRoute('Not authenticated, triggering login', { path: location.pathname });
+                login();
+            }, 0);
         }
 
         return <LoadingScreen message="正在跳轉至登入頁面..." />;
     }
-
-    logRoute('User authenticated, rendering children', { path: location.pathname });
 
     // 檢查角色權限
     if (requiredRoles.length > 0) {

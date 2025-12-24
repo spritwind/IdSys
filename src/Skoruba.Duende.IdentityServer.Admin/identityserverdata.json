@@ -139,6 +139,7 @@
                 "RequireClientSecret": false,
                 "RequirePkce": true,
                 "AllowOfflineAccess": true,
+                "AlwaysIncludeUserClaimsInIdToken": true,
                 "RefreshTokenUsage": 1,
                 "RefreshTokenExpiration": 1,
                 "AccessTokenLifetime": 3600,
@@ -171,6 +172,7 @@
                 "RequireClientSecret": false,
                 "RequirePkce": true,
                 "AllowOfflineAccess": true,
+                "AlwaysIncludeUserClaimsInIdToken": true,
                 "RefreshTokenUsage": 1,
                 "RefreshTokenExpiration": 1,
                 "AccessTokenLifetime": 3600,
@@ -178,13 +180,21 @@
                 "SlidingRefreshTokenLifetime": 43200,
                 "RedirectUris": [
                     "http://localhost:5173/auth/callback",
-                    "http://localhost:5173/auth/silent-renew"
+                    "http://localhost:5173/auth/silent-renew",
+                    "http://localhost:5174/auth/callback",
+                    "http://localhost:5174/auth/silent-renew",
+                    "https://prs.uccapital.com.tw/auth/callback",
+                    "https://prs.uccapital.com.tw/auth/silent-renew"
                 ],
                 "PostLogoutRedirectUris": [
-                    "http://localhost:5173/"
+                    "http://localhost:5173/",
+                    "http://localhost:5174/",
+                    "https://prs.uccapital.com.tw/"
                 ],
                 "AllowedCorsOrigins": [
-                    "http://localhost:5173"
+                    "http://localhost:5173",
+                    "http://localhost:5174",
+                    "https://prs.uccapital.com.tw"
                 ],
                 "AllowedScopes": [
                     "openid",

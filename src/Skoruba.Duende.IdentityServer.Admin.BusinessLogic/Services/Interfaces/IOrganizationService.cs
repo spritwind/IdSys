@@ -10,6 +10,8 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services.Interfaces
 {
     public interface IOrganizationService
     {
+        #region 查詢方法
+
         /// <summary>
         /// 取得所有組織群組（扁平列表）
         /// </summary>
@@ -29,5 +31,36 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services.Interfaces
         /// 取得組織統計資料
         /// </summary>
         Task<OrganizationStatsDto> GetOrganizationStatsAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 取得待刪除群組及其所有子群組資訊（用於刪除確認）
+        /// </summary>
+        Task<DeleteConfirmationDto> GetDeleteConfirmationAsync(string id, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 檢查群組名稱是否已存在
+        /// </summary>
+        Task<bool> CanInsertGroupAsync(string name, string parentId, string excludeId = null, CancellationToken cancellationToken = default);
+
+        #endregion
+
+        #region 新增/修改/刪除方法
+
+        /// <summary>
+        /// 新增組織群組
+        /// </summary>
+        Task<OrganizationGroupDto> CreateGroupAsync(CreateOrganizationGroupDto dto, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 更新組織群組
+        /// </summary>
+        Task<OrganizationGroupDto> UpdateGroupAsync(string id, UpdateOrganizationGroupDto dto, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 刪除組織群組（含所有子群組）
+        /// </summary>
+        Task<DeleteResultDto> DeleteGroupAsync(string id, CancellationToken cancellationToken = default);
+
+        #endregion
     }
 }

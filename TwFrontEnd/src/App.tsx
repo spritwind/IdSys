@@ -9,6 +9,7 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { MainLayout } from './layouts/MainLayout';
 import Overview from './pages/dashboard/Overview';
 import OrganizationPage from './pages/organization/OrganizationPage';
+import PermissionPage from './pages/permission/PermissionPage';
 import { LoginPage, CallbackPage } from './pages/auth';
 import { PlaceholderPage } from './components/features/PlaceholderPage';
 import { DebugPanel } from './components/debug/DebugPanel';
@@ -274,6 +275,9 @@ function App() {
 
                         {/* Organization */}
                         <Route path="/organization" element={<OrganizationPage />} />
+
+                        {/* Permission Management */}
+                        <Route path="/permissions" element={<PermissionPage />} />
                     </Route>
 
                     {/* Fallback */}

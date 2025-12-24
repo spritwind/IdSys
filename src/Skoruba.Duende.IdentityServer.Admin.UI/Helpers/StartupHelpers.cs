@@ -383,6 +383,9 @@ namespace Skoruba.Duende.IdentityServer.Admin.UI.Helpers
                         options.ClientSecret = adminConfiguration.ClientSecret;
                         options.ResponseType = adminConfiguration.OidcResponseType;
 
+                        // 停用 PAR (Pushed Authorization Requests) 以避免跨應用程式資料保護金鑰問題
+                        options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Disable;
+
                         options.Scope.Clear();
                         foreach (var scope in adminConfiguration.Scopes)
                         {

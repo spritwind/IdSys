@@ -4648,6 +4648,2122 @@ export class LogsClient extends WebApiClientBase implements ILogsClient {
     }
 }
 
+export interface IOrganizationClient {
+
+    getAll(): Promise<OrganizationGroupApiDto[]>;
+
+    create(dto: CreateOrganizationGroupApiDto): Promise<OrganizationGroupApiDto>;
+
+    getTree(): Promise<OrganizationTreeApiDto[]>;
+
+    getById(id: string): Promise<OrganizationGroupApiDto>;
+
+    update(id: string, dto: UpdateOrganizationGroupApiDto): Promise<OrganizationGroupApiDto>;
+
+    delete(id: string): Promise<DeleteResultApiDto>;
+
+    getStats(): Promise<OrganizationStatsApiDto>;
+
+    canInsert(name: string | null | undefined, parentId: string | null | undefined, excludeId: string | null | undefined): Promise<boolean>;
+
+    getDeleteConfirmation(id: string): Promise<DeleteConfirmationApiDto>;
+}
+
+export class OrganizationClient extends WebApiClientBase implements IOrganizationClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super();
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    getAll(): Promise<OrganizationGroupApiDto[]> {
+        let url_ = this.baseUrl + "/api/Organization";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetAll(_response);
+        });
+    }
+
+    protected processGetAll(response: Response): Promise<OrganizationGroupApiDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(OrganizationGroupApiDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OrganizationGroupApiDto[]>(null as any);
+    }
+
+    create(dto: CreateOrganizationGroupApiDto): Promise<OrganizationGroupApiDto> {
+        let url_ = this.baseUrl + "/api/Organization";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processCreate(_response);
+        });
+    }
+
+    protected processCreate(response: Response): Promise<OrganizationGroupApiDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result201 = OrganizationGroupApiDto.fromJS(resultData201);
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OrganizationGroupApiDto>(null as any);
+    }
+
+    getTree(): Promise<OrganizationTreeApiDto[]> {
+        let url_ = this.baseUrl + "/api/Organization/tree";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetTree(_response);
+        });
+    }
+
+    protected processGetTree(response: Response): Promise<OrganizationTreeApiDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(OrganizationTreeApiDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OrganizationTreeApiDto[]>(null as any);
+    }
+
+    getById(id: string): Promise<OrganizationGroupApiDto> {
+        let url_ = this.baseUrl + "/api/Organization/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetById(_response);
+        });
+    }
+
+    protected processGetById(response: Response): Promise<OrganizationGroupApiDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = OrganizationGroupApiDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OrganizationGroupApiDto>(null as any);
+    }
+
+    update(id: string, dto: UpdateOrganizationGroupApiDto): Promise<OrganizationGroupApiDto> {
+        let url_ = this.baseUrl + "/api/Organization/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processUpdate(_response);
+        });
+    }
+
+    protected processUpdate(response: Response): Promise<OrganizationGroupApiDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = OrganizationGroupApiDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OrganizationGroupApiDto>(null as any);
+    }
+
+    delete(id: string): Promise<DeleteResultApiDto> {
+        let url_ = this.baseUrl + "/api/Organization/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processDelete(_response);
+        });
+    }
+
+    protected processDelete(response: Response): Promise<DeleteResultApiDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = DeleteResultApiDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<DeleteResultApiDto>(null as any);
+    }
+
+    getStats(): Promise<OrganizationStatsApiDto> {
+        let url_ = this.baseUrl + "/api/Organization/stats";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetStats(_response);
+        });
+    }
+
+    protected processGetStats(response: Response): Promise<OrganizationStatsApiDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = OrganizationStatsApiDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OrganizationStatsApiDto>(null as any);
+    }
+
+    canInsert(name: string | null | undefined, parentId: string | null | undefined, excludeId: string | null | undefined): Promise<boolean> {
+        let url_ = this.baseUrl + "/api/Organization/check-name?";
+        if (name !== undefined && name !== null)
+            url_ += "name=" + encodeURIComponent("" + name) + "&";
+        if (parentId !== undefined && parentId !== null)
+            url_ += "parentId=" + encodeURIComponent("" + parentId) + "&";
+        if (excludeId !== undefined && excludeId !== null)
+            url_ += "excludeId=" + encodeURIComponent("" + excludeId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processCanInsert(_response);
+        });
+    }
+
+    protected processCanInsert(response: Response): Promise<boolean> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<boolean>(null as any);
+    }
+
+    getDeleteConfirmation(id: string): Promise<DeleteConfirmationApiDto> {
+        let url_ = this.baseUrl + "/api/Organization/{id}/delete-confirmation";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetDeleteConfirmation(_response);
+        });
+    }
+
+    protected processGetDeleteConfirmation(response: Response): Promise<DeleteConfirmationApiDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = DeleteConfirmationApiDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<DeleteConfirmationApiDto>(null as any);
+    }
+}
+
+export interface IPermissionClient {
+
+    getStats(): Promise<PermissionStatsDto>;
+
+    getClients(): Promise<string[]>;
+
+    searchUsers(search: string | null | undefined): Promise<UserBriefDto[]>;
+
+    getGroups(): Promise<GroupBriefDto[]>;
+
+    getAllScopes(clientId: string | null | undefined): Promise<ScopeDto[]>;
+
+    createScope(dto: CreateScopeDto): Promise<ScopeDto>;
+
+    getScopeById(id: string, clientId: string | null | undefined): Promise<ScopeDto>;
+
+    updateScope(id: string, dto: UpdateScopeDto): Promise<ScopeDto>;
+
+    deleteScope(id: string, clientId: string | null | undefined): Promise<void>;
+
+    canInsertScope(name: string | null | undefined, clientId: string | null | undefined, excludeId: string | null | undefined): Promise<boolean>;
+
+    getAllResources(clientId: string | null | undefined, type: string | null | undefined): Promise<ResourceDto[]>;
+
+    createResource(dto: CreateResourceDto): Promise<ResourceDto>;
+
+    getResourceById(id: string, clientId: string | null | undefined): Promise<ResourceDto>;
+
+    updateResource(id: string, dto: UpdateResourceDto): Promise<ResourceDto>;
+
+    deleteResource(id: string, clientId: string | null | undefined): Promise<void>;
+
+    canInsertResource(name: string | null | undefined, clientId: string | null | undefined, excludeId: string | null | undefined): Promise<boolean>;
+
+    getResourceScopes(resourceId: string, clientId: string | null | undefined): Promise<ResourceScopeDto[]>;
+
+    setResourceScopes(resourceId: string, clientId: string | null | undefined, scopeIds: string[]): Promise<number>;
+
+    getUserPermissions(userId: string, clientId: string | null | undefined): Promise<UserPermissionDto[]>;
+
+    setUserPermission(userId: string, dto: SetUserPermissionDto): Promise<UserPermissionDto>;
+
+    removeUserPermission(userId: string, clientId: string | null | undefined, resourceId: string | null | undefined): Promise<void>;
+
+    getResourceUserPermissions(resourceId: string, clientId: string | null | undefined): Promise<UserPermissionDto[]>;
+
+    getUserEffectivePermissions(userId: string, clientId: string | null | undefined): Promise<EffectivePermissionDto[]>;
+
+    hasPermission(userId: string, clientId: string | null | undefined, resourceId: string | null | undefined, scope: string | null | undefined): Promise<boolean>;
+
+    getGroupPermissions(groupId: string, clientId: string | null | undefined): Promise<GroupPermissionDto[]>;
+
+    setGroupPermission(groupId: string, dto: SetGroupPermissionDto): Promise<GroupPermissionDto>;
+
+    removeGroupPermission(groupId: string, clientId: string | null | undefined, resourceId: string | null | undefined): Promise<void>;
+
+    getResourceGroupPermissions(resourceId: string, clientId: string | null | undefined): Promise<GroupPermissionDto[]>;
+}
+
+export class PermissionClient extends WebApiClientBase implements IPermissionClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super();
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    getStats(): Promise<PermissionStatsDto> {
+        let url_ = this.baseUrl + "/api/Permission/stats";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetStats(_response);
+        });
+    }
+
+    protected processGetStats(response: Response): Promise<PermissionStatsDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PermissionStatsDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PermissionStatsDto>(null as any);
+    }
+
+    getClients(): Promise<string[]> {
+        let url_ = this.baseUrl + "/api/Permission/clients";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetClients(_response);
+        });
+    }
+
+    protected processGetClients(response: Response): Promise<string[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(item);
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<string[]>(null as any);
+    }
+
+    searchUsers(search: string | null | undefined): Promise<UserBriefDto[]> {
+        let url_ = this.baseUrl + "/api/Permission/users/search?";
+        if (search !== undefined && search !== null)
+            url_ += "search=" + encodeURIComponent("" + search) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processSearchUsers(_response);
+        });
+    }
+
+    protected processSearchUsers(response: Response): Promise<UserBriefDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(UserBriefDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserBriefDto[]>(null as any);
+    }
+
+    getGroups(): Promise<GroupBriefDto[]> {
+        let url_ = this.baseUrl + "/api/Permission/groups";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetGroups(_response);
+        });
+    }
+
+    protected processGetGroups(response: Response): Promise<GroupBriefDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(GroupBriefDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GroupBriefDto[]>(null as any);
+    }
+
+    getAllScopes(clientId: string | null | undefined): Promise<ScopeDto[]> {
+        let url_ = this.baseUrl + "/api/Permission/scopes?";
+        if (clientId !== undefined && clientId !== null)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetAllScopes(_response);
+        });
+    }
+
+    protected processGetAllScopes(response: Response): Promise<ScopeDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(ScopeDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ScopeDto[]>(null as any);
+    }
+
+    createScope(dto: CreateScopeDto): Promise<ScopeDto> {
+        let url_ = this.baseUrl + "/api/Permission/scopes";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processCreateScope(_response);
+        });
+    }
+
+    protected processCreateScope(response: Response): Promise<ScopeDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result201 = ScopeDto.fromJS(resultData201);
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ScopeDto>(null as any);
+    }
+
+    getScopeById(id: string, clientId: string | null | undefined): Promise<ScopeDto> {
+        let url_ = this.baseUrl + "/api/Permission/scopes/{id}?";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (clientId !== undefined && clientId !== null)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetScopeById(_response);
+        });
+    }
+
+    protected processGetScopeById(response: Response): Promise<ScopeDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ScopeDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ScopeDto>(null as any);
+    }
+
+    updateScope(id: string, dto: UpdateScopeDto): Promise<ScopeDto> {
+        let url_ = this.baseUrl + "/api/Permission/scopes/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processUpdateScope(_response);
+        });
+    }
+
+    protected processUpdateScope(response: Response): Promise<ScopeDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ScopeDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ScopeDto>(null as any);
+    }
+
+    deleteScope(id: string, clientId: string | null | undefined): Promise<void> {
+        let url_ = this.baseUrl + "/api/Permission/scopes/{id}?";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (clientId !== undefined && clientId !== null)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processDeleteScope(_response);
+        });
+    }
+
+    protected processDeleteScope(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    canInsertScope(name: string | null | undefined, clientId: string | null | undefined, excludeId: string | null | undefined): Promise<boolean> {
+        let url_ = this.baseUrl + "/api/Permission/scopes/check-name?";
+        if (name !== undefined && name !== null)
+            url_ += "name=" + encodeURIComponent("" + name) + "&";
+        if (clientId !== undefined && clientId !== null)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        if (excludeId !== undefined && excludeId !== null)
+            url_ += "excludeId=" + encodeURIComponent("" + excludeId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processCanInsertScope(_response);
+        });
+    }
+
+    protected processCanInsertScope(response: Response): Promise<boolean> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<boolean>(null as any);
+    }
+
+    getAllResources(clientId: string | null | undefined, type: string | null | undefined): Promise<ResourceDto[]> {
+        let url_ = this.baseUrl + "/api/Permission/resources?";
+        if (clientId !== undefined && clientId !== null)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        if (type !== undefined && type !== null)
+            url_ += "type=" + encodeURIComponent("" + type) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetAllResources(_response);
+        });
+    }
+
+    protected processGetAllResources(response: Response): Promise<ResourceDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(ResourceDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ResourceDto[]>(null as any);
+    }
+
+    createResource(dto: CreateResourceDto): Promise<ResourceDto> {
+        let url_ = this.baseUrl + "/api/Permission/resources";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processCreateResource(_response);
+        });
+    }
+
+    protected processCreateResource(response: Response): Promise<ResourceDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result201 = ResourceDto.fromJS(resultData201);
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ResourceDto>(null as any);
+    }
+
+    getResourceById(id: string, clientId: string | null | undefined): Promise<ResourceDto> {
+        let url_ = this.baseUrl + "/api/Permission/resources/{id}?";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (clientId !== undefined && clientId !== null)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetResourceById(_response);
+        });
+    }
+
+    protected processGetResourceById(response: Response): Promise<ResourceDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ResourceDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ResourceDto>(null as any);
+    }
+
+    updateResource(id: string, dto: UpdateResourceDto): Promise<ResourceDto> {
+        let url_ = this.baseUrl + "/api/Permission/resources/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processUpdateResource(_response);
+        });
+    }
+
+    protected processUpdateResource(response: Response): Promise<ResourceDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ResourceDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ResourceDto>(null as any);
+    }
+
+    deleteResource(id: string, clientId: string | null | undefined): Promise<void> {
+        let url_ = this.baseUrl + "/api/Permission/resources/{id}?";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (clientId !== undefined && clientId !== null)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processDeleteResource(_response);
+        });
+    }
+
+    protected processDeleteResource(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    canInsertResource(name: string | null | undefined, clientId: string | null | undefined, excludeId: string | null | undefined): Promise<boolean> {
+        let url_ = this.baseUrl + "/api/Permission/resources/check-name?";
+        if (name !== undefined && name !== null)
+            url_ += "name=" + encodeURIComponent("" + name) + "&";
+        if (clientId !== undefined && clientId !== null)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        if (excludeId !== undefined && excludeId !== null)
+            url_ += "excludeId=" + encodeURIComponent("" + excludeId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processCanInsertResource(_response);
+        });
+    }
+
+    protected processCanInsertResource(response: Response): Promise<boolean> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<boolean>(null as any);
+    }
+
+    getResourceScopes(resourceId: string, clientId: string | null | undefined): Promise<ResourceScopeDto[]> {
+        let url_ = this.baseUrl + "/api/Permission/resources/{resourceId}/scopes?";
+        if (resourceId === undefined || resourceId === null)
+            throw new Error("The parameter 'resourceId' must be defined.");
+        url_ = url_.replace("{resourceId}", encodeURIComponent("" + resourceId));
+        if (clientId !== undefined && clientId !== null)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetResourceScopes(_response);
+        });
+    }
+
+    protected processGetResourceScopes(response: Response): Promise<ResourceScopeDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(ResourceScopeDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ResourceScopeDto[]>(null as any);
+    }
+
+    setResourceScopes(resourceId: string, clientId: string | null | undefined, scopeIds: string[]): Promise<number> {
+        let url_ = this.baseUrl + "/api/Permission/resources/{resourceId}/scopes?";
+        if (resourceId === undefined || resourceId === null)
+            throw new Error("The parameter 'resourceId' must be defined.");
+        url_ = url_.replace("{resourceId}", encodeURIComponent("" + resourceId));
+        if (clientId !== undefined && clientId !== null)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(scopeIds);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processSetResourceScopes(_response);
+        });
+    }
+
+    protected processSetResourceScopes(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    getUserPermissions(userId: string, clientId: string | null | undefined): Promise<UserPermissionDto[]> {
+        let url_ = this.baseUrl + "/api/Permission/users/{userId}/permissions?";
+        if (userId === undefined || userId === null)
+            throw new Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
+        if (clientId !== undefined && clientId !== null)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetUserPermissions(_response);
+        });
+    }
+
+    protected processGetUserPermissions(response: Response): Promise<UserPermissionDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(UserPermissionDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserPermissionDto[]>(null as any);
+    }
+
+    setUserPermission(userId: string, dto: SetUserPermissionDto): Promise<UserPermissionDto> {
+        let url_ = this.baseUrl + "/api/Permission/users/{userId}/permissions";
+        if (userId === undefined || userId === null)
+            throw new Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processSetUserPermission(_response);
+        });
+    }
+
+    protected processSetUserPermission(response: Response): Promise<UserPermissionDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = UserPermissionDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserPermissionDto>(null as any);
+    }
+
+    removeUserPermission(userId: string, clientId: string | null | undefined, resourceId: string | null | undefined): Promise<void> {
+        let url_ = this.baseUrl + "/api/Permission/users/{userId}/permissions?";
+        if (userId === undefined || userId === null)
+            throw new Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
+        if (clientId !== undefined && clientId !== null)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        if (resourceId !== undefined && resourceId !== null)
+            url_ += "resourceId=" + encodeURIComponent("" + resourceId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processRemoveUserPermission(_response);
+        });
+    }
+
+    protected processRemoveUserPermission(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    getResourceUserPermissions(resourceId: string, clientId: string | null | undefined): Promise<UserPermissionDto[]> {
+        let url_ = this.baseUrl + "/api/Permission/resources/{resourceId}/user-permissions?";
+        if (resourceId === undefined || resourceId === null)
+            throw new Error("The parameter 'resourceId' must be defined.");
+        url_ = url_.replace("{resourceId}", encodeURIComponent("" + resourceId));
+        if (clientId !== undefined && clientId !== null)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetResourceUserPermissions(_response);
+        });
+    }
+
+    protected processGetResourceUserPermissions(response: Response): Promise<UserPermissionDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(UserPermissionDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserPermissionDto[]>(null as any);
+    }
+
+    getUserEffectivePermissions(userId: string, clientId: string | null | undefined): Promise<EffectivePermissionDto[]> {
+        let url_ = this.baseUrl + "/api/Permission/users/{userId}/effective-permissions?";
+        if (userId === undefined || userId === null)
+            throw new Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
+        if (clientId !== undefined && clientId !== null)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetUserEffectivePermissions(_response);
+        });
+    }
+
+    protected processGetUserEffectivePermissions(response: Response): Promise<EffectivePermissionDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(EffectivePermissionDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<EffectivePermissionDto[]>(null as any);
+    }
+
+    hasPermission(userId: string, clientId: string | null | undefined, resourceId: string | null | undefined, scope: string | null | undefined): Promise<boolean> {
+        let url_ = this.baseUrl + "/api/Permission/users/{userId}/has-permission?";
+        if (userId === undefined || userId === null)
+            throw new Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
+        if (clientId !== undefined && clientId !== null)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        if (resourceId !== undefined && resourceId !== null)
+            url_ += "resourceId=" + encodeURIComponent("" + resourceId) + "&";
+        if (scope !== undefined && scope !== null)
+            url_ += "scope=" + encodeURIComponent("" + scope) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processHasPermission(_response);
+        });
+    }
+
+    protected processHasPermission(response: Response): Promise<boolean> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<boolean>(null as any);
+    }
+
+    getGroupPermissions(groupId: string, clientId: string | null | undefined): Promise<GroupPermissionDto[]> {
+        let url_ = this.baseUrl + "/api/Permission/groups/{groupId}/permissions?";
+        if (groupId === undefined || groupId === null)
+            throw new Error("The parameter 'groupId' must be defined.");
+        url_ = url_.replace("{groupId}", encodeURIComponent("" + groupId));
+        if (clientId !== undefined && clientId !== null)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetGroupPermissions(_response);
+        });
+    }
+
+    protected processGetGroupPermissions(response: Response): Promise<GroupPermissionDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(GroupPermissionDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GroupPermissionDto[]>(null as any);
+    }
+
+    setGroupPermission(groupId: string, dto: SetGroupPermissionDto): Promise<GroupPermissionDto> {
+        let url_ = this.baseUrl + "/api/Permission/groups/{groupId}/permissions";
+        if (groupId === undefined || groupId === null)
+            throw new Error("The parameter 'groupId' must be defined.");
+        url_ = url_.replace("{groupId}", encodeURIComponent("" + groupId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processSetGroupPermission(_response);
+        });
+    }
+
+    protected processSetGroupPermission(response: Response): Promise<GroupPermissionDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = GroupPermissionDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GroupPermissionDto>(null as any);
+    }
+
+    removeGroupPermission(groupId: string, clientId: string | null | undefined, resourceId: string | null | undefined): Promise<void> {
+        let url_ = this.baseUrl + "/api/Permission/groups/{groupId}/permissions?";
+        if (groupId === undefined || groupId === null)
+            throw new Error("The parameter 'groupId' must be defined.");
+        url_ = url_.replace("{groupId}", encodeURIComponent("" + groupId));
+        if (clientId !== undefined && clientId !== null)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        if (resourceId !== undefined && resourceId !== null)
+            url_ += "resourceId=" + encodeURIComponent("" + resourceId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processRemoveGroupPermission(_response);
+        });
+    }
+
+    protected processRemoveGroupPermission(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    getResourceGroupPermissions(resourceId: string, clientId: string | null | undefined): Promise<GroupPermissionDto[]> {
+        let url_ = this.baseUrl + "/api/Permission/resources/{resourceId}/group-permissions?";
+        if (resourceId === undefined || resourceId === null)
+            throw new Error("The parameter 'resourceId' must be defined.");
+        url_ = url_.replace("{resourceId}", encodeURIComponent("" + resourceId));
+        if (clientId !== undefined && clientId !== null)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetResourceGroupPermissions(_response);
+        });
+    }
+
+    protected processGetResourceGroupPermissions(response: Response): Promise<GroupPermissionDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(GroupPermissionDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GroupPermissionDto[]>(null as any);
+    }
+}
+
 export interface IPersistedGrantsClient {
 
     get(searchText: string | null | undefined, page: number | undefined, pageSize: number | undefined): Promise<PersistedGrantSubjectsApiDto>;
@@ -8948,6 +11064,1510 @@ export interface IAuditLogDto {
     action: string | undefined;
     data: string | undefined;
     created: Date;
+}
+
+export class OrganizationGroupApiDto implements IOrganizationGroupApiDto {
+    id!: string | undefined;
+    name!: string | undefined;
+    path!: string | undefined;
+    parentId!: string | undefined;
+    description!: string | undefined;
+    subGroupCount!: number;
+    depth!: number;
+    deptCode!: string | undefined;
+    deptEName!: string | undefined;
+    deptZhName!: string | undefined;
+    manager!: string | undefined;
+    enabled!: boolean;
+    insDate!: Date | undefined;
+    updDate!: Date | undefined;
+
+    constructor(data?: IOrganizationGroupApiDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+            this.path = _data["path"];
+            this.parentId = _data["parentId"];
+            this.description = _data["description"];
+            this.subGroupCount = _data["subGroupCount"];
+            this.depth = _data["depth"];
+            this.deptCode = _data["deptCode"];
+            this.deptEName = _data["deptEName"];
+            this.deptZhName = _data["deptZhName"];
+            this.manager = _data["manager"];
+            this.enabled = _data["enabled"];
+            this.insDate = _data["insDate"] ? new Date(_data["insDate"].toString()) : <any>undefined;
+            this.updDate = _data["updDate"] ? new Date(_data["updDate"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): OrganizationGroupApiDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new OrganizationGroupApiDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        data["path"] = this.path;
+        data["parentId"] = this.parentId;
+        data["description"] = this.description;
+        data["subGroupCount"] = this.subGroupCount;
+        data["depth"] = this.depth;
+        data["deptCode"] = this.deptCode;
+        data["deptEName"] = this.deptEName;
+        data["deptZhName"] = this.deptZhName;
+        data["manager"] = this.manager;
+        data["enabled"] = this.enabled;
+        data["insDate"] = this.insDate ? this.insDate.toISOString() : <any>undefined;
+        data["updDate"] = this.updDate ? this.updDate.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IOrganizationGroupApiDto {
+    id: string | undefined;
+    name: string | undefined;
+    path: string | undefined;
+    parentId: string | undefined;
+    description: string | undefined;
+    subGroupCount: number;
+    depth: number;
+    deptCode: string | undefined;
+    deptEName: string | undefined;
+    deptZhName: string | undefined;
+    manager: string | undefined;
+    enabled: boolean;
+    insDate: Date | undefined;
+    updDate: Date | undefined;
+}
+
+export class OrganizationTreeApiDto implements IOrganizationTreeApiDto {
+    id!: string | undefined;
+    name!: string | undefined;
+    parentId!: string | undefined;
+    deptCode!: string | undefined;
+    deptEName!: string | undefined;
+    deptZhName!: string | undefined;
+    manager!: string | undefined;
+    description!: string | undefined;
+    depth!: number;
+    isCeo!: boolean;
+    isRoot!: boolean;
+    childCount!: number;
+    children!: OrganizationTreeApiDto[] | undefined;
+
+    constructor(data?: IOrganizationTreeApiDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+            this.parentId = _data["parentId"];
+            this.deptCode = _data["deptCode"];
+            this.deptEName = _data["deptEName"];
+            this.deptZhName = _data["deptZhName"];
+            this.manager = _data["manager"];
+            this.description = _data["description"];
+            this.depth = _data["depth"];
+            this.isCeo = _data["isCeo"];
+            this.isRoot = _data["isRoot"];
+            this.childCount = _data["childCount"];
+            if (Array.isArray(_data["children"])) {
+                this.children = [] as any;
+                for (let item of _data["children"])
+                    this.children!.push(OrganizationTreeApiDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): OrganizationTreeApiDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new OrganizationTreeApiDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        data["parentId"] = this.parentId;
+        data["deptCode"] = this.deptCode;
+        data["deptEName"] = this.deptEName;
+        data["deptZhName"] = this.deptZhName;
+        data["manager"] = this.manager;
+        data["description"] = this.description;
+        data["depth"] = this.depth;
+        data["isCeo"] = this.isCeo;
+        data["isRoot"] = this.isRoot;
+        data["childCount"] = this.childCount;
+        if (Array.isArray(this.children)) {
+            data["children"] = [];
+            for (let item of this.children)
+                data["children"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IOrganizationTreeApiDto {
+    id: string | undefined;
+    name: string | undefined;
+    parentId: string | undefined;
+    deptCode: string | undefined;
+    deptEName: string | undefined;
+    deptZhName: string | undefined;
+    manager: string | undefined;
+    description: string | undefined;
+    depth: number;
+    isCeo: boolean;
+    isRoot: boolean;
+    childCount: number;
+    children: OrganizationTreeApiDto[] | undefined;
+}
+
+export class OrganizationStatsApiDto implements IOrganizationStatsApiDto {
+    totalGroups!: number;
+    totalRootGroups!: number;
+    maxDepth!: number;
+    groupsWithManagers!: number;
+
+    constructor(data?: IOrganizationStatsApiDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.totalGroups = _data["totalGroups"];
+            this.totalRootGroups = _data["totalRootGroups"];
+            this.maxDepth = _data["maxDepth"];
+            this.groupsWithManagers = _data["groupsWithManagers"];
+        }
+    }
+
+    static fromJS(data: any): OrganizationStatsApiDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new OrganizationStatsApiDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["totalGroups"] = this.totalGroups;
+        data["totalRootGroups"] = this.totalRootGroups;
+        data["maxDepth"] = this.maxDepth;
+        data["groupsWithManagers"] = this.groupsWithManagers;
+        return data;
+    }
+}
+
+export interface IOrganizationStatsApiDto {
+    totalGroups: number;
+    totalRootGroups: number;
+    maxDepth: number;
+    groupsWithManagers: number;
+}
+
+export class DeleteConfirmationApiDto implements IDeleteConfirmationApiDto {
+    group!: OrganizationGroupApiDto | undefined;
+    descendants!: OrganizationGroupApiDto[] | undefined;
+    totalCount!: number;
+    hasDescendants!: boolean;
+
+    constructor(data?: IDeleteConfirmationApiDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.group = _data["group"] ? OrganizationGroupApiDto.fromJS(_data["group"]) : <any>undefined;
+            if (Array.isArray(_data["descendants"])) {
+                this.descendants = [] as any;
+                for (let item of _data["descendants"])
+                    this.descendants!.push(OrganizationGroupApiDto.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+            this.hasDescendants = _data["hasDescendants"];
+        }
+    }
+
+    static fromJS(data: any): DeleteConfirmationApiDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DeleteConfirmationApiDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["group"] = this.group ? this.group.toJSON() : <any>undefined;
+        if (Array.isArray(this.descendants)) {
+            data["descendants"] = [];
+            for (let item of this.descendants)
+                data["descendants"].push(item.toJSON());
+        }
+        data["totalCount"] = this.totalCount;
+        data["hasDescendants"] = this.hasDescendants;
+        return data;
+    }
+}
+
+export interface IDeleteConfirmationApiDto {
+    group: OrganizationGroupApiDto | undefined;
+    descendants: OrganizationGroupApiDto[] | undefined;
+    totalCount: number;
+    hasDescendants: boolean;
+}
+
+export class CreateOrganizationGroupApiDto implements ICreateOrganizationGroupApiDto {
+    name!: string;
+    parentId!: string | undefined;
+    deptCode!: string | undefined;
+    deptZhName!: string | undefined;
+    deptEName!: string | undefined;
+    manager!: string | undefined;
+    description!: string | undefined;
+
+    constructor(data?: ICreateOrganizationGroupApiDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.name = _data["name"];
+            this.parentId = _data["parentId"];
+            this.deptCode = _data["deptCode"];
+            this.deptZhName = _data["deptZhName"];
+            this.deptEName = _data["deptEName"];
+            this.manager = _data["manager"];
+            this.description = _data["description"];
+        }
+    }
+
+    static fromJS(data: any): CreateOrganizationGroupApiDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateOrganizationGroupApiDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        data["parentId"] = this.parentId;
+        data["deptCode"] = this.deptCode;
+        data["deptZhName"] = this.deptZhName;
+        data["deptEName"] = this.deptEName;
+        data["manager"] = this.manager;
+        data["description"] = this.description;
+        return data;
+    }
+}
+
+export interface ICreateOrganizationGroupApiDto {
+    name: string;
+    parentId: string | undefined;
+    deptCode: string | undefined;
+    deptZhName: string | undefined;
+    deptEName: string | undefined;
+    manager: string | undefined;
+    description: string | undefined;
+}
+
+export class UpdateOrganizationGroupApiDto implements IUpdateOrganizationGroupApiDto {
+    name!: string;
+    parentId!: string | undefined;
+    deptCode!: string | undefined;
+    deptZhName!: string | undefined;
+    deptEName!: string | undefined;
+    manager!: string | undefined;
+    description!: string | undefined;
+
+    constructor(data?: IUpdateOrganizationGroupApiDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.name = _data["name"];
+            this.parentId = _data["parentId"];
+            this.deptCode = _data["deptCode"];
+            this.deptZhName = _data["deptZhName"];
+            this.deptEName = _data["deptEName"];
+            this.manager = _data["manager"];
+            this.description = _data["description"];
+        }
+    }
+
+    static fromJS(data: any): UpdateOrganizationGroupApiDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateOrganizationGroupApiDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        data["parentId"] = this.parentId;
+        data["deptCode"] = this.deptCode;
+        data["deptZhName"] = this.deptZhName;
+        data["deptEName"] = this.deptEName;
+        data["manager"] = this.manager;
+        data["description"] = this.description;
+        return data;
+    }
+}
+
+export interface IUpdateOrganizationGroupApiDto {
+    name: string;
+    parentId: string | undefined;
+    deptCode: string | undefined;
+    deptZhName: string | undefined;
+    deptEName: string | undefined;
+    manager: string | undefined;
+    description: string | undefined;
+}
+
+export class DeleteResultApiDto implements IDeleteResultApiDto {
+    success!: boolean;
+    deletedCount!: number;
+    message!: string | undefined;
+
+    constructor(data?: IDeleteResultApiDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.success = _data["success"];
+            this.deletedCount = _data["deletedCount"];
+            this.message = _data["message"];
+        }
+    }
+
+    static fromJS(data: any): DeleteResultApiDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DeleteResultApiDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["success"] = this.success;
+        data["deletedCount"] = this.deletedCount;
+        data["message"] = this.message;
+        return data;
+    }
+}
+
+export interface IDeleteResultApiDto {
+    success: boolean;
+    deletedCount: number;
+    message: string | undefined;
+}
+
+export class PermissionStatsDto implements IPermissionStatsDto {
+    totalScopes!: number;
+    totalResources!: number;
+    totalUserPermissions!: number;
+    totalGroupPermissions!: number;
+    totalClients!: number;
+    clientStats!: ClientStatsDto[] | undefined;
+
+    constructor(data?: IPermissionStatsDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.totalScopes = _data["totalScopes"];
+            this.totalResources = _data["totalResources"];
+            this.totalUserPermissions = _data["totalUserPermissions"];
+            this.totalGroupPermissions = _data["totalGroupPermissions"];
+            this.totalClients = _data["totalClients"];
+            if (Array.isArray(_data["clientStats"])) {
+                this.clientStats = [] as any;
+                for (let item of _data["clientStats"])
+                    this.clientStats!.push(ClientStatsDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): PermissionStatsDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PermissionStatsDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["totalScopes"] = this.totalScopes;
+        data["totalResources"] = this.totalResources;
+        data["totalUserPermissions"] = this.totalUserPermissions;
+        data["totalGroupPermissions"] = this.totalGroupPermissions;
+        data["totalClients"] = this.totalClients;
+        if (Array.isArray(this.clientStats)) {
+            data["clientStats"] = [];
+            for (let item of this.clientStats)
+                data["clientStats"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IPermissionStatsDto {
+    totalScopes: number;
+    totalResources: number;
+    totalUserPermissions: number;
+    totalGroupPermissions: number;
+    totalClients: number;
+    clientStats: ClientStatsDto[] | undefined;
+}
+
+export class ClientStatsDto implements IClientStatsDto {
+    clientId!: string | undefined;
+    clientName!: string | undefined;
+    scopeCount!: number;
+    resourceCount!: number;
+    userPermissionCount!: number;
+    groupPermissionCount!: number;
+
+    constructor(data?: IClientStatsDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.clientId = _data["clientId"];
+            this.clientName = _data["clientName"];
+            this.scopeCount = _data["scopeCount"];
+            this.resourceCount = _data["resourceCount"];
+            this.userPermissionCount = _data["userPermissionCount"];
+            this.groupPermissionCount = _data["groupPermissionCount"];
+        }
+    }
+
+    static fromJS(data: any): ClientStatsDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ClientStatsDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["clientId"] = this.clientId;
+        data["clientName"] = this.clientName;
+        data["scopeCount"] = this.scopeCount;
+        data["resourceCount"] = this.resourceCount;
+        data["userPermissionCount"] = this.userPermissionCount;
+        data["groupPermissionCount"] = this.groupPermissionCount;
+        return data;
+    }
+}
+
+export interface IClientStatsDto {
+    clientId: string | undefined;
+    clientName: string | undefined;
+    scopeCount: number;
+    resourceCount: number;
+    userPermissionCount: number;
+    groupPermissionCount: number;
+}
+
+export class UserBriefDto implements IUserBriefDto {
+    id!: string | undefined;
+    username!: string | undefined;
+    email!: string | undefined;
+    fullName!: string | undefined;
+
+    constructor(data?: IUserBriefDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.username = _data["username"];
+            this.email = _data["email"];
+            this.fullName = _data["fullName"];
+        }
+    }
+
+    static fromJS(data: any): UserBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["username"] = this.username;
+        data["email"] = this.email;
+        data["fullName"] = this.fullName;
+        return data;
+    }
+}
+
+export interface IUserBriefDto {
+    id: string | undefined;
+    username: string | undefined;
+    email: string | undefined;
+    fullName: string | undefined;
+}
+
+export class GroupBriefDto implements IGroupBriefDto {
+    id!: string | undefined;
+    name!: string | undefined;
+    path!: string | undefined;
+    deptCode!: string | undefined;
+    deptZhName!: string | undefined;
+
+    constructor(data?: IGroupBriefDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+            this.path = _data["path"];
+            this.deptCode = _data["deptCode"];
+            this.deptZhName = _data["deptZhName"];
+        }
+    }
+
+    static fromJS(data: any): GroupBriefDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new GroupBriefDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        data["path"] = this.path;
+        data["deptCode"] = this.deptCode;
+        data["deptZhName"] = this.deptZhName;
+        return data;
+    }
+}
+
+export interface IGroupBriefDto {
+    id: string | undefined;
+    name: string | undefined;
+    path: string | undefined;
+    deptCode: string | undefined;
+    deptZhName: string | undefined;
+}
+
+export class ScopeDto implements IScopeDto {
+    id!: string | undefined;
+    clientId!: string | undefined;
+    clientName!: string | undefined;
+    name!: string | undefined;
+    displayName!: string | undefined;
+    iconUri!: string | undefined;
+    enabled!: boolean;
+    insDate!: Date | undefined;
+    updDate!: Date | undefined;
+
+    constructor(data?: IScopeDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.clientId = _data["clientId"];
+            this.clientName = _data["clientName"];
+            this.name = _data["name"];
+            this.displayName = _data["displayName"];
+            this.iconUri = _data["iconUri"];
+            this.enabled = _data["enabled"];
+            this.insDate = _data["insDate"] ? new Date(_data["insDate"].toString()) : <any>undefined;
+            this.updDate = _data["updDate"] ? new Date(_data["updDate"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): ScopeDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ScopeDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["clientId"] = this.clientId;
+        data["clientName"] = this.clientName;
+        data["name"] = this.name;
+        data["displayName"] = this.displayName;
+        data["iconUri"] = this.iconUri;
+        data["enabled"] = this.enabled;
+        data["insDate"] = this.insDate ? this.insDate.toISOString() : <any>undefined;
+        data["updDate"] = this.updDate ? this.updDate.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IScopeDto {
+    id: string | undefined;
+    clientId: string | undefined;
+    clientName: string | undefined;
+    name: string | undefined;
+    displayName: string | undefined;
+    iconUri: string | undefined;
+    enabled: boolean;
+    insDate: Date | undefined;
+    updDate: Date | undefined;
+}
+
+export class CreateScopeDto implements ICreateScopeDto {
+    clientId!: string | undefined;
+    clientName!: string | undefined;
+    name!: string | undefined;
+    displayName!: string | undefined;
+    iconUri!: string | undefined;
+
+    constructor(data?: ICreateScopeDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.clientId = _data["clientId"];
+            this.clientName = _data["clientName"];
+            this.name = _data["name"];
+            this.displayName = _data["displayName"];
+            this.iconUri = _data["iconUri"];
+        }
+    }
+
+    static fromJS(data: any): CreateScopeDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateScopeDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["clientId"] = this.clientId;
+        data["clientName"] = this.clientName;
+        data["name"] = this.name;
+        data["displayName"] = this.displayName;
+        data["iconUri"] = this.iconUri;
+        return data;
+    }
+}
+
+export interface ICreateScopeDto {
+    clientId: string | undefined;
+    clientName: string | undefined;
+    name: string | undefined;
+    displayName: string | undefined;
+    iconUri: string | undefined;
+}
+
+export class UpdateScopeDto implements IUpdateScopeDto {
+    id!: string | undefined;
+    clientId!: string | undefined;
+    name!: string | undefined;
+    displayName!: string | undefined;
+    iconUri!: string | undefined;
+
+    constructor(data?: IUpdateScopeDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.clientId = _data["clientId"];
+            this.name = _data["name"];
+            this.displayName = _data["displayName"];
+            this.iconUri = _data["iconUri"];
+        }
+    }
+
+    static fromJS(data: any): UpdateScopeDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateScopeDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["clientId"] = this.clientId;
+        data["name"] = this.name;
+        data["displayName"] = this.displayName;
+        data["iconUri"] = this.iconUri;
+        return data;
+    }
+}
+
+export interface IUpdateScopeDto {
+    id: string | undefined;
+    clientId: string | undefined;
+    name: string | undefined;
+    displayName: string | undefined;
+    iconUri: string | undefined;
+}
+
+export class ResourceDto implements IResourceDto {
+    id!: string | undefined;
+    clientId!: string | undefined;
+    clientName!: string | undefined;
+    name!: string | undefined;
+    displayName!: string | undefined;
+    type!: string | undefined;
+    uri!: string | undefined;
+    enabled!: boolean;
+    insDate!: Date | undefined;
+    updDate!: Date | undefined;
+    scopes!: string[] | undefined;
+
+    constructor(data?: IResourceDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.clientId = _data["clientId"];
+            this.clientName = _data["clientName"];
+            this.name = _data["name"];
+            this.displayName = _data["displayName"];
+            this.type = _data["type"];
+            this.uri = _data["uri"];
+            this.enabled = _data["enabled"];
+            this.insDate = _data["insDate"] ? new Date(_data["insDate"].toString()) : <any>undefined;
+            this.updDate = _data["updDate"] ? new Date(_data["updDate"].toString()) : <any>undefined;
+            if (Array.isArray(_data["scopes"])) {
+                this.scopes = [] as any;
+                for (let item of _data["scopes"])
+                    this.scopes!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): ResourceDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ResourceDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["clientId"] = this.clientId;
+        data["clientName"] = this.clientName;
+        data["name"] = this.name;
+        data["displayName"] = this.displayName;
+        data["type"] = this.type;
+        data["uri"] = this.uri;
+        data["enabled"] = this.enabled;
+        data["insDate"] = this.insDate ? this.insDate.toISOString() : <any>undefined;
+        data["updDate"] = this.updDate ? this.updDate.toISOString() : <any>undefined;
+        if (Array.isArray(this.scopes)) {
+            data["scopes"] = [];
+            for (let item of this.scopes)
+                data["scopes"].push(item);
+        }
+        return data;
+    }
+}
+
+export interface IResourceDto {
+    id: string | undefined;
+    clientId: string | undefined;
+    clientName: string | undefined;
+    name: string | undefined;
+    displayName: string | undefined;
+    type: string | undefined;
+    uri: string | undefined;
+    enabled: boolean;
+    insDate: Date | undefined;
+    updDate: Date | undefined;
+    scopes: string[] | undefined;
+}
+
+export class CreateResourceDto implements ICreateResourceDto {
+    clientId!: string | undefined;
+    clientName!: string | undefined;
+    name!: string | undefined;
+    displayName!: string | undefined;
+    type!: string | undefined;
+    uri!: string | undefined;
+    scopeIds!: string[] | undefined;
+
+    constructor(data?: ICreateResourceDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.clientId = _data["clientId"];
+            this.clientName = _data["clientName"];
+            this.name = _data["name"];
+            this.displayName = _data["displayName"];
+            this.type = _data["type"];
+            this.uri = _data["uri"];
+            if (Array.isArray(_data["scopeIds"])) {
+                this.scopeIds = [] as any;
+                for (let item of _data["scopeIds"])
+                    this.scopeIds!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): CreateResourceDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateResourceDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["clientId"] = this.clientId;
+        data["clientName"] = this.clientName;
+        data["name"] = this.name;
+        data["displayName"] = this.displayName;
+        data["type"] = this.type;
+        data["uri"] = this.uri;
+        if (Array.isArray(this.scopeIds)) {
+            data["scopeIds"] = [];
+            for (let item of this.scopeIds)
+                data["scopeIds"].push(item);
+        }
+        return data;
+    }
+}
+
+export interface ICreateResourceDto {
+    clientId: string | undefined;
+    clientName: string | undefined;
+    name: string | undefined;
+    displayName: string | undefined;
+    type: string | undefined;
+    uri: string | undefined;
+    scopeIds: string[] | undefined;
+}
+
+export class UpdateResourceDto implements IUpdateResourceDto {
+    id!: string | undefined;
+    clientId!: string | undefined;
+    name!: string | undefined;
+    displayName!: string | undefined;
+    type!: string | undefined;
+    uri!: string | undefined;
+    scopeIds!: string[] | undefined;
+
+    constructor(data?: IUpdateResourceDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.clientId = _data["clientId"];
+            this.name = _data["name"];
+            this.displayName = _data["displayName"];
+            this.type = _data["type"];
+            this.uri = _data["uri"];
+            if (Array.isArray(_data["scopeIds"])) {
+                this.scopeIds = [] as any;
+                for (let item of _data["scopeIds"])
+                    this.scopeIds!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): UpdateResourceDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateResourceDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["clientId"] = this.clientId;
+        data["name"] = this.name;
+        data["displayName"] = this.displayName;
+        data["type"] = this.type;
+        data["uri"] = this.uri;
+        if (Array.isArray(this.scopeIds)) {
+            data["scopeIds"] = [];
+            for (let item of this.scopeIds)
+                data["scopeIds"].push(item);
+        }
+        return data;
+    }
+}
+
+export interface IUpdateResourceDto {
+    id: string | undefined;
+    clientId: string | undefined;
+    name: string | undefined;
+    displayName: string | undefined;
+    type: string | undefined;
+    uri: string | undefined;
+    scopeIds: string[] | undefined;
+}
+
+export class ResourceScopeDto implements IResourceScopeDto {
+    resourceId!: string | undefined;
+    resourceName!: string | undefined;
+    scopeId!: string | undefined;
+    scopeName!: string | undefined;
+    clientId!: string | undefined;
+    insDate!: Date | undefined;
+
+    constructor(data?: IResourceScopeDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.resourceId = _data["resourceId"];
+            this.resourceName = _data["resourceName"];
+            this.scopeId = _data["scopeId"];
+            this.scopeName = _data["scopeName"];
+            this.clientId = _data["clientId"];
+            this.insDate = _data["insDate"] ? new Date(_data["insDate"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): ResourceScopeDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ResourceScopeDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["resourceId"] = this.resourceId;
+        data["resourceName"] = this.resourceName;
+        data["scopeId"] = this.scopeId;
+        data["scopeName"] = this.scopeName;
+        data["clientId"] = this.clientId;
+        data["insDate"] = this.insDate ? this.insDate.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IResourceScopeDto {
+    resourceId: string | undefined;
+    resourceName: string | undefined;
+    scopeId: string | undefined;
+    scopeName: string | undefined;
+    clientId: string | undefined;
+    insDate: Date | undefined;
+}
+
+export class UserPermissionDto implements IUserPermissionDto {
+    userId!: string | undefined;
+    username!: string | undefined;
+    clientId!: string | undefined;
+    clientName!: string | undefined;
+    resourceId!: string | undefined;
+    resourceName!: string | undefined;
+    scopes!: string[] | undefined;
+    enabled!: boolean;
+    insDate!: Date | undefined;
+    updDate!: Date | undefined;
+
+    constructor(data?: IUserPermissionDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.userId = _data["userId"];
+            this.username = _data["username"];
+            this.clientId = _data["clientId"];
+            this.clientName = _data["clientName"];
+            this.resourceId = _data["resourceId"];
+            this.resourceName = _data["resourceName"];
+            if (Array.isArray(_data["scopes"])) {
+                this.scopes = [] as any;
+                for (let item of _data["scopes"])
+                    this.scopes!.push(item);
+            }
+            this.enabled = _data["enabled"];
+            this.insDate = _data["insDate"] ? new Date(_data["insDate"].toString()) : <any>undefined;
+            this.updDate = _data["updDate"] ? new Date(_data["updDate"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): UserPermissionDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserPermissionDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["userId"] = this.userId;
+        data["username"] = this.username;
+        data["clientId"] = this.clientId;
+        data["clientName"] = this.clientName;
+        data["resourceId"] = this.resourceId;
+        data["resourceName"] = this.resourceName;
+        if (Array.isArray(this.scopes)) {
+            data["scopes"] = [];
+            for (let item of this.scopes)
+                data["scopes"].push(item);
+        }
+        data["enabled"] = this.enabled;
+        data["insDate"] = this.insDate ? this.insDate.toISOString() : <any>undefined;
+        data["updDate"] = this.updDate ? this.updDate.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IUserPermissionDto {
+    userId: string | undefined;
+    username: string | undefined;
+    clientId: string | undefined;
+    clientName: string | undefined;
+    resourceId: string | undefined;
+    resourceName: string | undefined;
+    scopes: string[] | undefined;
+    enabled: boolean;
+    insDate: Date | undefined;
+    updDate: Date | undefined;
+}
+
+export class SetUserPermissionDto implements ISetUserPermissionDto {
+    userId!: string | undefined;
+    username!: string | undefined;
+    clientId!: string | undefined;
+    clientName!: string | undefined;
+    resourceId!: string | undefined;
+    resourceName!: string | undefined;
+    scopes!: string[] | undefined;
+
+    constructor(data?: ISetUserPermissionDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.userId = _data["userId"];
+            this.username = _data["username"];
+            this.clientId = _data["clientId"];
+            this.clientName = _data["clientName"];
+            this.resourceId = _data["resourceId"];
+            this.resourceName = _data["resourceName"];
+            if (Array.isArray(_data["scopes"])) {
+                this.scopes = [] as any;
+                for (let item of _data["scopes"])
+                    this.scopes!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): SetUserPermissionDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new SetUserPermissionDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["userId"] = this.userId;
+        data["username"] = this.username;
+        data["clientId"] = this.clientId;
+        data["clientName"] = this.clientName;
+        data["resourceId"] = this.resourceId;
+        data["resourceName"] = this.resourceName;
+        if (Array.isArray(this.scopes)) {
+            data["scopes"] = [];
+            for (let item of this.scopes)
+                data["scopes"].push(item);
+        }
+        return data;
+    }
+}
+
+export interface ISetUserPermissionDto {
+    userId: string | undefined;
+    username: string | undefined;
+    clientId: string | undefined;
+    clientName: string | undefined;
+    resourceId: string | undefined;
+    resourceName: string | undefined;
+    scopes: string[] | undefined;
+}
+
+export class EffectivePermissionDto implements IEffectivePermissionDto {
+    resourceId!: string | undefined;
+    resourceName!: string | undefined;
+    clientId!: string | undefined;
+    clientName!: string | undefined;
+    scopes!: string[] | undefined;
+    source!: string | undefined;
+    isFromGroup!: boolean;
+    sourceGroupId!: string | undefined;
+    sourceGroupName!: string | undefined;
+
+    constructor(data?: IEffectivePermissionDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.resourceId = _data["resourceId"];
+            this.resourceName = _data["resourceName"];
+            this.clientId = _data["clientId"];
+            this.clientName = _data["clientName"];
+            if (Array.isArray(_data["scopes"])) {
+                this.scopes = [] as any;
+                for (let item of _data["scopes"])
+                    this.scopes!.push(item);
+            }
+            this.source = _data["source"];
+            this.isFromGroup = _data["isFromGroup"];
+            this.sourceGroupId = _data["sourceGroupId"];
+            this.sourceGroupName = _data["sourceGroupName"];
+        }
+    }
+
+    static fromJS(data: any): EffectivePermissionDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new EffectivePermissionDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["resourceId"] = this.resourceId;
+        data["resourceName"] = this.resourceName;
+        data["clientId"] = this.clientId;
+        data["clientName"] = this.clientName;
+        if (Array.isArray(this.scopes)) {
+            data["scopes"] = [];
+            for (let item of this.scopes)
+                data["scopes"].push(item);
+        }
+        data["source"] = this.source;
+        data["isFromGroup"] = this.isFromGroup;
+        data["sourceGroupId"] = this.sourceGroupId;
+        data["sourceGroupName"] = this.sourceGroupName;
+        return data;
+    }
+}
+
+export interface IEffectivePermissionDto {
+    resourceId: string | undefined;
+    resourceName: string | undefined;
+    clientId: string | undefined;
+    clientName: string | undefined;
+    scopes: string[] | undefined;
+    source: string | undefined;
+    isFromGroup: boolean;
+    sourceGroupId: string | undefined;
+    sourceGroupName: string | undefined;
+}
+
+export class GroupPermissionDto implements IGroupPermissionDto {
+    groupId!: string | undefined;
+    groupName!: string | undefined;
+    groupPath!: string | undefined;
+    clientId!: string | undefined;
+    clientName!: string | undefined;
+    resourceId!: string | undefined;
+    resourceName!: string | undefined;
+    scopes!: string[] | undefined;
+    inheritToChildren!: boolean;
+    enabled!: boolean;
+    insDate!: Date | undefined;
+    updDate!: Date | undefined;
+
+    constructor(data?: IGroupPermissionDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.groupId = _data["groupId"];
+            this.groupName = _data["groupName"];
+            this.groupPath = _data["groupPath"];
+            this.clientId = _data["clientId"];
+            this.clientName = _data["clientName"];
+            this.resourceId = _data["resourceId"];
+            this.resourceName = _data["resourceName"];
+            if (Array.isArray(_data["scopes"])) {
+                this.scopes = [] as any;
+                for (let item of _data["scopes"])
+                    this.scopes!.push(item);
+            }
+            this.inheritToChildren = _data["inheritToChildren"];
+            this.enabled = _data["enabled"];
+            this.insDate = _data["insDate"] ? new Date(_data["insDate"].toString()) : <any>undefined;
+            this.updDate = _data["updDate"] ? new Date(_data["updDate"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): GroupPermissionDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new GroupPermissionDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["groupId"] = this.groupId;
+        data["groupName"] = this.groupName;
+        data["groupPath"] = this.groupPath;
+        data["clientId"] = this.clientId;
+        data["clientName"] = this.clientName;
+        data["resourceId"] = this.resourceId;
+        data["resourceName"] = this.resourceName;
+        if (Array.isArray(this.scopes)) {
+            data["scopes"] = [];
+            for (let item of this.scopes)
+                data["scopes"].push(item);
+        }
+        data["inheritToChildren"] = this.inheritToChildren;
+        data["enabled"] = this.enabled;
+        data["insDate"] = this.insDate ? this.insDate.toISOString() : <any>undefined;
+        data["updDate"] = this.updDate ? this.updDate.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IGroupPermissionDto {
+    groupId: string | undefined;
+    groupName: string | undefined;
+    groupPath: string | undefined;
+    clientId: string | undefined;
+    clientName: string | undefined;
+    resourceId: string | undefined;
+    resourceName: string | undefined;
+    scopes: string[] | undefined;
+    inheritToChildren: boolean;
+    enabled: boolean;
+    insDate: Date | undefined;
+    updDate: Date | undefined;
+}
+
+export class SetGroupPermissionDto implements ISetGroupPermissionDto {
+    groupId!: string | undefined;
+    groupName!: string | undefined;
+    groupPath!: string | undefined;
+    clientId!: string | undefined;
+    clientName!: string | undefined;
+    resourceId!: string | undefined;
+    resourceName!: string | undefined;
+    scopes!: string[] | undefined;
+    inheritToChildren!: boolean;
+
+    constructor(data?: ISetGroupPermissionDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.groupId = _data["groupId"];
+            this.groupName = _data["groupName"];
+            this.groupPath = _data["groupPath"];
+            this.clientId = _data["clientId"];
+            this.clientName = _data["clientName"];
+            this.resourceId = _data["resourceId"];
+            this.resourceName = _data["resourceName"];
+            if (Array.isArray(_data["scopes"])) {
+                this.scopes = [] as any;
+                for (let item of _data["scopes"])
+                    this.scopes!.push(item);
+            }
+            this.inheritToChildren = _data["inheritToChildren"];
+        }
+    }
+
+    static fromJS(data: any): SetGroupPermissionDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new SetGroupPermissionDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["groupId"] = this.groupId;
+        data["groupName"] = this.groupName;
+        data["groupPath"] = this.groupPath;
+        data["clientId"] = this.clientId;
+        data["clientName"] = this.clientName;
+        data["resourceId"] = this.resourceId;
+        data["resourceName"] = this.resourceName;
+        if (Array.isArray(this.scopes)) {
+            data["scopes"] = [];
+            for (let item of this.scopes)
+                data["scopes"].push(item);
+        }
+        data["inheritToChildren"] = this.inheritToChildren;
+        return data;
+    }
+}
+
+export interface ISetGroupPermissionDto {
+    groupId: string | undefined;
+    groupName: string | undefined;
+    groupPath: string | undefined;
+    clientId: string | undefined;
+    clientName: string | undefined;
+    resourceId: string | undefined;
+    resourceName: string | undefined;
+    scopes: string[] | undefined;
+    inheritToChildren: boolean;
 }
 
 export class PersistedGrantSubjectsApiDto implements IPersistedGrantSubjectsApiDto {

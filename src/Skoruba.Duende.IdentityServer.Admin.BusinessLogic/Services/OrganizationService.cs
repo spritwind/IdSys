@@ -22,6 +22,8 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
             OrganizationRepository = organizationRepository;
         }
 
+        #region 查詢方法
+
         public async Task<List<OrganizationGroupDto>> GetAllGroupsAsync(CancellationToken cancellationToken = default)
         {
             var groups = await OrganizationRepository.GetAllGroupsAsync(cancellationToken);
@@ -74,6 +76,150 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
                 GroupsWithManagers = stats.withManagers
             };
         }
+
+        public async Task<DeleteConfirmationDto> GetDeleteConfirmationAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var group = await OrganizationRepository.GetGroupByIdAsync(id, cancellationToken);
+            if (group == null)
+            {
+                return null;
+            }
+
+            var descendants = await OrganizationRepository.GetAllDescendantsAsync(id, cancellationToken);
+
+            return new DeleteConfirmationDto
+            {
+                Group = MapToDto(group),
+                Descendants = descendants.Select(MapToDto).ToList()
+            };
+        }
+
+        public async Task<bool> CanInsertGroupAsync(string name, string parentId, string excludeId = null, CancellationToken cancellationToken = default)
+        {
+            var exists = await OrganizationRepository.ExistsAsync(name, parentId, excludeId, cancellationToken);
+            return !exists;
+        }
+
+        #endregion
+
+        #region 新增/修改/刪除方法
+
+        public async Task<OrganizationGroupDto> CreateGroupAsync(CreateOrganizationGroupDto dto, CancellationToken cancellationToken = default)
+        {
+            // 驗證名稱是否重複
+            var canInsert = await CanInsertGroupAsync(dto.Name, dto.ParentId, null, cancellationToken);
+            if (!canInsert)
+            {
+                throw new InvalidOperationException($"同層級已存在名稱為「{dto.Name}」的群組");
+            }
+
+            // 如果有父群組，驗證其存在
+            if (!string.IsNullOrEmpty(dto.ParentId))
+            {
+                var parentGroup = await OrganizationRepository.GetGroupByIdAsync(dto.ParentId, cancellationToken);
+                if (parentGroup == null)
+                {
+                    throw new InvalidOperationException($"找不到父群組 (ID: {dto.ParentId})");
+                }
+            }
+
+            var entity = new KeycloakGroup
+            {
+                Name = dto.Name,
+                ParentId = dto.ParentId,
+                DeptCode = dto.DeptCode,
+                DeptZhName = dto.DeptZhName,
+                DeptEName = dto.DeptEName,
+                Manager = dto.Manager,
+                Description = dto.Description
+            };
+
+            var created = await OrganizationRepository.CreateAsync(entity, cancellationToken);
+            return MapToDto(created);
+        }
+
+        public async Task<OrganizationGroupDto> UpdateGroupAsync(string id, UpdateOrganizationGroupDto dto, CancellationToken cancellationToken = default)
+        {
+            // 驗證群組存在
+            var existingGroup = await OrganizationRepository.GetGroupByIdAsync(id, cancellationToken);
+            if (existingGroup == null)
+            {
+                throw new InvalidOperationException($"找不到 ID 為 {id} 的群組");
+            }
+
+            // 驗證名稱是否重複（排除自己）
+            var canInsert = await CanInsertGroupAsync(dto.Name, dto.ParentId, id, cancellationToken);
+            if (!canInsert)
+            {
+                throw new InvalidOperationException($"同層級已存在名稱為「{dto.Name}」的群組");
+            }
+
+            // 如果有父群組，驗證其存在且不是自己的子孫
+            if (!string.IsNullOrEmpty(dto.ParentId))
+            {
+                if (dto.ParentId == id)
+                {
+                    throw new InvalidOperationException("不能將群組設為自己的子群組");
+                }
+
+                var parentGroup = await OrganizationRepository.GetGroupByIdAsync(dto.ParentId, cancellationToken);
+                if (parentGroup == null)
+                {
+                    throw new InvalidOperationException($"找不到父群組 (ID: {dto.ParentId})");
+                }
+
+                // 檢查是否要設為自己子孫的子群組（會造成循環）
+                var descendants = await OrganizationRepository.GetAllDescendantsAsync(id, cancellationToken);
+                if (descendants.Any(d => d.Id == dto.ParentId))
+                {
+                    throw new InvalidOperationException("不能將群組設為自己子群組的子群組，這會造成循環參照");
+                }
+            }
+
+            var entity = new KeycloakGroup
+            {
+                Id = id,
+                Name = dto.Name,
+                ParentId = dto.ParentId,
+                DeptCode = dto.DeptCode,
+                DeptZhName = dto.DeptZhName,
+                DeptEName = dto.DeptEName,
+                Manager = dto.Manager,
+                Description = dto.Description
+            };
+
+            var updated = await OrganizationRepository.UpdateAsync(entity, cancellationToken);
+            return MapToDto(updated);
+        }
+
+        public async Task<DeleteResultDto> DeleteGroupAsync(string id, CancellationToken cancellationToken = default)
+        {
+            var group = await OrganizationRepository.GetGroupByIdAsync(id, cancellationToken);
+            if (group == null)
+            {
+                return new DeleteResultDto
+                {
+                    Success = false,
+                    DeletedCount = 0,
+                    Message = $"找不到 ID 為 {id} 的群組"
+                };
+            }
+
+            var deletedCount = await OrganizationRepository.DeleteWithDescendantsAsync(id, cancellationToken);
+
+            return new DeleteResultDto
+            {
+                Success = true,
+                DeletedCount = deletedCount,
+                Message = deletedCount > 1
+                    ? $"已成功刪除 {deletedCount} 個群組（含子群組）"
+                    : "已成功刪除群組"
+            };
+        }
+
+        #endregion
+
+        #region 私有輔助方法
 
         private static OrganizationGroupDto MapToDto(KeycloakGroup group)
         {
@@ -191,5 +337,7 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
             if (node.Depth == 0) return 1;
             return 10 + node.Depth;
         }
+
+        #endregion
     }
 }

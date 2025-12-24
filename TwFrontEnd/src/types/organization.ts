@@ -100,3 +100,59 @@ export interface SearchResult {
     path: string[];
     matchType: 'name' | 'code' | 'manager';
 }
+
+// ========================================
+// CRUD 操作相關類型
+// ========================================
+
+/**
+ * 新增組織群組請求
+ */
+export interface CreateOrganizationGroupRequest {
+    name: string;
+    parentId: string | null;
+    deptCode?: string;
+    deptZhName?: string;
+    deptEName?: string;
+    manager?: string;
+    description?: string;
+}
+
+/**
+ * 更新組織群組請求
+ */
+export interface UpdateOrganizationGroupRequest {
+    name: string;
+    parentId: string | null;
+    deptCode?: string;
+    deptZhName?: string;
+    deptEName?: string;
+    manager?: string;
+    description?: string;
+}
+
+/**
+ * 刪除確認資訊（包含待刪除的群組及子群組列表）
+ */
+export interface DeleteConfirmation {
+    /** 待刪除的群組 */
+    group: OrganizationGroup;
+    /** 將被一同刪除的子群組列表 */
+    descendants: OrganizationGroup[];
+    /** 總計將刪除的群組數量（包含自身） */
+    totalCount: number;
+    /** 是否有子群組 */
+    hasDescendants: boolean;
+}
+
+/**
+ * 刪除結果
+ */
+export interface DeleteResult {
+    /** 是否成功 */
+    success: boolean;
+    /** 刪除的群組數量 */
+    deletedCount: number;
+    /** 訊息 */
+    message: string;
+}

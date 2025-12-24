@@ -31,6 +31,31 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity
         {
             var rootConfiguration = CreateRootConfiguration();
             services.AddSingleton(rootConfiguration);
+
+            // 設定 CORS - 允許所有已註冊的 Client Origins
+            services.AddCors(options =>
+            {
+                options.AddPolicy("IdentityServerCors", policy =>
+                {
+                    policy.SetIsOriginAllowed(origin =>
+                    {
+                        // 允許 localhost 開發環境
+                        if (origin.StartsWith("http://localhost:"))
+                            return true;
+                        // 允許內網 IP
+                        if (origin.StartsWith("http://172.16."))
+                            return true;
+                        // 允許正式環境
+                        if (origin.Contains("uccapital.com.tw"))
+                            return true;
+                        return false;
+                    })
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+                });
+            });
+
             // Register DbContexts for IdentityServer and Identity
             RegisterDbContexts(services);
 
@@ -72,6 +97,8 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity
 
             app.UsePathBase(Configuration.GetValue<string>("BasePath"));
 
+            // 啟用 CORS - 必須在 UseRouting 之前
+            app.UseCors("IdentityServerCors");
 
             app.UseStaticFiles();
             UseAuthentication(app);

@@ -1,0 +1,189 @@
+/* Modern Theme - Premium Dark & Glassmorphism */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* Color Palette - Deep Navy, Gold, Neon Blue */
+    --bg-core: #0f172a;
+    --bg-deep: #020617;
+    --bg-surface: rgba(30, 41, 59, 0.65); /* Glass Surface */
+    --bg-panel: rgba(15, 23, 42, 0.85);
+    
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    
+    --accent-gold: #f59e0b;
+    --accent-gold-glow: rgba(245, 158, 11, 0.3);
+    --accent-blue: #3b82f6;
+    --accent-blue-glow: rgba(59, 130, 246, 0.3);
+    
+    --border-glass: 1px solid rgba(255, 255, 255, 0.08);
+    --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    
+    --font-main: 'Outfit', sans-serif;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+}
+
+body {
+    background: radial-gradient(circle at top right, #1e293b, var(--bg-core));
+    color: var(--text-primary);
+    font-family: var(--font-main);
+}
+
+/* --- Typography --- */
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+    font-family: var(--font-main);
+    color: var(--text-primary);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+/* --- Glassmorphism Cards/Panels --- */
+.card, .panel, .bg-white {
+    background: var(--bg-surface) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: var(--border-glass) !important;
+    box-shadow: var(--shadow-glass);
+    border-radius: var(--radius-lg) !important;
+    color: var(--text-primary);
+}
+
+.card-header, .panel-heading {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-bottom: var(--border-glass) !important;
+    color: var(--accent-gold) !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* --- Sidebar --- */
+.app-sidebar, .sidebar {
+    background: var(--bg-deep) !important;
+    border-right: var(--border-glass);
+}
+
+.sidebar-nav .nav-item .nav-link {
+    color: var(--text-secondary) !important;
+    transition: all 0.3s ease;
+    border-radius: var(--radius-md);
+    margin: 4px 8px;
+}
+
+.sidebar-nav .nav-item .nav-link:hover,
+.sidebar-nav .nav-item .nav-link.active {
+    background: rgba(245, 158, 11, 0.15) !important;
+    color: var(--accent-gold) !important;
+    box-shadow: 0 0 15px var(--accent-gold-glow);
+    transform: translateX(4px);
+}
+
+/* --- Navbar --- */
+.navbar {
+    background: var(--bg-panel) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: var(--border-glass);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: var(--text-primary) !important;
+    font-size: 1.5rem;
+}
+
+/* --- Buttons --- */
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent-gold), #d97706) !important;
+    border: none !important;
+    color: #fff !important;
+    border-radius: 50px !important;
+    padding: 8px 24px !important;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px var(--accent-gold-glow);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px var(--accent-gold-glow);
+    filter: brightness(1.1);
+}
+
+.btn-secondary, .btn-light, .btn-default {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: var(--border-glass) !important;
+    color: var(--text-primary) !important;
+    border-radius: 50px !important;
+    backdrop-filter: blur(4px);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* --- Tables --- */
+.table {
+    color: var(--text-secondary) !important;
+}
+
+.table thead th {
+    border-bottom: var(--border-glass) !important;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+.table td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+    vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    transform: scale(1.005);
+    transition: all 0.2s ease;
+}
+
+/* --- Forms --- */
+.form-control {
+    background: rgba(15, 23, 42, 0.6) !important;
+    border: var(--border-glass) !important;
+    color: var(--text-primary) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 10px 15px;
+}
+
+.form-control:focus {
+    background: rgba(15, 23, 42, 0.9) !important;
+    border-color: var(--accent-gold) !important;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1) !important;
+}
+
+/* --- Badges --- */
+.badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* --- Footer --- */
+footer, .footer {
+    background: transparent !important;
+    border-top: var(--border-glass);
+    color: var(--text-muted) !important;
+}
+
+/* --- Animations --- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.container, .container-fluid {
+    animation: fadeIn 0.6s ease-out;
+}

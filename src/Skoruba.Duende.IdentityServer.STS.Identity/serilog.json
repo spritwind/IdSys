@@ -1,9 +1,11 @@
 ﻿{
     "Serilog": {
         "MinimumLevel": {
-            "Default": "Error",
+            "Default": "Debug",
             "Override": {
-                "Skoruba": "Information"
+                "Skoruba": "Information",
+                "Duende": "Debug",
+                "Microsoft.AspNetCore.Authentication": "Debug"
             }
         },
         "WriteTo": [
