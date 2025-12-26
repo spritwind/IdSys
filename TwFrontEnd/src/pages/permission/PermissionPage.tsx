@@ -2,15 +2,15 @@
  * Permission Management Page
  * UC Capital Identity Admin
  *
- * 權限控管主頁面 - 使用標籤頁切換不同功能
+ * 權限控管主頁面 - 使用新架構 (v2 API)
  */
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Key, Layers, Users, Building2, BarChart3 } from 'lucide-react';
 import clsx from 'clsx';
-import { permissionApi } from '@/services/permissionApi';
-import type { PermissionStatsDto } from '@/types/permission';
+import * as permissionV2Api from '@/services/permissionV2Api';
+import type { PermissionResourceDto } from '@/types/permissionV2';
 import { ScopesTab } from './components/ScopesTab';
 import { ResourcesTab } from './components/ResourcesTab';
 import { UserPermissionsTab } from './components/UserPermissionsTab';
@@ -26,15 +26,21 @@ interface TabConfig {
 }
 
 const tabs: TabConfig[] = [
-    { id: 'scopes', label: '權限範圍', icon: Key, description: '管理可授權的操作範圍（如：讀取、寫入、刪除）' },
-    { id: 'resources', label: '受保護資源', icon: Layers, description: '管理系統中需要保護的資源（如：頁面、API、功能）' },
+    { id: 'scopes', label: '權限範圍', icon: Key, description: '檢視系統定義的操作範圍（如：讀取、寫入、刪除）' },
+    { id: 'resources', label: '受保護資源', icon: Layers, description: '檢視系統中需要保護的資源（如：頁面、API、功能）' },
     { id: 'users', label: '使用者授權', icon: Users, description: '授予使用者對特定資源的存取權限' },
-    { id: 'groups', label: '群組授權', icon: Building2, description: '授予群組對特定資源的存取權限（成員自動繼承）' },
+    { id: 'groups', label: '組織授權', icon: Building2, description: '授予組織對特定資源的存取權限（成員自動繼承）' },
 ];
 
+interface PermissionStats {
+    totalScopes: number;
+    totalResources: number;
+    totalPermissions: number;
+}
+
 export default function PermissionPage() {
-    const [activeTab, setActiveTab] = useState<TabType>('scopes');
-    const [stats, setStats] = useState<PermissionStatsDto | null>(null);
+    const [activeTab, setActiveTab] = useState<TabType>('resources');
+    const [stats, setStats] = useState<PermissionStats | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -44,8 +50,24 @@ export default function PermissionPage() {
     const loadStats = async () => {
         try {
             setLoading(true);
-            const data = await permissionApi.getPermissionStats();
-            setStats(data);
+            // 從新 API 獲取統計資料
+            const [resources, scopes] = await Promise.all([
+                permissionV2Api.getResources(),
+                permissionV2Api.getScopes(),
+            ]);
+
+            // 計算資源總數（包含子資源）
+            const countResources = (items: PermissionResourceDto[]): number => {
+                return items.reduce((acc, item) => {
+                    return acc + 1 + (item.children ? countResources(item.children) : 0);
+                }, 0);
+            };
+
+            setStats({
+                totalScopes: scopes.length,
+                totalResources: countResources(resources),
+                totalPermissions: 0, // 可以之後從 API 獲取
+            });
         } catch (error) {
             console.error('Failed to load permission stats:', error);
         } finally {
@@ -110,7 +132,7 @@ export default function PermissionPage() {
                             <StatCard
                                 icon={BarChart3}
                                 label="授權"
-                                value={stats.totalUserPermissions + stats.totalGroupPermissions}
+                                value={stats.totalPermissions}
                                 color="text-green-400"
                             />
                         </>

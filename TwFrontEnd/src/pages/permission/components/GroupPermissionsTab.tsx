@@ -1,292 +1,355 @@
 /**
- * Group Permissions Tab Component
+ * Group/Organization Permissions Tab Component
  * UC Capital Identity Admin
  *
- * 群組權限管理標籤頁
+ * 組織權限管理標籤頁 (使用新架構 v2 API)
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Trash2, Building2, Check, X, Tag, Shield, Users } from 'lucide-react';
-import { permissionApi } from '@/services/permissionApi';
+import {
+    Plus,
+    Search,
+    Trash2,
+    Building2,
+    Check,
+    X,
+    Shield,
+    RefreshCw,
+    Info,
+    ChevronRight,
+    ChevronDown,
+    Box,
+    Filter,
+    Database,
+    FileText,
+    Globe,
+    Zap,
+    Menu,
+    Settings,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import * as permissionV2Api from '@/services/permissionV2Api';
+import { organizationApi } from '@/services/organizationApi';
 import type {
-    GroupPermissionDto,
-    SetGroupPermissionDto,
-    GroupBriefDto,
-    ResourceDto,
-} from '@/types/permission';
-import { GlassTable } from '@/components/common/GlassTable';
+    PermissionResourceDto,
+    PermissionScopeDto,
+    PermissionDto,
+} from '@/types/permissionV2';
+import { SUBJECT_TYPES, SCOPE_NAMES } from '@/types/permissionV2';
+import type { OrganizationTreeNode } from '@/types/organization';
 import clsx from 'clsx';
+
+// 資源類型配置
+interface ResourceTypeConfig {
+    key: string;
+    label: string;
+    icon: React.ElementType;
+    matcher: (code: string) => boolean;
+    priority: number;
+}
+
+const RESOURCE_TYPE_CONFIGS: ResourceTypeConfig[] = [
+    {
+        key: 'module_search',
+        label: '搜尋模組',
+        icon: Filter,
+        matcher: (code) => code.toLowerCase().startsWith('module_search'),
+        priority: 1,
+    },
+    {
+        key: 'module',
+        label: '功能模組',
+        icon: Box,
+        matcher: (code) => code.toLowerCase().startsWith('module_') && !code.toLowerCase().startsWith('module_search'),
+        priority: 2,
+    },
+    {
+        key: 'data',
+        label: '資料流',
+        icon: Database,
+        matcher: (code) => code.toLowerCase().startsWith('data_'),
+        priority: 3,
+    },
+    {
+        key: 'report',
+        label: '報表',
+        icon: FileText,
+        matcher: (code) => code.toLowerCase().startsWith('report_'),
+        priority: 4,
+    },
+    {
+        key: 'api',
+        label: 'API',
+        icon: Globe,
+        matcher: (code) => code.toLowerCase().startsWith('api_'),
+        priority: 5,
+    },
+    {
+        key: 'page',
+        label: '頁面',
+        icon: FileText,
+        matcher: (code) => code.toLowerCase().startsWith('page_'),
+        priority: 6,
+    },
+    {
+        key: 'menu',
+        label: '選單',
+        icon: Menu,
+        matcher: (code) => code.toLowerCase().startsWith('menu_'),
+        priority: 7,
+    },
+    {
+        key: 'feature',
+        label: '功能',
+        icon: Zap,
+        matcher: (code) => code.toLowerCase().startsWith('feature_'),
+        priority: 8,
+    },
+    {
+        key: 'other',
+        label: '其他',
+        icon: Settings,
+        matcher: () => true,
+        priority: 99,
+    },
+];
+
+function getResourceType(code: string): ResourceTypeConfig {
+    for (const config of RESOURCE_TYPE_CONFIGS) {
+        if (config.key !== 'other' && config.matcher(code)) {
+            return config;
+        }
+    }
+    return RESOURCE_TYPE_CONFIGS[RESOURCE_TYPE_CONFIGS.length - 1];
+}
 
 interface GroupPermissionsTabProps {
     onUpdate?: () => void;
 }
 
 export function GroupPermissionsTab({ onUpdate }: GroupPermissionsTabProps) {
-    const [permissions, setPermissions] = useState<GroupPermissionDto[]>([]);
-    const [resources, setResources] = useState<ResourceDto[]>([]);
-    const [groups, setGroups] = useState<GroupBriefDto[]>([]);
+    const [resources, setResources] = useState<PermissionResourceDto[]>([]);
+    const [scopes, setScopes] = useState<PermissionScopeDto[]>([]);
+    const [organizations, setOrganizations] = useState<OrganizationTreeNode[]>([]);
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [clientFilter, setClientFilter] = useState<string>('');
-    const [clients, setClients] = useState<string[]>([]);
     const [showModal, setShowModal] = useState(false);
-    const [deleteTarget, setDeleteTarget] = useState<GroupPermissionDto | null>(null);
+    const [selectedOrg, setSelectedOrg] = useState<OrganizationTreeNode | null>(null);
+    const [orgPermissions, setOrgPermissions] = useState<PermissionDto[]>([]);
+    const [loadingPermissions, setLoadingPermissions] = useState(false);
 
     useEffect(() => {
-        loadClients();
-        loadGroups();
+        loadInitialData();
     }, []);
 
-    useEffect(() => {
-        loadPermissions();
-        loadResources();
-    }, [clientFilter]);
-
-    const loadClients = async () => {
-        try {
-            const data = await permissionApi.getClients();
-            setClients(data);
-            if (data.length === 1) {
-                setClientFilter(data[0]);
-            }
-        } catch (error) {
-            console.error('Failed to load clients:', error);
-        }
-    };
-
-    const loadGroups = async () => {
-        try {
-            const data = await permissionApi.getGroups();
-            setGroups(data);
-        } catch (error) {
-            console.error('Failed to load groups:', error);
-        }
-    };
-
-    const loadPermissions = async () => {
+    const loadInitialData = async () => {
         try {
             setLoading(true);
-            // 取得所有資源的群組權限
-            const allResources = await permissionApi.getAllResources(clientFilter || undefined);
-            const allPermissions: GroupPermissionDto[] = [];
-
-            for (const resource of allResources) {
-                const perms = await permissionApi.getResourceGroupPermissions(resource.id, resource.clientId);
-                allPermissions.push(...perms);
-            }
-
-            setPermissions(allPermissions);
+            const [resourcesData, scopesData, orgsData] = await Promise.all([
+                permissionV2Api.getResources(),
+                permissionV2Api.getScopes(),
+                organizationApi.getOrganizationTree(),
+            ]);
+            setResources(resourcesData);
+            setScopes(scopesData);
+            setOrganizations(orgsData);
         } catch (error) {
-            console.error('Failed to load permissions:', error);
+            console.error('Failed to load initial data:', error);
+            toast.error('載入資料失敗');
         } finally {
             setLoading(false);
         }
     };
 
-    const loadResources = async () => {
+    const loadOrgPermissions = async (org: OrganizationTreeNode) => {
+        setSelectedOrg(org);
+        setLoadingPermissions(true);
         try {
-            const data = await permissionApi.getAllResources(clientFilter || undefined);
-            setResources(data);
+            const permissions = await permissionV2Api.getOrganizationPermissions(org.id);
+            setOrgPermissions(permissions);
         } catch (error) {
-            console.error('Failed to load resources:', error);
+            console.error('Failed to load organization permissions:', error);
+            toast.error('載入組織權限失敗');
+        } finally {
+            setLoadingPermissions(false);
         }
     };
 
-    const handleCreate = () => {
-        setShowModal(true);
-    };
-
-    const handleDelete = async () => {
-        if (!deleteTarget) return;
+    const handleRevokePermission = async (permissionId: string) => {
         try {
-            await permissionApi.removeGroupPermission(
-                deleteTarget.groupId,
-                deleteTarget.clientId,
-                deleteTarget.resourceId
-            );
-            await loadPermissions();
+            await permissionV2Api.revokePermission(permissionId);
+            toast.success('權限已撤銷');
+            if (selectedOrg) {
+                loadOrgPermissions(selectedOrg);
+            }
             onUpdate?.();
-            setDeleteTarget(null);
         } catch (error) {
-            console.error('Failed to delete permission:', error);
+            console.error('Failed to revoke permission:', error);
+            toast.error('撤銷權限失敗');
         }
     };
 
-    const handleSave = async (data: SetGroupPermissionDto) => {
+    const handleGrantPermissions = async (
+        orgId: string,
+        orgName: string,
+        resourceScopes: { resourceId: string; scopes: string[] }[],
+        inheritToChildren: boolean
+    ) => {
         try {
-            await permissionApi.setGroupPermission(data.groupId, data);
-            await loadPermissions();
+            await permissionV2Api.batchGrantPermissions({
+                subjectType: SUBJECT_TYPES.ORGANIZATION,
+                subjectId: orgId,
+                subjectName: orgName,
+                resourceScopes,
+                inheritToChildren,
+            });
+            toast.success('權限已授予');
+            if (selectedOrg) {
+                loadOrgPermissions(selectedOrg);
+            }
             onUpdate?.();
             setShowModal(false);
         } catch (error) {
-            console.error('Failed to save permission:', error);
+            console.error('Failed to grant permissions:', error);
+            toast.error('授予權限失敗');
         }
     };
 
-    const filteredPermissions = permissions.filter(perm =>
-        perm.groupName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        perm.resourceName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        perm.groupPath?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
     return (
         <div className="space-y-6">
-            {/* Actions Bar */}
-            <div className="flex flex-col sm:flex-row gap-4">
-                {/* Client Filter */}
-                <div className="flex-shrink-0">
-                    <select
-                        value={clientFilter}
-                        onChange={(e) => setClientFilter(e.target.value)}
-                        className="h-12 px-4 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-xl text-white focus:outline-none focus:border-[var(--color-accent-primary)]"
-                    >
-                        <option value="">所有客戶端</option>
-                        {clients.map(client => (
-                            <option key={client} value={client}>{client}</option>
-                        ))}
-                    </select>
-                </div>
-
-                {/* Search */}
-                <div className="relative flex-1 max-w-md group">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Search size={18} className="text-[var(--color-text-secondary)] group-focus-within:text-[var(--color-accent-primary)] transition-colors" />
-                    </div>
-                    <input
-                        type="text"
-                        placeholder="搜尋群組或資源..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full h-12 pl-10 pr-4 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-xl text-white placeholder-[var(--color-text-secondary)] focus:outline-none focus:border-[var(--color-accent-primary)] focus:ring-1 focus:ring-[var(--color-accent-primary)] transition-all"
-                    />
-                </div>
-
-                {/* Add Button */}
-                <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleCreate}
-                    className="btn-primary group flex-shrink-0"
-                >
-                    <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" />
-                    <span>新增群組授權</span>
-                </motion.button>
-            </div>
-
             {/* Info Banner */}
-            <div className="flex items-start gap-3 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
-                <Users size={20} className="text-indigo-400 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-[var(--color-text-secondary)]">
-                    <span className="text-indigo-400 font-medium">群組授權說明：</span>
-                    授予群組的權限會自動繼承給所有成員。若啟用「繼承至子群組」，子群組的成員也會獲得相同權限。
+            <div className="flex items-start gap-3 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
+                <Info className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+                <div>
+                    <p className="text-sm text-blue-300">
+                        在這裡可以授予組織對特定資源的存取權限。
+                        組織的權限可以選擇是否讓子組織繼承，組織成員會自動獲得組織的權限。
+                    </p>
                 </div>
             </div>
 
-            {/* Data Table */}
-            <GlassTable
-                data={filteredPermissions}
-                isLoading={loading}
-                columns={[
-                    {
-                        header: '群組',
-                        accessor: (perm) => (
-                            <div className="flex items-center gap-2">
-                                <Building2 size={16} className="text-purple-400" />
-                                <div>
-                                    <div className="font-medium text-white">{perm.groupName || perm.groupId}</div>
-                                    {perm.groupPath && (
-                                        <div className="text-xs text-[var(--color-text-secondary)]">{perm.groupPath}</div>
-                                    )}
-                                </div>
+            {/* Layout: Organization Tree + Permissions */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Organization Tree */}
+                <div className="lg:col-span-1">
+                    <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.08)] rounded-xl overflow-hidden">
+                        <div className="px-4 py-3 border-b border-[rgba(255,255,255,0.05)]">
+                            <h3 className="text-sm font-medium text-white">組織架構</h3>
+                        </div>
+                        {loading ? (
+                            <div className="flex items-center justify-center py-12">
+                                <RefreshCw className="w-6 h-6 text-[var(--color-accent-primary)] animate-spin" />
                             </div>
-                        ),
-                    },
-                    {
-                        header: '資源',
-                        accessor: (perm) => (
-                            <span className="text-cyan-400">{perm.resourceName || perm.resourceId}</span>
-                        ),
-                    },
-                    {
-                        header: '權限範圍',
-                        accessor: (perm) => (
-                            <div className="flex items-center gap-1 flex-wrap">
-                                {perm.scopes?.map(scope => (
-                                    <span
-                                        key={scope}
-                                        className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                                    >
-                                        {scope}
-                                    </span>
+                        ) : organizations.length === 0 ? (
+                            <div className="text-center py-8 text-[var(--color-text-secondary)]">
+                                尚無組織資料
+                            </div>
+                        ) : (
+                            <div className="p-2 max-h-[500px] overflow-y-auto">
+                                {organizations.map((org) => (
+                                    <OrganizationTreeItem
+                                        key={org.id}
+                                        org={org}
+                                        selectedId={selectedOrg?.id}
+                                        onSelect={loadOrgPermissions}
+                                    />
                                 ))}
                             </div>
-                        ),
-                    },
-                    {
-                        header: '繼承',
-                        accessor: (perm) => (
-                            <span className={clsx(
-                                'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                                perm.inheritToChildren
-                                    ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                                    : 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
-                            )}>
-                                {perm.inheritToChildren ? '繼承至子群組' : '僅本群組'}
-                            </span>
-                        ),
-                    },
-                    {
-                        header: '狀態',
-                        accessor: (perm) => (
-                            <span className={clsx(
-                                'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                                perm.enabled
-                                    ? 'bg-green-500/10 text-green-400 border border-green-500/20'
-                                    : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                            )}>
-                                {perm.enabled ? '啟用' : '停用'}
-                            </span>
-                        ),
-                    },
-                    {
-                        header: '',
-                        accessor: (perm) => (
-                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                        )}
+                    </div>
+                </div>
+
+                {/* Permissions Panel */}
+                <div className="lg:col-span-2">
+                    {selectedOrg ? (
+                        <div className="space-y-4">
+                            {/* Selected Org Info */}
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl"
+                            >
+                                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                                    <Building2 size={20} className="text-emerald-400" />
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-white font-medium">{selectedOrg.name}</p>
+                                    <p className="text-sm text-[var(--color-text-secondary)]">
+                                        {selectedOrg.deptCode} · 共 {orgPermissions.length} 項權限
+                                    </p>
+                                </div>
                                 <button
-                                    onClick={() => setDeleteTarget(perm)}
-                                    className="p-2 text-[var(--color-text-secondary)] hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                                    title="移除授權"
+                                    onClick={() => loadOrgPermissions(selectedOrg)}
+                                    disabled={loadingPermissions}
+                                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                                 >
-                                    <Trash2 size={16} />
+                                    <RefreshCw size={18} className={clsx('text-[var(--color-text-secondary)]', loadingPermissions && 'animate-spin')} />
                                 </button>
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => setShowModal(true)}
+                                    className="btn-primary text-sm"
+                                >
+                                    <Plus size={16} />
+                                    授予權限
+                                </motion.button>
+                            </motion.div>
+
+                            {/* Permissions List */}
+                            <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.08)] rounded-xl overflow-hidden">
+                                {loadingPermissions ? (
+                                    <div className="flex items-center justify-center py-12">
+                                        <RefreshCw className="w-8 h-8 text-[var(--color-accent-primary)] animate-spin" />
+                                    </div>
+                                ) : orgPermissions.length === 0 ? (
+                                    <div className="text-center py-12">
+                                        <Shield className="w-16 h-16 mx-auto mb-4 text-[var(--color-text-secondary)] opacity-50" />
+                                        <p className="text-[var(--color-text-secondary)]">此組織尚未有任何權限</p>
+                                        <button
+                                            onClick={() => setShowModal(true)}
+                                            className="mt-4 text-emerald-400 hover:text-emerald-300 transition-colors"
+                                        >
+                                            點此授予權限
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="divide-y divide-[rgba(255,255,255,0.05)]">
+                                        {orgPermissions.map((permission) => (
+                                            <PermissionItem
+                                                key={permission.id}
+                                                permission={permission}
+                                                scopes={scopes}
+                                                onRevoke={() => handleRevokePermission(permission.id)}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
                             </div>
-                        ),
-                    },
-                ]}
-            />
+                        </div>
+                    ) : (
+                        <div className="text-center py-16 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.08)] rounded-xl">
+                            <Building2 className="w-20 h-20 mx-auto mb-4 text-[var(--color-text-secondary)] opacity-30" />
+                            <p className="text-xl text-[var(--color-text-secondary)]">請從左側選擇組織</p>
+                            <p className="text-sm text-[var(--color-text-secondary)] mt-2">
+                                選擇組織後可查看及管理其權限
+                            </p>
+                        </div>
+                    )}
+                </div>
+            </div>
 
-            {/* Create Permission Modal */}
+            {/* Grant Permission Modal */}
             <AnimatePresence>
-                {showModal && (
-                    <GroupPermissionModal
-                        clients={clients}
+                {showModal && selectedOrg && (
+                    <GrantOrgPermissionModal
+                        orgId={selectedOrg.id}
+                        orgName={selectedOrg.name}
                         resources={resources}
-                        groups={groups}
-                        defaultClientId={clientFilter}
-                        onSave={handleSave}
+                        scopes={scopes}
+                        existingPermissions={orgPermissions}
+                        onGrant={handleGrantPermissions}
                         onClose={() => setShowModal(false)}
-                    />
-                )}
-            </AnimatePresence>
-
-            {/* Delete Confirmation Modal */}
-            <AnimatePresence>
-                {deleteTarget && (
-                    <DeleteConfirmModal
-                        permission={deleteTarget}
-                        onConfirm={handleDelete}
-                        onCancel={() => setDeleteTarget(null)}
                     />
                 )}
             </AnimatePresence>
@@ -294,88 +357,415 @@ export function GroupPermissionsTab({ onUpdate }: GroupPermissionsTabProps) {
     );
 }
 
-// Group Permission Modal
-function GroupPermissionModal({
-    clients,
+// Organization Tree Item Component
+function OrganizationTreeItem({
+    org,
+    selectedId,
+    onSelect,
+    depth = 0,
+}: {
+    org: OrganizationTreeNode;
+    selectedId?: string;
+    onSelect: (org: OrganizationTreeNode) => void;
+    depth?: number;
+}) {
+    const [expanded, setExpanded] = useState(depth < 1);
+    const hasChildren = org.children && org.children.length > 0;
+    const isSelected = org.id === selectedId;
+
+    return (
+        <div>
+            <div
+                className={clsx(
+                    'flex items-center gap-2 py-2 px-2 rounded-lg cursor-pointer transition-colors',
+                    isSelected
+                        ? 'bg-emerald-500/20 text-white'
+                        : 'hover:bg-white/5 text-[var(--color-text-secondary)]'
+                )}
+                style={{ paddingLeft: `${depth * 12 + 8}px` }}
+                onClick={() => onSelect(org)}
+            >
+                {hasChildren ? (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setExpanded(!expanded);
+                        }}
+                        className="p-0.5 hover:bg-white/10 rounded"
+                    >
+                        {expanded ? (
+                            <ChevronDown size={14} />
+                        ) : (
+                            <ChevronRight size={14} />
+                        )}
+                    </button>
+                ) : (
+                    <div className="w-4" />
+                )}
+                <Building2 size={14} className={isSelected ? 'text-emerald-400' : ''} />
+                <span className="text-sm truncate flex-1">{org.name}</span>
+            </div>
+
+            {hasChildren && expanded && (
+                <div>
+                    {org.children!.map((child: OrganizationTreeNode) => (
+                        <OrganizationTreeItem
+                            key={child.id}
+                            org={child}
+                            selectedId={selectedId}
+                            onSelect={onSelect}
+                            depth={depth + 1}
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
+// Permission Item Component
+function PermissionItem({
+    permission,
+    scopes,
+    onRevoke,
+}: {
+    permission: PermissionDto;
+    scopes: PermissionScopeDto[];
+    onRevoke: () => void;
+}) {
+    const [showConfirm, setShowConfirm] = useState(false);
+
+    const permissionScopes = useMemo(() => {
+        if (permission.scopeList && permission.scopeList.length > 0) {
+            return permission.scopeList;
+        }
+        if (permission.scopes.startsWith('@')) {
+            return permission.scopes.split('@').filter(Boolean);
+        }
+        if (permission.scopes.startsWith('[')) {
+            try {
+                return JSON.parse(permission.scopes);
+            } catch {
+                return [];
+            }
+        }
+        return permission.scopes.split(',').filter(Boolean);
+    }, [permission.scopes, permission.scopeList]);
+
+    return (
+        <div className="flex items-center gap-4 p-4 hover:bg-[rgba(255,255,255,0.03)] transition-colors group">
+            <div className="p-2 bg-cyan-500/20 rounded-lg">
+                <Shield size={18} className="text-cyan-400" />
+            </div>
+
+            <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                    <p className="text-white font-medium truncate">
+                        {permission.resourceName || permission.resourceCode || permission.resourceId}
+                    </p>
+                    {permission.inheritToChildren && (
+                        <span className="px-1.5 py-0.5 text-[10px] rounded bg-emerald-500/20 text-emerald-400">
+                            繼承
+                        </span>
+                    )}
+                </div>
+                {permission.clientId && (
+                    <p className="text-xs text-[var(--color-text-secondary)]">
+                        客戶端: {permission.clientId}
+                    </p>
+                )}
+            </div>
+
+            <div className="flex items-center gap-1.5 flex-wrap max-w-[200px]">
+                {permissionScopes.map((scope: string) => {
+                    const scopeInfo = scopes.find((s) => s.code === scope);
+                    return (
+                        <span
+                            key={scope}
+                            title={scopeInfo?.name || SCOPE_NAMES[scope]}
+                            className="px-2 py-0.5 text-xs font-medium rounded bg-amber-500/20 text-amber-400 uppercase"
+                        >
+                            {scope}
+                        </span>
+                    );
+                })}
+            </div>
+
+            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                {showConfirm ? (
+                    <>
+                        <button
+                            onClick={() => setShowConfirm(false)}
+                            className="p-2 text-[var(--color-text-secondary)] hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                        >
+                            <X size={16} />
+                        </button>
+                        <button
+                            onClick={onRevoke}
+                            className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                        >
+                            <Check size={16} />
+                        </button>
+                    </>
+                ) : (
+                    <button
+                        onClick={() => setShowConfirm(true)}
+                        className="p-2 text-[var(--color-text-secondary)] hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                        title="撤銷權限"
+                    >
+                        <Trash2 size={16} />
+                    </button>
+                )}
+            </div>
+        </div>
+    );
+}
+
+// Grant Organization Permission Modal
+function GrantOrgPermissionModal({
+    orgId,
+    orgName,
     resources,
-    groups,
-    defaultClientId,
-    onSave,
+    scopes,
+    existingPermissions,
+    onGrant,
     onClose,
 }: {
-    clients: string[];
-    resources: ResourceDto[];
-    groups: GroupBriefDto[];
-    defaultClientId: string;
-    onSave: (data: SetGroupPermissionDto) => Promise<void>;
+    orgId: string;
+    orgName: string;
+    resources: PermissionResourceDto[];
+    scopes: PermissionScopeDto[];
+    existingPermissions: PermissionDto[];
+    onGrant: (orgId: string, orgName: string, resourceScopes: { resourceId: string; scopes: string[] }[], inheritToChildren: boolean) => Promise<void>;
     onClose: () => void;
 }) {
-    const [formData, setFormData] = useState({
-        clientId: defaultClientId || (clients.length > 0 ? clients[0] : ''),
-        groupId: '',
-        groupName: '',
-        groupPath: '',
-        resourceId: '',
-        resourceName: '',
-        scopes: [] as string[],
-        inheritToChildren: true,
-    });
+    const [selectedScopes, setSelectedScopes] = useState<Record<string, string[]>>({});
+    const [inheritToChildren, setInheritToChildren] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedClient, setSelectedClient] = useState<string>('');
+    const [selectedType, setSelectedType] = useState<string>('');
+    const [expandedResources, setExpandedResources] = useState<Set<string>>(new Set());
 
-    // 過濾資源
-    const availableResources = resources.filter(r => r.clientId === formData.clientId);
-    const selectedResource = availableResources.find(r => r.id === formData.resourceId);
-    const availableScopes = selectedResource?.scopes || [];
+    // 計算客戶端列表
+    const clients = useMemo(() => {
+        const clientMap = new Map<string, { id: string; name: string; resourceCount: number }>();
+        const countResources = (items: PermissionResourceDto[]): number => {
+            return items.reduce((acc, item) => {
+                return acc + 1 + (item.children ? countResources(item.children) : 0);
+            }, 0);
+        };
 
-    const handleGroupChange = (groupId: string) => {
-        const group = groups.find(g => g.id === groupId);
-        setFormData(prev => ({
-            ...prev,
-            groupId,
-            groupName: group?.name || '',
-            groupPath: group?.path || '',
-        }));
+        resources.forEach(r => {
+            if (r.clientId && !clientMap.has(r.clientId)) {
+                clientMap.set(r.clientId, {
+                    id: r.clientId,
+                    name: r.clientName || r.clientId,
+                    resourceCount: 0,
+                });
+            }
+        });
+
+        clientMap.forEach((info, clientId) => {
+            const clientResources = resources.filter(r => r.clientId === clientId);
+            info.resourceCount = countResources(clientResources);
+        });
+
+        return Array.from(clientMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+    }, [resources]);
+
+    // 當 clients 載入後自動選擇第一個
+    useEffect(() => {
+        if (clients.length > 0 && !selectedClient) {
+            setSelectedClient(clients[0].id);
+        }
+    }, [clients, selectedClient]);
+
+    // 過濾當前客戶端的資源
+    const clientResources = useMemo(() => {
+        return resources.filter(r => r.clientId === selectedClient);
+    }, [resources, selectedClient]);
+
+    // 按資源類型分組
+    const resourcesByType = useMemo(() => {
+        const groups: Record<string, PermissionResourceDto[]> = {};
+        const flattenAndGroup = (items: PermissionResourceDto[]) => {
+            items.forEach(item => {
+                const typeConfig = getResourceType(item.code);
+                if (!groups[typeConfig.key]) {
+                    groups[typeConfig.key] = [];
+                }
+                groups[typeConfig.key].push(item);
+                if (item.children) {
+                    flattenAndGroup(item.children);
+                }
+            });
+        };
+        flattenAndGroup(clientResources);
+        return groups;
+    }, [clientResources]);
+
+    // 取得可用的資源類型標籤
+    const availableTypes = useMemo(() => {
+        return RESOURCE_TYPE_CONFIGS.filter(config =>
+            resourcesByType[config.key] && resourcesByType[config.key].length > 0
+        ).sort((a, b) => a.priority - b.priority);
+    }, [resourcesByType]);
+
+    // 當可用類型變化時，選擇第一個
+    useEffect(() => {
+        if (availableTypes.length > 0 && (!selectedType || !availableTypes.find(t => t.key === selectedType))) {
+            setSelectedType(availableTypes[0].key);
+        }
+    }, [availableTypes, selectedType]);
+
+    // 當前類型的資源
+    const currentTypeResources = useMemo(() => {
+        if (!selectedType) return [];
+        return resourcesByType[selectedType] || [];
+    }, [resourcesByType, selectedType]);
+
+    // 搜尋過濾
+    const filteredResources = useMemo(() => {
+        if (!searchTerm) return currentTypeResources;
+        const term = searchTerm.toLowerCase();
+        return currentTypeResources.filter(r =>
+            r.name.toLowerCase().includes(term) ||
+            r.code.toLowerCase().includes(term)
+        );
+    }, [currentTypeResources, searchTerm]);
+
+    const getExistingScopes = (resourceId: string): string[] => {
+        const permission = existingPermissions.find((p) => p.resourceId === resourceId);
+        if (!permission) return [];
+
+        if (permission.scopeList && permission.scopeList.length > 0) {
+            return permission.scopeList;
+        }
+        if (permission.scopes.startsWith('@')) {
+            return permission.scopes.split('@').filter(Boolean);
+        }
+        return [];
     };
 
-    const handleResourceChange = (resourceId: string) => {
-        const resource = availableResources.find(r => r.id === resourceId);
-        setFormData(prev => ({
-            ...prev,
+    const toggleScope = (resourceId: string, scope: string) => {
+        setSelectedScopes((prev) => {
+            const current = prev[resourceId] || [];
+            const newScopes = current.includes(scope)
+                ? current.filter((s) => s !== scope)
+                : [...current, scope];
+
+            if (newScopes.length === 0) {
+                const { [resourceId]: _, ...rest } = prev;
+                return rest;
+            }
+
+            return { ...prev, [resourceId]: newScopes };
+        });
+    };
+
+    const toggleExpand = (resourceId: string) => {
+        setExpandedResources(prev => {
+            const next = new Set(prev);
+            if (next.has(resourceId)) {
+                next.delete(resourceId);
+            } else {
+                next.add(resourceId);
+            }
+            return next;
+        });
+    };
+
+    const handleSubmit = async () => {
+        const resourceScopes = Object.entries(selectedScopes).map(([resourceId, scopeList]) => ({
             resourceId,
-            resourceName: resource?.displayName || resource?.name || '',
-            scopes: [],
+            scopes: scopeList,
         }));
-    };
 
-    const toggleScope = (scope: string) => {
-        setFormData(prev => ({
-            ...prev,
-            scopes: prev.scopes.includes(scope)
-                ? prev.scopes.filter(s => s !== scope)
-                : [...prev.scopes, scope],
-        }));
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!formData.groupId || !formData.resourceId || formData.scopes.length === 0) {
+        if (resourceScopes.length === 0) {
+            toast.warning('請至少選擇一項權限');
             return;
         }
+
         setSaving(true);
         try {
-            await onSave({
-                groupId: formData.groupId,
-                groupName: formData.groupName,
-                groupPath: formData.groupPath,
-                clientId: formData.clientId,
-                resourceId: formData.resourceId,
-                resourceName: formData.resourceName,
-                scopes: formData.scopes,
-                inheritToChildren: formData.inheritToChildren,
-            });
+            await onGrant(orgId, orgName, resourceScopes, inheritToChildren);
         } finally {
             setSaving(false);
         }
+    };
+
+    const selectedCount = Object.values(selectedScopes).reduce((acc, s) => acc + s.length, 0);
+
+    // 渲染資源項目
+    const renderResourceItem = (resource: PermissionResourceDto, depth: number = 0) => {
+        const currentScopes = selectedScopes[resource.id] || [];
+        const existingResourceScopes = getExistingScopes(resource.id);
+        const hasChildren = resource.children && resource.children.length > 0;
+        const isExpanded = expandedResources.has(resource.id);
+
+        return (
+            <div key={resource.id}>
+                <div
+                    className="flex items-center gap-2 py-2 px-3 hover:bg-white/5 rounded-lg transition-colors group"
+                    style={{ paddingLeft: `${depth * 16 + 12}px` }}
+                >
+                    {/* Expand/Collapse Button */}
+                    {hasChildren ? (
+                        <button
+                            onClick={() => toggleExpand(resource.id)}
+                            className="p-0.5 hover:bg-white/10 rounded"
+                        >
+                            {isExpanded ? (
+                                <ChevronDown size={14} className="text-gray-400" />
+                            ) : (
+                                <ChevronRight size={14} className="text-gray-400" />
+                            )}
+                        </button>
+                    ) : (
+                        <div className="w-4" />
+                    )}
+
+                    <div className="flex-1 min-w-0">
+                        <span className="text-white text-sm">{resource.name}</span>
+                        <span className="ml-2 text-xs text-gray-500 font-mono">{resource.code}</span>
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                        {scopes.map((scope) => {
+                            const isSelected = currentScopes.includes(scope.code);
+                            const isExisting = existingResourceScopes.includes(scope.code);
+
+                            return (
+                                <button
+                                    key={scope.code}
+                                    onClick={() => toggleScope(resource.id, scope.code)}
+                                    disabled={isExisting}
+                                    title={isExisting ? '已有此權限' : scope.name || SCOPE_NAMES[scope.code]}
+                                    className={clsx(
+                                        'w-6 h-6 flex items-center justify-center rounded text-[10px] font-medium uppercase transition-colors',
+                                        isExisting
+                                            ? 'bg-green-500/30 text-green-300 cursor-not-allowed'
+                                            : isSelected
+                                                ? 'bg-emerald-500 text-white'
+                                                : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                                    )}
+                                >
+                                    {scope.code}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* Children */}
+                {hasChildren && isExpanded && (
+                    <div>
+                        {resource.children!.map(child => renderResourceItem(child, depth + 1))}
+                    </div>
+                )}
+            </div>
+        );
     };
 
     return (
@@ -383,204 +773,157 @@ function GroupPermissionModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
             onClick={onClose}
         >
             <motion.div
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.95, opacity: 0 }}
-                className="w-full max-w-lg bg-[#1a1a2e] border border-[rgba(255,255,255,0.1)] rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+                className="w-full max-w-5xl bg-[#1a1a2e] border border-[rgba(255,255,255,0.1)] rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="px-6 py-4 border-b border-[rgba(255,255,255,0.1)]">
-                    <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                        <Shield size={20} className="text-purple-400" />
-                        新增群組授權
-                    </h3>
-                </div>
-
-                <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto">
-                    {/* Client */}
-                    <div>
-                        <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
-                            客戶端
-                        </label>
-                        <select
-                            value={formData.clientId}
-                            onChange={(e) => setFormData({ ...formData, clientId: e.target.value, resourceId: '', scopes: [] })}
-                            className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-xl text-white focus:outline-none focus:border-[var(--color-accent-primary)]"
-                            required
-                        >
-                            {clients.map(client => (
-                                <option key={client} value={client}>{client}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Group */}
-                    <div>
-                        <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
-                            群組
-                        </label>
-                        <select
-                            value={formData.groupId}
-                            onChange={(e) => handleGroupChange(e.target.value)}
-                            className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-xl text-white focus:outline-none focus:border-[var(--color-accent-primary)]"
-                            required
-                        >
-                            <option value="">選擇群組</option>
-                            {groups.map(group => (
-                                <option key={group.id} value={group.id}>
-                                    {group.deptZhName || group.name} {group.path && `(${group.path})`}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Resource */}
-                    <div>
-                        <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
-                            資源
-                        </label>
-                        <select
-                            value={formData.resourceId}
-                            onChange={(e) => handleResourceChange(e.target.value)}
-                            className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-xl text-white focus:outline-none focus:border-[var(--color-accent-primary)]"
-                            required
-                        >
-                            <option value="">選擇資源</option>
-                            {availableResources.map(resource => (
-                                <option key={resource.id} value={resource.id}>
-                                    {resource.displayName || resource.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Scopes */}
-                    <div>
-                        <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
-                            權限範圍
-                        </label>
-                        <div className="flex flex-wrap gap-2 p-3 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-xl min-h-[60px]">
-                            {availableScopes.length === 0 ? (
-                                <span className="text-sm text-[var(--color-text-secondary)]">
-                                    {formData.resourceId ? '此資源沒有可用的範圍' : '請先選擇資源'}
-                                </span>
-                            ) : (
-                                availableScopes.map(scope => (
-                                    <button
-                                        key={scope}
-                                        type="button"
-                                        onClick={() => toggleScope(scope)}
-                                        className={clsx(
-                                            'inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
-                                            formData.scopes.includes(scope)
-                                                ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                                                : 'bg-[rgba(255,255,255,0.03)] text-[var(--color-text-secondary)] border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.2)]'
-                                        )}
-                                    >
-                                        <Tag size={14} />
-                                        {scope}
-                                        {formData.scopes.includes(scope) && (
-                                            <Check size={14} className="text-amber-400" />
-                                        )}
-                                    </button>
-                                ))
-                            )}
+                {/* Header */}
+                <div className="px-6 py-4 border-b border-[rgba(255,255,255,0.1)] flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-emerald-500/20 rounded-lg">
+                            <Building2 size={20} className="text-emerald-400" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-semibold text-white">授予組織權限</h3>
+                            <p className="text-sm text-[var(--color-text-secondary)]">{orgName}</p>
                         </div>
                     </div>
+                    <button
+                        onClick={onClose}
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                    >
+                        <X size={20} className="text-[var(--color-text-secondary)]" />
+                    </button>
+                </div>
 
-                    {/* Inherit to Children */}
-                    <div className="flex items-center gap-3 p-4 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-xl">
-                        <input
-                            type="checkbox"
-                            id="inheritToChildren"
-                            checked={formData.inheritToChildren}
-                            onChange={(e) => setFormData({ ...formData, inheritToChildren: e.target.checked })}
-                            className="w-5 h-5 rounded border-[rgba(255,255,255,0.2)] bg-[rgba(255,255,255,0.03)] text-purple-500 focus:ring-purple-500 focus:ring-offset-0"
-                        />
-                        <label htmlFor="inheritToChildren" className="flex-1">
-                            <div className="text-sm font-medium text-white">繼承至子群組</div>
-                            <div className="text-xs text-[var(--color-text-secondary)]">
-                                啟用後，所有子群組的成員也會獲得此權限
-                            </div>
+                {/* System Selector + Search */}
+                <div className="px-6 py-3 border-b border-[rgba(255,255,255,0.05)] space-y-3">
+                    <div className="flex items-center gap-4">
+                        {/* System Dropdown */}
+                        <div className="relative">
+                            <select
+                                value={selectedClient}
+                                onChange={(e) => setSelectedClient(e.target.value)}
+                                className="appearance-none h-10 pl-4 pr-10 bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500/50 cursor-pointer min-w-[200px]"
+                            >
+                                {clients.map(client => (
+                                    <option key={client.id} value={client.id} className="bg-[#1a1a2e]">
+                                        {client.name} ({client.resourceCount})
+                                    </option>
+                                ))}
+                            </select>
+                            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                        </div>
+
+                        {/* Search */}
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="搜尋資源..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full h-10 pl-10 pr-4 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-emerald-500/50"
+                            />
+                        </div>
+
+                        {/* Inherit Option */}
+                        <label className="flex items-center gap-2 cursor-pointer flex-shrink-0">
+                            <input
+                                type="checkbox"
+                                checked={inheritToChildren}
+                                onChange={(e) => setInheritToChildren(e.target.checked)}
+                                className="w-4 h-4 rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-0"
+                            />
+                            <span className="text-sm text-[var(--color-text-secondary)]">
+                                子組織繼承
+                            </span>
                         </label>
                     </div>
 
-                    <div className="flex justify-end gap-3 pt-4">
+                    {/* Resource Type Tabs */}
+                    <div className="flex items-center gap-1 overflow-x-auto pb-1">
+                        {availableTypes.map(typeConfig => {
+                            const Icon = typeConfig.icon;
+                            const count = resourcesByType[typeConfig.key]?.length || 0;
+                            const isActive = selectedType === typeConfig.key;
+
+                            return (
+                                <button
+                                    key={typeConfig.key}
+                                    onClick={() => setSelectedType(typeConfig.key)}
+                                    className={clsx(
+                                        'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm whitespace-nowrap transition-colors',
+                                        isActive
+                                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                    )}
+                                >
+                                    <Icon size={14} />
+                                    <span>{typeConfig.label}</span>
+                                    <span className={clsx(
+                                        'px-1.5 py-0.5 rounded text-xs',
+                                        isActive ? 'bg-emerald-500/30' : 'bg-white/10'
+                                    )}>
+                                        {count}
+                                    </span>
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Scope Legend */}
+                    <div className="flex items-center gap-4 text-xs text-gray-400">
+                        <span>權限範圍:</span>
+                        {scopes.map((scope) => (
+                            <span key={scope.code} className="flex items-center gap-1">
+                                <span className="w-5 h-5 flex items-center justify-center bg-white/10 rounded text-gray-300 font-medium uppercase">
+                                    {scope.code}
+                                </span>
+                                <span>{scope.name || SCOPE_NAMES[scope.code]}</span>
+                            </span>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Resources List */}
+                <div className="flex-1 overflow-y-auto p-4">
+                    {filteredResources.length === 0 ? (
+                        <div className="text-center py-8 text-[var(--color-text-secondary)]">
+                            沒有找到符合的資源
+                        </div>
+                    ) : (
+                        <div className="space-y-0.5">
+                            {filteredResources.map((resource) => renderResourceItem(resource))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Footer */}
+                <div className="px-6 py-4 border-t border-[rgba(255,255,255,0.1)] flex items-center justify-between">
+                    <p className="text-sm text-[var(--color-text-secondary)]">
+                        已選擇 <span className="text-white font-medium">{selectedCount}</span> 項權限
+                        {inheritToChildren && <span className="text-emerald-400 ml-2">(將繼承給子組織)</span>}
+                    </p>
+                    <div className="flex items-center gap-3">
                         <button
-                            type="button"
                             onClick={onClose}
                             className="px-4 py-2 text-[var(--color-text-secondary)] hover:text-white transition-colors"
                         >
                             取消
                         </button>
                         <button
-                            type="submit"
-                            disabled={saving || !formData.groupId || !formData.resourceId || formData.scopes.length === 0}
+                            onClick={handleSubmit}
+                            disabled={saving || selectedCount === 0}
                             className="btn-primary disabled:opacity-50"
                         >
-                            {saving ? '儲存中...' : '授權'}
-                        </button>
-                    </div>
-                </form>
-            </motion.div>
-        </motion.div>
-    );
-}
-
-// Delete Confirmation Modal
-function DeleteConfirmModal({
-    permission,
-    onConfirm,
-    onCancel,
-}: {
-    permission: GroupPermissionDto;
-    onConfirm: () => void;
-    onCancel: () => void;
-}) {
-    return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-            onClick={onCancel}
-        >
-            <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                className="w-full max-w-sm bg-[#1a1a2e] border border-[rgba(255,255,255,0.1)] rounded-2xl shadow-2xl overflow-hidden"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div className="p-6 text-center">
-                    <div className="mx-auto w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
-                        <Trash2 className="w-6 h-6 text-red-400" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-white mb-2">確認移除群組授權</h3>
-                    <p className="text-[var(--color-text-secondary)] mb-6">
-                        確定要移除 <span className="text-purple-400 font-medium">{permission.groupName}</span> 對{' '}
-                        <span className="text-cyan-400 font-medium">{permission.resourceName}</span> 的存取權限嗎？
-                        <br />
-                        <span className="text-xs">所有群組成員將失去此權限。</span>
-                    </p>
-                    <div className="flex justify-center gap-3">
-                        <button
-                            onClick={onCancel}
-                            className="px-4 py-2 text-[var(--color-text-secondary)] hover:text-white transition-colors flex items-center gap-2"
-                        >
-                            <X size={16} />
-                            取消
-                        </button>
-                        <button
-                            onClick={onConfirm}
-                            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center gap-2"
-                        >
-                            <Check size={16} />
-                            確認移除
+                            {saving ? '授權中...' : '確認授權'}
                         </button>
                     </div>
                 </div>

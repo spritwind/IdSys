@@ -46,10 +46,12 @@ export function LoginPage() {
                     {/* Logo */}
                     <div className="mb-12">
                         <div className="flex items-center space-x-4">
-                            <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                                <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                                </svg>
+                            <div className="w-14 h-14 rounded-2xl flex items-center justify-center p-1 border border-white/20">
+                                <img
+                                    src="/images/logo_gold.png"
+                                    alt="UC Capital"
+                                    className="w-full h-full object-contain"
+                                />
                             </div>
                             <div>
                                 <h1 className="text-2xl font-bold text-white">UC Capital</h1>

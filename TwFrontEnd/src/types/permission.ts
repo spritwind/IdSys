@@ -89,6 +89,7 @@ export interface ResourceScopeDto {
 // UserPermission 使用者權限
 // =====================
 export interface UserPermissionDto {
+    id: string; // Composite key: `${userId}_${clientId}_${resourceId}`
     userId: string;
     username?: string;
     clientId: string;
@@ -115,6 +116,7 @@ export interface SetUserPermissionDto {
 // GroupPermission 群組權限
 // =====================
 export interface GroupPermissionDto {
+    id: string; // Composite key: `${groupId}_${clientId}_${resourceId}`
     groupId: string;
     groupName?: string;
     groupPath?: string;

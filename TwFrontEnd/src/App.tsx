@@ -15,6 +15,8 @@ import { PlaceholderPage } from './components/features/PlaceholderPage';
 import { DebugPanel } from './components/debug/DebugPanel';
 import ClientsPage from './pages/clients/ClientsPage';
 import ClientDetail from './pages/clients/ClientDetail';
+import UsersPage from './pages/users/UsersPage';
+import RolesPage from './pages/roles/RolesPage';
 import './index.css';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
@@ -23,8 +25,6 @@ import {
     Layers,
     Lock,
     Shield,
-    Users,
-    UserCog,
     Key,
     KeyRound,
     FileText,
@@ -78,13 +78,15 @@ function LandingPage() {
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: 0.2, duration: 0.6 }}
-                    className="w-28 h-28 rounded-2xl overflow-hidden ring-4 ring-white/10 shadow-2xl shadow-cyan-500/20"
+                    className="w-28 h-28 flex-shrink-0 logo-gold-streamer-lg"
                 >
-                    <img
-                        src="/images/uc-capital-logo.png"
-                        alt="UC Capital Logo"
-                        className="w-full h-full object-cover"
-                    />
+                    <div className="w-full h-full rounded-2xl overflow-hidden flex items-center justify-center border border-white/10">
+                        <img
+                            src="/images/logo_gold.png"
+                            alt="UC Capital Logo"
+                            className="w-24 h-24 object-contain"
+                        />
+                    </div>
                 </motion.div>
 
                 {/* Brand Name */}
@@ -124,7 +126,7 @@ function LandingPage() {
 
                 {/* Version Info */}
                 <p className="text-xs text-[var(--color-text-muted)] mt-4">
-                    Powered by Duende IdentityServer v7.0
+                    Powered by 優式資訊帳務
                 </p>
             </motion.div>
         </div>
@@ -158,21 +160,7 @@ const IdentityResourcesPage = () => (
     />
 );
 
-const UsersPage = () => (
-    <PlaceholderPage
-        title="使用者管理"
-        description="管理系統使用者帳號，包括建立、編輯、停用和角色指派。"
-        icon={Users}
-    />
-);
-
-const RolesPage = () => (
-    <PlaceholderPage
-        title="角色管理"
-        description="定義和管理使用者角色，設定角色權限和聲明。"
-        icon={UserCog}
-    />
-);
+/* UsersPage and RolesPage are now real components imported above */
 
 const IdentityProvidersPage = () => (
     <PlaceholderPage

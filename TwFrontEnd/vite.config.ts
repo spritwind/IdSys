@@ -42,6 +42,27 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      '/api/user-management': {
+        target: 'https://localhost:44302',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/role-management': {
+        target: 'https://localhost:44302',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/permission': {
+        target: 'https://localhost:44302',
+        changeOrigin: true,
+        secure: false,
+      },
+      // Permission v2 API (Multi-Tenant)
+      '/api/v2/permissions': {
+        target: 'https://localhost:44302',
+        changeOrigin: true,
+        secure: false,
+      },
       // 其他 Admin MVC API
       '/api': {
         target: 'https://localhost:44303',
