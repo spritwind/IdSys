@@ -149,9 +149,9 @@ function TagInput({ value, onChange, placeholder }: TagInputProps) {
 export default function IdentityResourceEditPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const isNew = id === 'new';
+    const isNew = !id || id === 'new';
 
-    const [loading, setLoading] = useState(!isNew);
+    const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState<Partial<IdentityResourceApiDto>>(defaultIdentityResource);

@@ -159,9 +159,10 @@ function TagInput({ value, onChange, placeholder }: TagInputProps) {
 export default function ClientEditPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const isNew = id === 'new';
+    // 當 id 為 undefined（新增頁面路由）或 'new' 時，視為新增模式
+    const isNew = !id || id === 'new';
 
-    const [loading, setLoading] = useState(!isNew);
+    const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState<Partial<ClientApiDto>>(defaultClient);
