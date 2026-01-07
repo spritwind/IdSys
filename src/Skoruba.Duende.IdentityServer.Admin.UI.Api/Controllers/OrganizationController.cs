@@ -124,6 +124,26 @@ namespace Skoruba.Duende.IdentityServer.Admin.UI.Api.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// 取得群組成員列表
+        /// </summary>
+        [HttpGet("{id}/members")]
+        [ProducesResponseType(typeof(List<GroupMemberApiDto>), 200)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<List<GroupMemberApiDto>>> GetMembers(string id)
+        {
+            // 先確認群組存在
+            var group = await _organizationService.GetGroupByIdAsync(id);
+            if (group == null)
+            {
+                return NotFound();
+            }
+
+            var members = await _organizationService.GetGroupMembersAsync(id);
+            var result = members.ConvertAll(m => m.ToOrganizationApiModel<GroupMemberApiDto>());
+            return Ok(result);
+        }
+
         #endregion
 
         #region 新增/修改/刪除端點

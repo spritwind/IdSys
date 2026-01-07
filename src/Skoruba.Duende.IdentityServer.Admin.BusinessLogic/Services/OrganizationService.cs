@@ -1,5 +1,6 @@
 // UC Capital - Organization Service
 // 組織架構服務實作
+// 重構：從 Keycloak 表遷移至 Organizations 表
 
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,9 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
     {
         protected readonly IOrganizationRepository OrganizationRepository;
 
+        // 預設租戶 ID（單一租戶模式）
+        private static readonly Guid DefaultTenantId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+
         public OrganizationService(IOrganizationRepository organizationRepository)
         {
             OrganizationRepository = organizationRepository;
@@ -26,23 +30,23 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
 
         public async Task<List<OrganizationGroupDto>> GetAllGroupsAsync(CancellationToken cancellationToken = default)
         {
-            var groups = await OrganizationRepository.GetAllGroupsAsync(cancellationToken);
-            return groups.Select(MapToDto).ToList();
+            var organizations = await OrganizationRepository.GetAllGroupsAsync(cancellationToken);
+            return organizations.Select(MapToDto).ToList();
         }
 
         public async Task<List<OrganizationTreeDto>> GetOrganizationTreeAsync(CancellationToken cancellationToken = default)
         {
-            var allGroups = await OrganizationRepository.GetAllGroupsAsync(cancellationToken);
+            var allOrganizations = await OrganizationRepository.GetAllGroupsAsync(cancellationToken);
 
-            // 建立樹狀結構
-            var groupDict = allGroups.ToDictionary(g => g.Id, g => MapToTreeDto(g));
+            // 建立樹狀結構（使用 Guid 作為 key）
+            var orgDict = allOrganizations.ToDictionary(o => o.Id, o => MapToTreeDto(o));
             var rootNodes = new List<OrganizationTreeDto>();
 
-            foreach (var group in allGroups)
+            foreach (var org in allOrganizations)
             {
-                var treeNode = groupDict[group.Id];
+                var treeNode = orgDict[org.Id];
 
-                if (!string.IsNullOrEmpty(group.ParentId) && groupDict.TryGetValue(group.ParentId, out var parentNode))
+                if (org.ParentId != null && orgDict.TryGetValue(org.ParentId.Value, out var parentNode))
                 {
                     parentNode.Children.Add(treeNode);
                 }
@@ -52,16 +56,48 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
                 }
             }
 
+            // 批次取得所有組織的成員數量（單一查詢，避免 N+1 問題和並發問題）
+            var memberCountDict = await OrganizationRepository.GetAllMemberCountsAsync(cancellationToken);
+
+            // 填入各組織的 MemberCount
+            foreach (var org in allOrganizations)
+            {
+                if (orgDict.TryGetValue(org.Id, out var treeNode))
+                {
+                    treeNode.MemberCount = memberCountDict.TryGetValue(org.Id, out var count) ? count : 0;
+                }
+            }
+
+            // 計算 TotalMemberCount（遞迴計算含子孫組織的成員總數）
+            CalculateTotalMemberCount(rootNodes);
+
             // 排序子節點
             SortTreeChildren(rootNodes);
 
             return rootNodes;
         }
 
+        /// <summary>
+        /// 遞迴計算各節點的 TotalMemberCount（含所有子孫組織成員）
+        /// </summary>
+        private static int CalculateTotalMemberCount(List<OrganizationTreeDto> nodes)
+        {
+            var total = 0;
+            foreach (var node in nodes)
+            {
+                // 先計算子節點的總數
+                var childrenTotal = CalculateTotalMemberCount(node.Children);
+                // 該節點的 TotalMemberCount = 自身成員 + 子孫成員
+                node.TotalMemberCount = node.MemberCount + childrenTotal;
+                total += node.TotalMemberCount;
+            }
+            return total;
+        }
+
         public async Task<OrganizationGroupDto> GetGroupByIdAsync(string id, CancellationToken cancellationToken = default)
         {
-            var group = await OrganizationRepository.GetGroupByIdAsync(id, cancellationToken);
-            return group != null ? MapToDto(group) : null;
+            var organization = await OrganizationRepository.GetGroupByIdAsync(id, cancellationToken);
+            return organization != null ? MapToDto(organization) : null;
         }
 
         public async Task<OrganizationStatsDto> GetOrganizationStatsAsync(CancellationToken cancellationToken = default)
@@ -79,8 +115,8 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
 
         public async Task<DeleteConfirmationDto> GetDeleteConfirmationAsync(string id, CancellationToken cancellationToken = default)
         {
-            var group = await OrganizationRepository.GetGroupByIdAsync(id, cancellationToken);
-            if (group == null)
+            var organization = await OrganizationRepository.GetGroupByIdAsync(id, cancellationToken);
+            if (organization == null)
             {
                 return null;
             }
@@ -89,7 +125,7 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
 
             return new DeleteConfirmationDto
             {
-                Group = MapToDto(group),
+                Group = MapToDto(organization),
                 Descendants = descendants.Select(MapToDto).ToList()
             };
         }
@@ -98,6 +134,12 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
         {
             var exists = await OrganizationRepository.ExistsAsync(name, parentId, excludeId, cancellationToken);
             return !exists;
+        }
+
+        public async Task<List<GroupMemberDto>> GetGroupMembersAsync(string groupId, CancellationToken cancellationToken = default)
+        {
+            var members = await OrganizationRepository.GetGroupMembersAsync(groupId, cancellationToken);
+            return members.Select(MapToMemberDto).ToList();
         }
 
         #endregion
@@ -116,21 +158,29 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
             // 如果有父群組，驗證其存在
             if (!string.IsNullOrEmpty(dto.ParentId))
             {
-                var parentGroup = await OrganizationRepository.GetGroupByIdAsync(dto.ParentId, cancellationToken);
-                if (parentGroup == null)
+                var parentOrg = await OrganizationRepository.GetGroupByIdAsync(dto.ParentId, cancellationToken);
+                if (parentOrg == null)
                 {
                     throw new InvalidOperationException($"找不到父群組 (ID: {dto.ParentId})");
                 }
             }
 
-            var entity = new KeycloakGroup
+            // 解析父群組 ID
+            Guid? parentGuid = null;
+            if (!string.IsNullOrEmpty(dto.ParentId) && Guid.TryParse(dto.ParentId, out var parsedParentId))
             {
+                parentGuid = parsedParentId;
+            }
+
+            var entity = new Organization
+            {
+                TenantId = DefaultTenantId,
                 Name = dto.Name,
-                ParentId = dto.ParentId,
-                DeptCode = dto.DeptCode,
-                DeptZhName = dto.DeptZhName,
-                DeptEName = dto.DeptEName,
-                Manager = dto.Manager,
+                ParentId = parentGuid,
+                Code = dto.DeptCode,
+                ChineseName = dto.DeptZhName,
+                EnglishName = dto.DeptEName,
+                ManagerUserId = dto.Manager, // 注意：舊系統用 username，新系統應改用 UserId
                 Description = dto.Description
             };
 
@@ -141,8 +191,8 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
         public async Task<OrganizationGroupDto> UpdateGroupAsync(string id, UpdateOrganizationGroupDto dto, CancellationToken cancellationToken = default)
         {
             // 驗證群組存在
-            var existingGroup = await OrganizationRepository.GetGroupByIdAsync(id, cancellationToken);
-            if (existingGroup == null)
+            var existingOrg = await OrganizationRepository.GetGroupByIdAsync(id, cancellationToken);
+            if (existingOrg == null)
             {
                 throw new InvalidOperationException($"找不到 ID 為 {id} 的群組");
             }
@@ -162,29 +212,41 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
                     throw new InvalidOperationException("不能將群組設為自己的子群組");
                 }
 
-                var parentGroup = await OrganizationRepository.GetGroupByIdAsync(dto.ParentId, cancellationToken);
-                if (parentGroup == null)
+                var parentOrg = await OrganizationRepository.GetGroupByIdAsync(dto.ParentId, cancellationToken);
+                if (parentOrg == null)
                 {
                     throw new InvalidOperationException($"找不到父群組 (ID: {dto.ParentId})");
                 }
 
                 // 檢查是否要設為自己子孫的子群組（會造成循環）
                 var descendants = await OrganizationRepository.GetAllDescendantsAsync(id, cancellationToken);
-                if (descendants.Any(d => d.Id == dto.ParentId))
+                if (descendants.Any(d => d.Id.ToString().Equals(dto.ParentId, StringComparison.OrdinalIgnoreCase)))
                 {
                     throw new InvalidOperationException("不能將群組設為自己子群組的子群組，這會造成循環參照");
                 }
             }
 
-            var entity = new KeycloakGroup
+            // 解析 ID 和父群組 ID
+            if (!Guid.TryParse(id, out var orgGuid))
             {
-                Id = id,
+                throw new InvalidOperationException($"無效的群組 ID 格式: {id}");
+            }
+
+            Guid? parentGuid = null;
+            if (!string.IsNullOrEmpty(dto.ParentId) && Guid.TryParse(dto.ParentId, out var parsedParentId))
+            {
+                parentGuid = parsedParentId;
+            }
+
+            var entity = new Organization
+            {
+                Id = orgGuid,
                 Name = dto.Name,
-                ParentId = dto.ParentId,
-                DeptCode = dto.DeptCode,
-                DeptZhName = dto.DeptZhName,
-                DeptEName = dto.DeptEName,
-                Manager = dto.Manager,
+                ParentId = parentGuid,
+                Code = dto.DeptCode,
+                ChineseName = dto.DeptZhName,
+                EnglishName = dto.DeptEName,
+                ManagerUserId = dto.Manager,
                 Description = dto.Description
             };
 
@@ -194,8 +256,8 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
 
         public async Task<DeleteResultDto> DeleteGroupAsync(string id, CancellationToken cancellationToken = default)
         {
-            var group = await OrganizationRepository.GetGroupByIdAsync(id, cancellationToken);
-            if (group == null)
+            var organization = await OrganizationRepository.GetGroupByIdAsync(id, cancellationToken);
+            if (organization == null)
             {
                 return new DeleteResultDto
                 {
@@ -221,40 +283,46 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
 
         #region 私有輔助方法
 
-        private static OrganizationGroupDto MapToDto(KeycloakGroup group)
+        /// <summary>
+        /// 將 Organization 實體映射為 DTO
+        /// </summary>
+        private static OrganizationGroupDto MapToDto(Organization org)
         {
             return new OrganizationGroupDto
             {
-                Id = group.Id,
-                Name = group.Name,
-                Path = group.Path,
-                ParentId = group.ParentId,
-                Description = group.Description,
-                SubGroupCount = group.SubGroupCount ?? 0,
-                Depth = group.Depth ?? 0,
-                DeptCode = group.DeptCode,
-                DeptEName = group.DeptEName,
-                DeptZhName = group.DeptZhName,
-                Manager = group.Manager,
-                Enabled = group.Enabled ?? true,
-                InsDate = group.InsDate,
-                UpdDate = group.UpdDate
+                Id = org.Id.ToString(),
+                Name = org.Name,
+                Path = org.Path,
+                ParentId = org.ParentId?.ToString(),
+                Description = org.Description,
+                SubGroupCount = 0, // Organizations 表沒有此欄位，需要另外計算
+                Depth = org.Depth,
+                DeptCode = org.Code,
+                DeptEName = org.EnglishName,
+                DeptZhName = org.ChineseName,
+                Manager = org.ManagerUserId,
+                Enabled = org.IsEnabled,
+                InsDate = org.CreatedAt,
+                UpdDate = org.UpdatedAt
             };
         }
 
-        private static OrganizationTreeDto MapToTreeDto(KeycloakGroup group)
+        /// <summary>
+        /// 將 Organization 實體映射為樹狀 DTO
+        /// </summary>
+        private static OrganizationTreeDto MapToTreeDto(Organization org)
         {
             var node = new OrganizationTreeDto
             {
-                Id = group.Id,
-                Name = group.Name,
-                ParentId = group.ParentId,
-                DeptCode = group.DeptCode,
-                DeptEName = group.DeptEName,
-                DeptZhName = group.DeptZhName,
-                Manager = group.Manager,
-                Description = group.Description,
-                Depth = group.Depth ?? 0,
+                Id = org.Id.ToString(),
+                Name = org.Name,
+                ParentId = org.ParentId?.ToString(),
+                DeptCode = org.Code,
+                DeptEName = org.EnglishName,
+                DeptZhName = org.ChineseName,
+                Manager = org.ManagerUserId,
+                Description = org.Description,
+                Depth = org.Depth,
                 Children = new List<OrganizationTreeDto>()
             };
 
@@ -329,13 +397,21 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
         }
 
         /// <summary>
-        /// 計算節點的排序優先級（數字越小越優先）
+        /// 將 OrganizationMemberWithUser 映射為 GroupMemberDto
         /// </summary>
-        private static int GetNodePriority(OrganizationTreeDto node)
+        private static GroupMemberDto MapToMemberDto(OrganizationMemberWithUser member)
         {
-            if (IsCeoNode(node)) return 0;
-            if (node.Depth == 0) return 1;
-            return 10 + node.Depth;
+            return new GroupMemberDto
+            {
+                GroupId = member.OrganizationId,
+                UserId = member.UserId,
+                UserName = member.UserName,
+                DisplayName = member.DisplayName,
+                Email = member.Email,
+                GroupName = member.OrganizationName,
+                GroupPath = member.OrganizationPath,
+                JoinedAt = member.JoinedAt
+            };
         }
 
         #endregion

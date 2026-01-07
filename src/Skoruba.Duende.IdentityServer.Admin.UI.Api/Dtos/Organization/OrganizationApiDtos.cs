@@ -45,6 +45,17 @@ namespace Skoruba.Duende.IdentityServer.Admin.UI.Api.Dtos.Organization
         public bool IsCeo { get; set; }
         public bool IsRoot { get; set; }
         public int ChildCount { get; set; }
+
+        /// <summary>
+        /// 該組織本身的成員數量
+        /// </summary>
+        public int MemberCount { get; set; }
+
+        /// <summary>
+        /// 該組織及所有子孫組織的成員總數
+        /// </summary>
+        public int TotalMemberCount { get; set; }
+
         public List<OrganizationTreeApiDto> Children { get; set; } = new List<OrganizationTreeApiDto>();
     }
 
@@ -202,5 +213,51 @@ namespace Skoruba.Duende.IdentityServer.Admin.UI.Api.Dtos.Organization
         /// 訊息
         /// </summary>
         public string Message { get; set; }
+    }
+
+    /// <summary>
+    /// 群組成員 API DTO
+    /// </summary>
+    public class GroupMemberApiDto
+    {
+        /// <summary>
+        /// 群組 ID
+        /// </summary>
+        public string GroupId { get; set; }
+
+        /// <summary>
+        /// 使用者 ID
+        /// </summary>
+        public string UserId { get; set; }
+
+        /// <summary>
+        /// 使用者名稱
+        /// </summary>
+        public string UserName { get; set; }
+
+        /// <summary>
+        /// 顯示名稱
+        /// </summary>
+        public string DisplayName { get; set; }
+
+        /// <summary>
+        /// Email
+        /// </summary>
+        public string Email { get; set; }
+
+        /// <summary>
+        /// 群組名稱
+        /// </summary>
+        public string GroupName { get; set; }
+
+        /// <summary>
+        /// 群組路徑
+        /// </summary>
+        public string GroupPath { get; set; }
+
+        /// <summary>
+        /// 加入時間
+        /// </summary>
+        public DateTime? JoinedAt { get; set; }
     }
 }

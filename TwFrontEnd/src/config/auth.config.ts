@@ -25,6 +25,9 @@ export const APP_URL = isDevelopment
     ? 'http://localhost:5173'
     : (import.meta.env.VITE_APP_URL as string);
 
+// 取得基礎路徑 (開發環境為 '/'，正式環境為 '/app/')
+const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, ''); // 移除結尾斜線
+
 /**
  * OIDC 客戶端配置
  */
@@ -35,10 +38,10 @@ export const oidcConfig: UserManagerSettings = {
     // 客戶端設定
     client_id: 'uc_capital_react_admin',
 
-    // 回調 URL
-    redirect_uri: `${APP_URL}/auth/callback`,
-    post_logout_redirect_uri: `${APP_URL}/`,
-    silent_redirect_uri: `${APP_URL}/auth/silent-renew`,
+    // 回調 URL (包含基礎路徑)
+    redirect_uri: `${APP_URL}${BASE_PATH}/auth/callback`,
+    post_logout_redirect_uri: `${APP_URL}${BASE_PATH}/`,
+    silent_redirect_uri: `${APP_URL}${BASE_PATH}/auth/silent-renew`,
 
     // 授權範圍
     scope: 'openid profile email roles offline_access uc_capital_admin_api',

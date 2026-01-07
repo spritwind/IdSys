@@ -54,9 +54,22 @@ npx gulp build
 
 # 發布 STS
 Write-Host ""
-Write-Host "[5/5] 發布 STS Identity..." -ForegroundColor Yellow
+Write-Host "[5/7] 發布 STS Identity..." -ForegroundColor Yellow
 Set-Location $ProjectRoot
 dotnet publish $STSProject -c Release -o "$PublishDir\STS" --no-restore
+
+# 建置 React 前端 (TwFrontEnd)
+Write-Host ""
+Write-Host "[6/7] 建置 React 前端 (TwFrontEnd)..." -ForegroundColor Yellow
+Set-Location "$ProjectRoot\TwFrontEnd"
+npm install --silent 2>$null
+npm run build
+
+# 複製 React 前端到發布目錄
+Write-Host ""
+Write-Host "[7/7] 複製 React 前端到發布目錄..." -ForegroundColor Yellow
+New-Item -ItemType Directory -Path "$PublishDir\Admin\app" -Force | Out-Null
+Copy-Item -Path "$ProjectRoot\TwFrontEnd\dist\*" -Destination "$PublishDir\Admin\app" -Recurse -Force
 
 # 建立 certs 目錄
 Write-Host ""
@@ -96,6 +109,10 @@ Write-Host "   - 子應用程式 (STS):"
 Write-Host "     在 UCCapitalAdmin 下新增應用程式"
 Write-Host "     別名: sts"
 Write-Host "     實體路徑: $PublishDir\STS"
+Write-Host ""
+Write-Host "   - React 前端 (/app):"
+Write-Host "     已自動複製到: $PublishDir\Admin\app"
+Write-Host "     確保 IIS URL Rewrite 規則已設定"
 Write-Host ""
 Write-Host "3. 產生簽名憑證:" -ForegroundColor White
 Write-Host "   執行: docs\generate-signing-cert.ps1"

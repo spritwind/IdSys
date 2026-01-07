@@ -19,6 +19,8 @@ namespace Skoruba.Duende.IdentityServer.Admin.UI.Api.Mappers
             CreateMap<OrganizationTreeDto, OrganizationTreeApiDto>(MemberList.Destination)
                 .ForMember(dest => dest.IsRoot, opt => opt.MapFrom(src => string.IsNullOrEmpty(src.ParentId)))
                 .ForMember(dest => dest.ChildCount, opt => opt.MapFrom(src => src.Children != null ? src.Children.Count : 0))
+                .ForMember(dest => dest.MemberCount, opt => opt.MapFrom(src => src.MemberCount))
+                .ForMember(dest => dest.TotalMemberCount, opt => opt.MapFrom(src => src.TotalMemberCount))
                 .ReverseMap();
 
             // 組織統計 DTO 映射
@@ -41,6 +43,10 @@ namespace Skoruba.Duende.IdentityServer.Admin.UI.Api.Mappers
 
             // 刪除結果 DTO 映射
             CreateMap<DeleteResultDto, DeleteResultApiDto>(MemberList.Destination)
+                .ReverseMap();
+
+            // 群組成員 DTO 映射
+            CreateMap<GroupMemberDto, GroupMemberApiDto>(MemberList.Destination)
                 .ReverseMap();
         }
     }

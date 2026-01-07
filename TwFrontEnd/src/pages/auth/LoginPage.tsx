@@ -48,7 +48,7 @@ export function LoginPage() {
                         <div className="flex items-center space-x-4">
                             <div className="w-14 h-14 rounded-2xl flex items-center justify-center p-1 border border-white/20">
                                 <img
-                                    src="/images/logo_gold.png"
+                                    src={`${import.meta.env.BASE_URL}images/logo_gold.png`}
                                     alt="UC Capital"
                                     className="w-full h-full object-contain"
                                 />

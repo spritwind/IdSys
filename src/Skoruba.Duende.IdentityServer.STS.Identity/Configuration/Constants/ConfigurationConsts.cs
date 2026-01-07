@@ -15,6 +15,8 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.Configuration.Constants
 
         public const string DataProtectionDbConnectionStringKey = "DataProtectionDbConnection";
 
+        public const string AdminAuditLogDbConnectionStringKey = "AdminAuditLogDbConnection";
+
         public const string ResourcesPath = "Resources";
 
         public const string AdminConfigurationKey = "AdminConfiguration";

@@ -181,15 +181,24 @@
                 "RedirectUris": [
                     "http://localhost:5173/auth/callback",
                     "http://localhost:5173/auth/silent-renew",
+                    "http://localhost:5173/app/auth/callback",
+                    "http://localhost:5173/app/auth/silent-renew",
                     "http://localhost:5174/auth/callback",
                     "http://localhost:5174/auth/silent-renew",
+                    "http://localhost:5174/app/auth/callback",
+                    "http://localhost:5174/app/auth/silent-renew",
                     "https://prs.uccapital.com.tw/auth/callback",
-                    "https://prs.uccapital.com.tw/auth/silent-renew"
+                    "https://prs.uccapital.com.tw/auth/silent-renew",
+                    "https://prs.uccapital.com.tw/app/auth/callback",
+                    "https://prs.uccapital.com.tw/app/auth/silent-renew"
                 ],
                 "PostLogoutRedirectUris": [
                     "http://localhost:5173/",
+                    "http://localhost:5173/app/",
                     "http://localhost:5174/",
-                    "https://prs.uccapital.com.tw/"
+                    "http://localhost:5174/app/",
+                    "https://prs.uccapital.com.tw/",
+                    "https://prs.uccapital.com.tw/app/"
                 ],
                 "AllowedCorsOrigins": [
                     "http://localhost:5173",

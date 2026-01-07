@@ -70,12 +70,15 @@ namespace Skoruba.Duende.IdentityServer.Admin.Api
                 IdentityUserClaimsDto, IdentityUserProviderDto, IdentityUserProvidersDto, IdentityUserChangePasswordDto,
                 IdentityRoleClaimsDto, IdentityUserClaimDto, IdentityRoleClaimDto>(Configuration, adminApiConfiguration);
 
-            // UC Capital - 組織架構服務
+            // UC Capital - 組織架構服務 (Keycloak 舊表)
             var connectionString = Configuration.GetConnectionString("ConfigurationDbConnection");
             services.AddOrganizationServices(connectionString);
 
-            // UC Capital - 權限控管服務
+            // UC Capital - 權限控管服務 (Keycloak 舊表)
             services.AddPermissionServices(connectionString);
+
+            // UC Capital - 多租戶服務 (新架構)
+            services.AddMultiTenantServices(connectionString);
 
             services.AddSwaggerServices(adminApiConfiguration);
             

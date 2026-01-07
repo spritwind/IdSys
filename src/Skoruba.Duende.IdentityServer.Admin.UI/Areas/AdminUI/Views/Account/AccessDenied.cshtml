@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.AspNetCore.Mvc.Localization
 @using Skoruba.Duende.IdentityServer.Admin.UI.Configuration
 @using Skoruba.Duende.IdentityServer.Admin.UI.Configuration.Constants
 @inject IViewLocalizer Localizer
@@ -11,7 +11,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="icon" type="image/x-icon" href="@UrlHelper.Content(AdminConfiguration.FaviconUri)" />
     <link rel="shortcut icon" type="image/x-icon" href="@UrlHelper.Content(AdminConfiguration.FaviconUri)" />
-    <title>@Localizer["PageTitle"]</title>
+    <title>存取被拒絕 - @AdminConfiguration.PageTitle</title>
 
     <environment include="Development">
         <link href="~/dist/css/bundle.min.css" asp-append-version="true" rel="stylesheet" />
@@ -21,28 +21,230 @@
         <link href="~/dist/css/bundle.min.css" asp-append-version="true" rel="stylesheet" />
         <link href="~/dist/css/web.min.css" asp-append-version="true" rel="stylesheet" />
     </environment>
+
+    <style>
+        :root {
+            --primary-navy: #0a1628;
+            --secondary-navy: #1a2d4a;
+            --accent-gold: #d4a853;
+            --accent-gold-light: #e6c580;
+            --text-light: #e8eaed;
+            --text-muted: #9ca3af;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary-navy) 0%, var(--secondary-navy) 50%, #2d4a6a 100%);
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .access-denied-container {
+            text-align: center;
+            padding: 3rem;
+            max-width: 500px;
+        }
+
+        .shield-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem auto;
+            opacity: 0.9;
+        }
+
+        .shield-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .error-code {
+            font-size: 1rem;
+            color: var(--accent-gold);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .error-title {
+            font-size: 2.5rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            font-weight: 300;
+        }
+
+        .error-message {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 2.5rem;
+        }
+
+        .user-info {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-info-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .user-info-value {
+            font-size: 1rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .btn-primary-custom {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-gold-light) 100%);
+            color: var(--primary-navy);
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(212, 168, 83, 0.3);
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 168, 83, 0.4);
+            color: var(--primary-navy);
+            text-decoration: none;
+        }
+
+        .btn-secondary-custom {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 2rem;
+            background: transparent;
+            color: var(--text-light);
+            font-weight: 500;
+            font-size: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary-custom:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: var(--text-light);
+            text-decoration: none;
+        }
+
+        .btn-icon {
+            margin-right: 0.5rem;
+        }
+
+        .help-text {
+            margin-top: 2.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .help-text a {
+            color: var(--accent-gold);
+            text-decoration: none;
+        }
+
+        .help-text a:hover {
+            text-decoration: underline;
+        }
+
+        .brand-footer {
+            position: fixed;
+            bottom: 2rem;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .brand-footer span {
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <div class="row justify-content-md-center">
-            <div class="col-sm-12 col-md-6">
-                <div class="card-deck mb-3 mt-5 text-center">
-                    <div class="card mb-2 box-shadow">
-                        <div class="card-header">
-                            <h4 class="my-0 font-weight-normal">@Localizer["PageTitle"]</h4>
-                        </div>
-                        <div class="card-body">
-                            <h1 class="card-title">
-                                <span class="oi oi-circle-x" title="Warning" aria-hidden="true"></span>
-                            </h1>
-                            <a href="@AdminConfiguration.IdentityServerBaseUrl" class="btn btn-lg btn-block btn-danger">@Localizer["ReturnToIdentityServer"]</a>
-                            <a asp-controller="Account" asp-area="@CommonConsts.AdminUIArea" asp-action="Logout" class="btn btn-lg btn-block btn-danger">@Localizer["Logout"]</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div class="access-denied-container">
+        <!-- Shield Icon -->
+        <div class="shield-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L4 6V12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12V6L12 2Z"
+                      stroke="#d4a853" stroke-width="1.5" fill="none"/>
+                <path d="M9 12L11 14L15 10"
+                      stroke="#e74c3c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="4" stroke="#e74c3c" stroke-width="1.5" fill="none" opacity="0.3"/>
+            </svg>
         </div>
+
+        <div class="error-code">Error 403</div>
+        <h1 class="error-title">存取被拒絕</h1>
+        <p class="error-message">
+            您的帳號目前沒有權限存取管理介面。<br/>
+            請聯繫系統管理員以取得必要的存取權限。
+        </p>
+
+        @if (User.Identity.IsAuthenticated)
+        {
+            <div class="user-info">
+                <div class="user-info-label">目前登入帳號</div>
+                <div class="user-info-value">@User.Identity.Name</div>
+            </div>
+        }
+
+        <div class="action-buttons">
+            <a asp-controller="Account" asp-area="@CommonConsts.AdminUIArea" asp-action="Logout" class="btn-primary-custom">
+                <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                登出並切換帳號
+            </a>
+            <a href="@AdminConfiguration.IdentityServerBaseUrl" class="btn-secondary-custom">
+                <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                返回首頁
+            </a>
+        </div>
+
+        <p class="help-text">
+            需要協助？請聯繫 <a href="mailto:it@uccapital.com.tw">IT 支援團隊</a>
+        </p>
     </div>
+
+    <div class="brand-footer">
+        <span>UC Capital</span> Identity System
+    </div>
+
     <environment include="Development">
         <script src="~/dist/js/bundle.min.js" asp-append-version="true"></script>
     </environment>

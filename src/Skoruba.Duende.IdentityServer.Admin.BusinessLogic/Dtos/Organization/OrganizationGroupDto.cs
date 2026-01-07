@@ -63,6 +63,16 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Dtos.Organization
         /// </summary>
         public int ChildCount => Children?.Count ?? 0;
 
+        /// <summary>
+        /// 該組織本身的成員數量
+        /// </summary>
+        public int MemberCount { get; set; }
+
+        /// <summary>
+        /// 該組織及所有子孫組織的成員總數（去重）
+        /// </summary>
+        public int TotalMemberCount { get; set; }
+
         public List<OrganizationTreeDto> Children { get; set; } = new List<OrganizationTreeDto>();
     }
 
@@ -204,5 +214,51 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Dtos.Organization
         /// 訊息
         /// </summary>
         public string Message { get; set; }
+    }
+
+    /// <summary>
+    /// 群組成員 DTO（基於 KeycloakGroupMember）
+    /// </summary>
+    public class GroupMemberDto
+    {
+        /// <summary>
+        /// 群組 ID
+        /// </summary>
+        public string GroupId { get; set; }
+
+        /// <summary>
+        /// 使用者 ID
+        /// </summary>
+        public string UserId { get; set; }
+
+        /// <summary>
+        /// 使用者名稱
+        /// </summary>
+        public string UserName { get; set; }
+
+        /// <summary>
+        /// 顯示名稱
+        /// </summary>
+        public string DisplayName { get; set; }
+
+        /// <summary>
+        /// Email
+        /// </summary>
+        public string Email { get; set; }
+
+        /// <summary>
+        /// 群組名稱
+        /// </summary>
+        public string GroupName { get; set; }
+
+        /// <summary>
+        /// 群組路徑
+        /// </summary>
+        public string GroupPath { get; set; }
+
+        /// <summary>
+        /// 加入時間
+        /// </summary>
+        public DateTime? JoinedAt { get; set; }
     }
 }

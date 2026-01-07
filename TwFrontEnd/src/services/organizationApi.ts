@@ -15,6 +15,7 @@ import type {
     UpdateOrganizationGroupRequest,
     DeleteConfirmation,
     DeleteResult,
+    OrganizationMember,
 } from '../types/organization';
 
 // API 基礎路徑
@@ -125,6 +126,21 @@ export const organizationApi = {
      */
     deleteGroup: async (id: string): Promise<DeleteResult> => {
         const response = await api.delete<DeleteResult>(`${API_BASE}/${encodeURIComponent(id)}`);
+        return response.data;
+    },
+
+    // ========================================
+    // 組織成員方法
+    // ========================================
+
+    /**
+     * 獲取組織成員列表
+     * 使用 V1 API: /api/organization/{id}/members
+     */
+    getMembers: async (groupId: string): Promise<OrganizationMember[]> => {
+        const response = await api.get<OrganizationMember[]>(
+            `${API_BASE}/${encodeURIComponent(groupId)}/members`
+        );
         return response.data;
     },
 };

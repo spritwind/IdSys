@@ -1,5 +1,8 @@
 ﻿ko.bindingHandlers.modal = {
     init: function (element, valueAccessor) {
+        // 標記 modal 是否曾經顯示過
+        $(element).data('modal-shown', false);
+
         $(element).modal({
             show: false
         });
@@ -9,6 +12,9 @@
             $(element).on('hidden.bs.modal', function () {
                 value(false);
             });
+            $(element).on('shown.bs.modal', function () {
+                $(element).data('modal-shown', true);
+            });
         }
 
     },
@@ -17,7 +23,10 @@
         if (ko.utils.unwrapObservable(value)) {
             $(element).modal('show');
         } else {
-            $(element).modal('hide');
+            // 只有在 modal 曾經顯示過時才調用 hide，避免創建不必要的 backdrop
+            if ($(element).data('modal-shown')) {
+                $(element).modal('hide');
+            }
         }
     }
 }

@@ -38,6 +38,10 @@ export interface OrganizationTreeNode {
     isRoot: boolean;
     /** 子節點數量 */
     childCount: number;
+    /** 該組織本身的成員數量 */
+    memberCount: number;
+    /** 該組織及所有子孫組織的成員總數（去重） */
+    totalMemberCount: number;
     children: OrganizationTreeNode[];
 }
 
@@ -93,6 +97,32 @@ export function isCeoNode(node: OrganizationTreeNode): boolean {
 
 // 視圖模式
 export type ViewMode = 'chart' | 'table';
+
+// ========================================
+// 組織成員類型
+// ========================================
+
+/**
+ * 組織成員（匹配後端 GroupMemberApiDto）
+ */
+export interface OrganizationMember {
+    /** 群組 ID */
+    groupId: string;
+    /** 使用者 ID */
+    userId: string;
+    /** 使用者名稱 */
+    userName: string;
+    /** 顯示名稱 */
+    displayName: string | null;
+    /** Email */
+    email: string | null;
+    /** 群組名稱 */
+    groupName: string | null;
+    /** 群組路徑 */
+    groupPath: string | null;
+    /** 加入時間 */
+    joinedAt: string | null;
+}
 
 // 搜尋結果
 export interface SearchResult {

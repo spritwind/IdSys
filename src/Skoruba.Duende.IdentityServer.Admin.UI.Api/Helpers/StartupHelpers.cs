@@ -133,7 +133,11 @@ namespace Skoruba.Duende.IdentityServer.Admin.UI.Api.Helpers
 
             services.TryAddTransient(typeof(IGenericControllerLocalizer<>), typeof(GenericControllerLocalizer<>));
 
+            // Get the Admin.UI.Api assembly to register all controllers (including non-generic ones)
+            var adminUiApiAssembly = typeof(StartupHelpers).Assembly;
+
             services.AddControllersWithViews(o => { o.Conventions.Add(new GenericControllerRouteConvention()); })
+                .AddApplicationPart(adminUiApiAssembly) // Register all controllers from Admin.UI.Api assembly
                 .AddDataAnnotationsLocalization()
                 .ConfigureApplicationPartManager(m =>
                 {

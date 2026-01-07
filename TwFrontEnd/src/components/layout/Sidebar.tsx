@@ -11,13 +11,12 @@ import {
     Building2,
     ChevronDown,
     LogOut,
-    Settings,
-    Layers,
-    Lock,
     KeyRound,
     UserCog,
     ChevronLeft,
     ChevronRight,
+    Settings2,
+    Lock,
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import clsx from 'clsx';
@@ -38,14 +37,9 @@ const menuItems: MenuItem[] = [
         path: '/dashboard',
     },
     {
-        icon: Settings,
+        icon: Settings2,
         label: 'IdentityServer 設定',
-        children: [
-            { icon: Globe, label: '客戶端', path: '/clients' },
-            { icon: Layers, label: 'API 資源', path: '/api-resources' },
-            { icon: Lock, label: 'API 範圍', path: '/api-scopes' },
-            { icon: Shield, label: '身份資源', path: '/identity-resources' },
-        ],
+        path: '/identity-server-settings',
     },
     {
         icon: Users,
@@ -114,11 +108,11 @@ export function Sidebar() {
         >
             {/* Logo Section */}
             <div className="h-20 flex items-center px-4 border-b border-[rgba(255,255,255,0.05)]">
-                <a href="/dashboard" className="flex items-center gap-3 group overflow-hidden">
+                <a href={`${import.meta.env.BASE_URL}dashboard`} className="flex items-center gap-3 group overflow-hidden">
                     <div className="w-11 h-11 flex-shrink-0 logo-gold-streamer">
                         <div className="w-full h-full rounded-xl overflow-hidden ring-1 ring-white/10 flex items-center justify-center">
                             <img
-                                src="/images/logo_gold.png"
+                                src={`${import.meta.env.BASE_URL}images/logo_gold.png`}
                                 alt="UC Capital Logo"
                                 className="w-9 h-9 object-contain"
                             />

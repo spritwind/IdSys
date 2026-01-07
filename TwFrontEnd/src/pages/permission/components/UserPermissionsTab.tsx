@@ -144,6 +144,10 @@ export function UserPermissionsTab({ onUpdate }: UserPermissionsTabProps) {
     const [userPermissions, setUserPermissions] = useState<PermissionDto[]>([]);
     const [loadingPermissions, setLoadingPermissions] = useState(false);
     const [userSearchTerm, setUserSearchTerm] = useState('');
+    // 使用者權限數量快取
+    const [userPermissionCounts, setUserPermissionCounts] = useState<Record<string, number>>({});
+    // 權限清單搜尋
+    const [permissionSearchTerm, setPermissionSearchTerm] = useState('');
 
     useEffect(() => {
         loadInitialData();
@@ -176,6 +180,20 @@ export function UserPermissionsTab({ onUpdate }: UserPermissionsTabProps) {
         try {
             const response = await userApi.getUsers({ organizationId: org.id, pageSize: 100 });
             setOrgUsers(response.items);
+
+            // 批次載入每個使用者的權限數量
+            const counts: Record<string, number> = {};
+            await Promise.all(
+                response.items.map(async (user) => {
+                    try {
+                        const permissions = await permissionV2Api.getUserPermissions(user.id);
+                        counts[user.id] = permissions.length;
+                    } catch {
+                        counts[user.id] = 0;
+                    }
+                })
+            );
+            setUserPermissionCounts((prev) => ({ ...prev, ...counts }));
         } catch (error) {
             console.error('Failed to load organization users:', error);
             toast.error('載入組織成員失敗');
@@ -190,6 +208,8 @@ export function UserPermissionsTab({ onUpdate }: UserPermissionsTabProps) {
         try {
             const permissions = await permissionV2Api.getUserPermissions(userId);
             setUserPermissions(permissions);
+            // 更新權限數量快取
+            setUserPermissionCounts((prev) => ({ ...prev, [userId]: permissions.length }));
         } catch (error) {
             console.error('Failed to load user permissions:', error);
             toast.error('載入使用者權限失敗');
@@ -245,6 +265,18 @@ export function UserPermissionsTab({ onUpdate }: UserPermissionsTabProps) {
             (u.email?.toLowerCase().includes(term))
         );
     }, [orgUsers, userSearchTerm]);
+
+    // 過濾權限清單
+    const filteredPermissions = useMemo(() => {
+        if (!permissionSearchTerm) return userPermissions;
+        const term = permissionSearchTerm.toLowerCase();
+        return userPermissions.filter(p =>
+            (p.resourceName?.toLowerCase().includes(term)) ||
+            (p.resourceCode?.toLowerCase().includes(term)) ||
+            (p.scopes?.toLowerCase().includes(term)) ||
+            (p.clientId?.toLowerCase().includes(term))
+        );
+    }, [userPermissions, permissionSearchTerm]);
 
     return (
         <div className="space-y-6">
@@ -325,33 +357,48 @@ export function UserPermissionsTab({ onUpdate }: UserPermissionsTabProps) {
                                     </div>
                                 ) : (
                                     <div className="p-2 max-h-[400px] overflow-y-auto space-y-1">
-                                        {filteredUsers.map((user) => (
-                                            <button
-                                                key={user.id}
-                                                onClick={() => loadUserPermissions(user.id, user.displayName || user.userName)}
-                                                className={clsx(
-                                                    'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left',
-                                                    selectedUser?.id === user.id
-                                                        ? 'bg-indigo-500/20 text-white'
-                                                        : 'hover:bg-white/5 text-[var(--color-text-secondary)]'
-                                                )}
-                                            >
-                                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
-                                                    {(user.displayName || user.userName).charAt(0).toUpperCase()}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className={clsx(
-                                                        'text-sm font-medium truncate',
-                                                        selectedUser?.id === user.id ? 'text-white' : ''
+                                        {filteredUsers.map((user) => {
+                                            const permCount = userPermissionCounts[user.id] ?? 0;
+                                            return (
+                                                <button
+                                                    key={user.id}
+                                                    onClick={() => loadUserPermissions(user.id, user.displayName || user.userName)}
+                                                    className={clsx(
+                                                        'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left',
+                                                        selectedUser?.id === user.id
+                                                            ? 'bg-indigo-500/20 text-white'
+                                                            : 'hover:bg-white/5 text-[var(--color-text-secondary)]'
+                                                    )}
+                                                >
+                                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
+                                                        {(user.displayName || user.userName).charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className={clsx(
+                                                            'text-sm font-medium truncate',
+                                                            selectedUser?.id === user.id ? 'text-white' : ''
+                                                        )}>
+                                                            {user.displayName || user.userName}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500 truncate">
+                                                            {user.email}
+                                                        </p>
+                                                    </div>
+                                                    {/* 權限數量徽章 */}
+                                                    <span className={clsx(
+                                                        'flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full transition-colors',
+                                                        selectedUser?.id === user.id
+                                                            ? 'bg-indigo-500/30 text-indigo-300'
+                                                            : permCount > 0
+                                                                ? 'bg-amber-500/20 text-amber-400'
+                                                                : 'bg-white/5 text-gray-500'
                                                     )}>
-                                                        {user.displayName || user.userName}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500 truncate">
-                                                        {user.email}
-                                                    </p>
-                                                </div>
-                                            </button>
-                                        ))}
+                                                        <Shield size={10} />
+                                                        {permCount}
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </>
@@ -403,6 +450,34 @@ export function UserPermissionsTab({ onUpdate }: UserPermissionsTabProps) {
 
                             {/* Permissions List */}
                             <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.08)] rounded-xl overflow-hidden">
+                                {/* 權限搜尋欄 */}
+                                {userPermissions.length > 0 && (
+                                    <div className="px-4 py-3 border-b border-[rgba(255,255,255,0.05)]">
+                                        <div className="relative">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                            <input
+                                                type="text"
+                                                placeholder="搜尋權限（資源名稱、代碼、範圍）..."
+                                                value={permissionSearchTerm}
+                                                onChange={(e) => setPermissionSearchTerm(e.target.value)}
+                                                className="w-full h-9 pl-10 pr-4 text-sm bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-indigo-500/50"
+                                            />
+                                            {permissionSearchTerm && (
+                                                <button
+                                                    onClick={() => setPermissionSearchTerm('')}
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            )}
+                                        </div>
+                                        {permissionSearchTerm && (
+                                            <p className="text-xs text-gray-500 mt-2">
+                                                找到 {filteredPermissions.length} / {userPermissions.length} 項權限
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
                                 {loadingPermissions ? (
                                     <div className="flex items-center justify-center py-12">
                                         <RefreshCw className="w-8 h-8 text-[var(--color-accent-primary)] animate-spin" />
@@ -418,9 +493,13 @@ export function UserPermissionsTab({ onUpdate }: UserPermissionsTabProps) {
                                             點此授予權限
                                         </button>
                                     </div>
+                                ) : filteredPermissions.length === 0 ? (
+                                    <div className="text-center py-8 text-[var(--color-text-secondary)] text-sm">
+                                        沒有符合「{permissionSearchTerm}」的權限
+                                    </div>
                                 ) : (
-                                    <div className="divide-y divide-[rgba(255,255,255,0.05)]">
-                                        {userPermissions.map((permission) => (
+                                    <div className="divide-y divide-[rgba(255,255,255,0.05)] max-h-[400px] overflow-y-auto">
+                                        {filteredPermissions.map((permission) => (
                                             <PermissionItem
                                                 key={permission.id}
                                                 permission={permission}
@@ -509,6 +588,17 @@ function OrganizationTreeItem({
                 )}
                 <Building2 size={14} className={isSelected ? 'text-indigo-400' : ''} />
                 <span className="text-sm truncate flex-1">{org.name}</span>
+                <span className={clsx(
+                    'flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full transition-colors',
+                    isSelected
+                        ? 'bg-indigo-500/30 text-indigo-300'
+                        : org.totalMemberCount > 0
+                            ? 'bg-emerald-500/20 text-emerald-400'
+                            : 'bg-white/5 text-gray-500'
+                )}>
+                    <Users size={10} />
+                    {org.totalMemberCount}
+                </span>
             </div>
 
             {hasChildren && expanded && (

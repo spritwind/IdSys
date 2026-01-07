@@ -372,6 +372,11 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.Helpers
 
                     options.DynamicProviders.SignInScheme = IdentityConstants.ExternalScheme;
                     options.DynamicProviders.SignOutScheme = IdentityConstants.ApplicationScheme;
+
+                    // 優化：延長 SSO Session Cookie 有效期到 8 小時
+                    // 這樣用戶在 8 小時內不需要重新登入
+                    options.Authentication.CookieLifetime = TimeSpan.FromHours(8);
+                    options.Authentication.CookieSlidingExpiration = true;
                 })
                 .AddConfigurationStore<TConfigurationDbContext>()
                 .AddOperationalStore<TPersistedGrantDbContext>()

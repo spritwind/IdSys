@@ -4,6 +4,8 @@ import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
+  // 根目錄部署時使用 '/'，子應用程式部署時使用 '/app/'
+  base: '/app/',
   plugins: [react()],
   resolve: {
     alias: {
@@ -59,6 +61,27 @@ export default defineConfig({
       },
       // Permission v2 API (Multi-Tenant)
       '/api/v2/permissions': {
+        target: 'https://localhost:44302',
+        changeOrigin: true,
+        secure: false,
+      },
+      // IdentityServer Configuration API (44302)
+      '/api/Clients': {
+        target: 'https://localhost:44302',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/ApiResources': {
+        target: 'https://localhost:44302',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/ApiScopes': {
+        target: 'https://localhost:44302',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/IdentityResources': {
         target: 'https://localhost:44302',
         changeOrigin: true,
         secure: false,

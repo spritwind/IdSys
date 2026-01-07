@@ -17,6 +17,13 @@ import ClientsPage from './pages/clients/ClientsPage';
 import ClientDetail from './pages/clients/ClientDetail';
 import UsersPage from './pages/users/UsersPage';
 import RolesPage from './pages/roles/RolesPage';
+import {
+    IdentityServerSettingsPage,
+    ClientEditPage,
+    ApiResourceEditPage,
+    ApiScopeEditPage,
+    IdentityResourceEditPage,
+} from './pages/identity-server';
 import './index.css';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
@@ -82,7 +89,7 @@ function LandingPage() {
                 >
                     <div className="w-full h-full rounded-2xl overflow-hidden flex items-center justify-center border border-white/10">
                         <img
-                            src="/images/logo_gold.png"
+                            src={`${import.meta.env.BASE_URL}images/logo_gold.png`}
                             alt="UC Capital Logo"
                             className="w-24 h-24 object-contain"
                         />
@@ -111,7 +118,7 @@ function LandingPage() {
                 {/* CTA Button */}
                 <div className="flex gap-4 mt-2">
                     <motion.a
-                        href="/dashboard"
+                        href={`${import.meta.env.BASE_URL}dashboard`}
                         className="btn-primary cursor-pointer group no-underline text-base px-8 py-3"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -216,7 +223,7 @@ function ProtectedLayout() {
 function App() {
     return (
         <AuthProvider>
-            <BrowserRouter>
+            <BrowserRouter basename={import.meta.env.BASE_URL}>
                 {/* Debug Panel - 只在開發模式顯示 */}
                 <DebugPanel />
                 <Routes>
@@ -234,6 +241,17 @@ function App() {
                         <Route path="/dashboard" element={<Overview />} />
 
                         {/* IdentityServer Configuration */}
+                        <Route path="/identity-server-settings" element={<IdentityServerSettingsPage />} />
+                        <Route path="/identity-server/clients/new" element={<ClientEditPage />} />
+                        <Route path="/identity-server/clients/:id/edit" element={<ClientEditPage />} />
+                        <Route path="/identity-server/api-resources/new" element={<ApiResourceEditPage />} />
+                        <Route path="/identity-server/api-resources/:id/edit" element={<ApiResourceEditPage />} />
+                        <Route path="/identity-server/api-scopes/new" element={<ApiScopeEditPage />} />
+                        <Route path="/identity-server/api-scopes/:id/edit" element={<ApiScopeEditPage />} />
+                        <Route path="/identity-server/identity-resources/new" element={<IdentityResourceEditPage />} />
+                        <Route path="/identity-server/identity-resources/:id/edit" element={<IdentityResourceEditPage />} />
+
+                        {/* Legacy routes for backward compatibility */}
                         <Route path="/clients" element={<ClientsPage />} />
                         <Route path="/clients/new" element={<ClientDetail />} />
                         <Route path="/clients/:id" element={<ClientDetail />} />

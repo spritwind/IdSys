@@ -3,9 +3,13 @@ using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Skoruba.AuditLogging.EntityFramework.DbContexts;
+using Skoruba.AuditLogging.EntityFramework.Entities;
+using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Configuration.Configuration;
 using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Shared.DbContexts;
 using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Shared.Entities.Identity;
 using Skoruba.Duende.IdentityServer.Shared.Configuration.Helpers;
@@ -13,6 +17,7 @@ using Skoruba.Duende.IdentityServer.STS.Identity.Configuration;
 using Skoruba.Duende.IdentityServer.STS.Identity.Configuration.Constants;
 using Skoruba.Duende.IdentityServer.STS.Identity.Configuration.Interfaces;
 using Skoruba.Duende.IdentityServer.STS.Identity.Helpers;
+using Skoruba.Duende.IdentityServer.STS.Identity.Services;
 
 namespace Skoruba.Duende.IdentityServer.STS.Identity
 {
@@ -80,6 +85,43 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity
             RegisterAuthorization(services);
 
             services.AddIdSHealthChecks<IdentityServerConfigurationDbContext, IdentityServerPersistedGrantDbContext, AdminIdentityDbContext, IdentityServerDataProtectionDbContext>(Configuration);
+
+            // 註冊 AuditLog DbContext 用於記錄登入審計日誌
+            RegisterAuditLogDbContext(services);
+
+            // 註冊登入審計服務
+            services.AddScoped<ILoginAuditService, LoginAuditService>();
+        }
+
+        /// <summary>
+        /// 註冊 AuditLog DbContext
+        /// </summary>
+        public virtual void RegisterAuditLogDbContext(IServiceCollection services)
+        {
+            var databaseProvider = Configuration.GetSection(nameof(DatabaseProviderConfiguration)).Get<DatabaseProviderConfiguration>();
+            var connectionString = Configuration.GetConnectionString(ConfigurationConsts.AdminAuditLogDbConnectionStringKey)
+                ?? Configuration.GetConnectionString(ConfigurationConsts.ConfigurationDbConnectionStringKey);
+
+            switch (databaseProvider?.ProviderType)
+            {
+                case DatabaseProviderType.SqlServer:
+                default:
+                    services.AddDbContext<AdminAuditLogDbContext>(options =>
+                        options.UseSqlServer(connectionString));
+                    break;
+                case DatabaseProviderType.PostgreSQL:
+                    services.AddDbContext<AdminAuditLogDbContext>(options =>
+                        options.UseNpgsql(connectionString));
+                    break;
+                case DatabaseProviderType.MySql:
+                    services.AddDbContext<AdminAuditLogDbContext>(options =>
+                        options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+                    break;
+            }
+
+            // 註冊 IAuditLoggingDbContext 接口
+            services.AddScoped<IAuditLoggingDbContext<AuditLog>>(provider =>
+                provider.GetRequiredService<AdminAuditLogDbContext>());
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

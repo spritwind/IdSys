@@ -10,10 +10,25 @@ import { getUserManager } from '../contexts/AuthContext';
 import { logApi, logError } from '../utils/debugLogger';
 
 /**
+ * 取得 API 基礎 URL
+ * 開發環境：使用相對路徑讓 Vite proxy 可以正確轉發請求
+ * 正式環境：使用 VITE_ADMIN_API_URL 環境變數
+ */
+const getBaseUrl = (): string => {
+    // 正式環境使用環境變數
+    const adminApiUrl = import.meta.env.VITE_ADMIN_API_URL;
+    if (adminApiUrl) {
+        return adminApiUrl;
+    }
+    // 開發環境使用相對路徑（Vite proxy）
+    return '';
+};
+
+/**
  * 建立 Axios 實例
- * 使用相對路徑讓 Vite proxy 可以正確轉發請求
  */
 export const api: AxiosInstance = axios.create({
+    baseURL: getBaseUrl(),
     headers: {
         'Content-Type': 'application/json',
     },

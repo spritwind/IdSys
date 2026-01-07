@@ -4648,6 +4648,1565 @@ export class LogsClient extends WebApiClientBase implements ILogsClient {
     }
 }
 
+export interface IMultiTenantOrganizationClient {
+
+    getAll(tenantId: string | null | undefined): Promise<OrganizationDto[]>;
+
+    create(tenantId: string | null | undefined, dto: CreateOrganizationDto): Promise<OrganizationDto>;
+
+    getTree(tenantId: string | null | undefined): Promise<OrganizationTreeNodeDto[]>;
+
+    getById(id: string): Promise<OrganizationDto>;
+
+    update(id: string, dto: UpdateOrganizationDto): Promise<OrganizationDto>;
+
+    delete(id: string, includeDescendants: boolean | undefined): Promise<OperationResultDto>;
+
+    getChildren(id: string): Promise<OrganizationDto[]>;
+
+    getStats(tenantId: string | null | undefined): Promise<OrganizationStatsDto>;
+
+    getMembers(id: string): Promise<OrganizationMemberDto[]>;
+
+    addMember(id: string, dto: AddOrganizationMemberDto): Promise<OrganizationMemberDto>;
+
+    removeMember(id: string, userId: string): Promise<OperationResultDto>;
+
+    getPositions(tenantId: string | null | undefined): Promise<PositionDto[]>;
+
+    getUserOrganizations(userId: string): Promise<OrganizationMemberDto[]>;
+}
+
+export class MultiTenantOrganizationClient extends WebApiClientBase implements IMultiTenantOrganizationClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super();
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    getAll(tenantId: string | null | undefined): Promise<OrganizationDto[]> {
+        let url_ = this.baseUrl + "/api/v2/organizations?";
+        if (tenantId !== undefined && tenantId !== null)
+            url_ += "tenantId=" + encodeURIComponent("" + tenantId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetAll(_response);
+        });
+    }
+
+    protected processGetAll(response: Response): Promise<OrganizationDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(OrganizationDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OrganizationDto[]>(null as any);
+    }
+
+    create(tenantId: string | null | undefined, dto: CreateOrganizationDto): Promise<OrganizationDto> {
+        let url_ = this.baseUrl + "/api/v2/organizations?";
+        if (tenantId !== undefined && tenantId !== null)
+            url_ += "tenantId=" + encodeURIComponent("" + tenantId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processCreate(_response);
+        });
+    }
+
+    protected processCreate(response: Response): Promise<OrganizationDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result201 = OrganizationDto.fromJS(resultData201);
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OrganizationDto>(null as any);
+    }
+
+    getTree(tenantId: string | null | undefined): Promise<OrganizationTreeNodeDto[]> {
+        let url_ = this.baseUrl + "/api/v2/organizations/tree?";
+        if (tenantId !== undefined && tenantId !== null)
+            url_ += "tenantId=" + encodeURIComponent("" + tenantId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetTree(_response);
+        });
+    }
+
+    protected processGetTree(response: Response): Promise<OrganizationTreeNodeDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(OrganizationTreeNodeDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OrganizationTreeNodeDto[]>(null as any);
+    }
+
+    getById(id: string): Promise<OrganizationDto> {
+        let url_ = this.baseUrl + "/api/v2/organizations/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetById(_response);
+        });
+    }
+
+    protected processGetById(response: Response): Promise<OrganizationDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = OrganizationDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OrganizationDto>(null as any);
+    }
+
+    update(id: string, dto: UpdateOrganizationDto): Promise<OrganizationDto> {
+        let url_ = this.baseUrl + "/api/v2/organizations/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processUpdate(_response);
+        });
+    }
+
+    protected processUpdate(response: Response): Promise<OrganizationDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = OrganizationDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OrganizationDto>(null as any);
+    }
+
+    delete(id: string, includeDescendants: boolean | undefined): Promise<OperationResultDto> {
+        let url_ = this.baseUrl + "/api/v2/organizations/{id}?";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (includeDescendants === null)
+            throw new Error("The parameter 'includeDescendants' cannot be null.");
+        else if (includeDescendants !== undefined)
+            url_ += "includeDescendants=" + encodeURIComponent("" + includeDescendants) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processDelete(_response);
+        });
+    }
+
+    protected processDelete(response: Response): Promise<OperationResultDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = OperationResultDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OperationResultDto>(null as any);
+    }
+
+    getChildren(id: string): Promise<OrganizationDto[]> {
+        let url_ = this.baseUrl + "/api/v2/organizations/{id}/children";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetChildren(_response);
+        });
+    }
+
+    protected processGetChildren(response: Response): Promise<OrganizationDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(OrganizationDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OrganizationDto[]>(null as any);
+    }
+
+    getStats(tenantId: string | null | undefined): Promise<OrganizationStatsDto> {
+        let url_ = this.baseUrl + "/api/v2/organizations/stats?";
+        if (tenantId !== undefined && tenantId !== null)
+            url_ += "tenantId=" + encodeURIComponent("" + tenantId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetStats(_response);
+        });
+    }
+
+    protected processGetStats(response: Response): Promise<OrganizationStatsDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = OrganizationStatsDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OrganizationStatsDto>(null as any);
+    }
+
+    getMembers(id: string): Promise<OrganizationMemberDto[]> {
+        let url_ = this.baseUrl + "/api/v2/organizations/{id}/members";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetMembers(_response);
+        });
+    }
+
+    protected processGetMembers(response: Response): Promise<OrganizationMemberDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(OrganizationMemberDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OrganizationMemberDto[]>(null as any);
+    }
+
+    addMember(id: string, dto: AddOrganizationMemberDto): Promise<OrganizationMemberDto> {
+        let url_ = this.baseUrl + "/api/v2/organizations/{id}/members";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processAddMember(_response);
+        });
+    }
+
+    protected processAddMember(response: Response): Promise<OrganizationMemberDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result201 = OrganizationMemberDto.fromJS(resultData201);
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OrganizationMemberDto>(null as any);
+    }
+
+    removeMember(id: string, userId: string): Promise<OperationResultDto> {
+        let url_ = this.baseUrl + "/api/v2/organizations/{id}/members/{userId}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (userId === undefined || userId === null)
+            throw new Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processRemoveMember(_response);
+        });
+    }
+
+    protected processRemoveMember(response: Response): Promise<OperationResultDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = OperationResultDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OperationResultDto>(null as any);
+    }
+
+    getPositions(tenantId: string | null | undefined): Promise<PositionDto[]> {
+        let url_ = this.baseUrl + "/api/v2/organizations/positions?";
+        if (tenantId !== undefined && tenantId !== null)
+            url_ += "tenantId=" + encodeURIComponent("" + tenantId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetPositions(_response);
+        });
+    }
+
+    protected processGetPositions(response: Response): Promise<PositionDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(PositionDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PositionDto[]>(null as any);
+    }
+
+    getUserOrganizations(userId: string): Promise<OrganizationMemberDto[]> {
+        let url_ = this.baseUrl + "/api/v2/organizations/users/{userId}/organizations";
+        if (userId === undefined || userId === null)
+            throw new Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetUserOrganizations(_response);
+        });
+    }
+
+    protected processGetUserOrganizations(response: Response): Promise<OrganizationMemberDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(OrganizationMemberDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OrganizationMemberDto[]>(null as any);
+    }
+}
+
+export interface IMultiTenantPermissionClient {
+
+    getResources(clientId: string | null | undefined): Promise<PermissionResourceDto[]>;
+
+    getResourceTree(clientId: string | null | undefined): Promise<PermissionResourceDto[]>;
+
+    getResourceById(id: string): Promise<PermissionResourceDto>;
+
+    getScopes(): Promise<PermissionScopeDto[]>;
+
+    getUserPermissions(userId: string): Promise<PermissionDto[]>;
+
+    getUserEffectivePermissions(userId: string): Promise<UserEffectivePermissionsDto>;
+
+    checkUserPermission(userId: string, resourceId: string | null | undefined, clientId: string | null | undefined, resourceCode: string | null | undefined, scope: string | null | undefined): Promise<PermissionCheckResultDto>;
+
+    getOrganizationPermissions(organizationId: string): Promise<PermissionDto[]>;
+
+    getResourcePermissions(resourceId: string): Promise<PermissionDto[]>;
+
+    grantPermission(dto: GrantPermissionDto): Promise<PermissionDto>;
+
+    batchGrantPermissions(dto: BatchGrantPermissionDto): Promise<PermissionDto[]>;
+
+    revokePermission(id: string): Promise<OperationResultDto>;
+
+    updatePermission(id: string, dto: UpdatePermissionDto): Promise<PermissionDto>;
+
+    batchRevokePermissions(permissionIds: string[]): Promise<OperationResultDto>;
+}
+
+export class MultiTenantPermissionClient extends WebApiClientBase implements IMultiTenantPermissionClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super();
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    getResources(clientId: string | null | undefined): Promise<PermissionResourceDto[]> {
+        let url_ = this.baseUrl + "/api/v2/permissions/resources?";
+        if (clientId !== undefined && clientId !== null)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetResources(_response);
+        });
+    }
+
+    protected processGetResources(response: Response): Promise<PermissionResourceDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(PermissionResourceDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PermissionResourceDto[]>(null as any);
+    }
+
+    getResourceTree(clientId: string | null | undefined): Promise<PermissionResourceDto[]> {
+        let url_ = this.baseUrl + "/api/v2/permissions/resources/tree?";
+        if (clientId !== undefined && clientId !== null)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetResourceTree(_response);
+        });
+    }
+
+    protected processGetResourceTree(response: Response): Promise<PermissionResourceDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(PermissionResourceDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PermissionResourceDto[]>(null as any);
+    }
+
+    getResourceById(id: string): Promise<PermissionResourceDto> {
+        let url_ = this.baseUrl + "/api/v2/permissions/resources/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetResourceById(_response);
+        });
+    }
+
+    protected processGetResourceById(response: Response): Promise<PermissionResourceDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PermissionResourceDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PermissionResourceDto>(null as any);
+    }
+
+    getScopes(): Promise<PermissionScopeDto[]> {
+        let url_ = this.baseUrl + "/api/v2/permissions/scopes";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetScopes(_response);
+        });
+    }
+
+    protected processGetScopes(response: Response): Promise<PermissionScopeDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(PermissionScopeDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PermissionScopeDto[]>(null as any);
+    }
+
+    getUserPermissions(userId: string): Promise<PermissionDto[]> {
+        let url_ = this.baseUrl + "/api/v2/permissions/users/{userId}";
+        if (userId === undefined || userId === null)
+            throw new Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetUserPermissions(_response);
+        });
+    }
+
+    protected processGetUserPermissions(response: Response): Promise<PermissionDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(PermissionDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PermissionDto[]>(null as any);
+    }
+
+    getUserEffectivePermissions(userId: string): Promise<UserEffectivePermissionsDto> {
+        let url_ = this.baseUrl + "/api/v2/permissions/users/{userId}/effective";
+        if (userId === undefined || userId === null)
+            throw new Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetUserEffectivePermissions(_response);
+        });
+    }
+
+    protected processGetUserEffectivePermissions(response: Response): Promise<UserEffectivePermissionsDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = UserEffectivePermissionsDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserEffectivePermissionsDto>(null as any);
+    }
+
+    checkUserPermission(userId: string, resourceId: string | null | undefined, clientId: string | null | undefined, resourceCode: string | null | undefined, scope: string | null | undefined): Promise<PermissionCheckResultDto> {
+        let url_ = this.baseUrl + "/api/v2/permissions/users/{userId}/check?";
+        if (userId === undefined || userId === null)
+            throw new Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
+        if (resourceId !== undefined && resourceId !== null)
+            url_ += "resourceId=" + encodeURIComponent("" + resourceId) + "&";
+        if (clientId !== undefined && clientId !== null)
+            url_ += "clientId=" + encodeURIComponent("" + clientId) + "&";
+        if (resourceCode !== undefined && resourceCode !== null)
+            url_ += "resourceCode=" + encodeURIComponent("" + resourceCode) + "&";
+        if (scope !== undefined && scope !== null)
+            url_ += "scope=" + encodeURIComponent("" + scope) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processCheckUserPermission(_response);
+        });
+    }
+
+    protected processCheckUserPermission(response: Response): Promise<PermissionCheckResultDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PermissionCheckResultDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PermissionCheckResultDto>(null as any);
+    }
+
+    getOrganizationPermissions(organizationId: string): Promise<PermissionDto[]> {
+        let url_ = this.baseUrl + "/api/v2/permissions/organizations/{organizationId}";
+        if (organizationId === undefined || organizationId === null)
+            throw new Error("The parameter 'organizationId' must be defined.");
+        url_ = url_.replace("{organizationId}", encodeURIComponent("" + organizationId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetOrganizationPermissions(_response);
+        });
+    }
+
+    protected processGetOrganizationPermissions(response: Response): Promise<PermissionDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(PermissionDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PermissionDto[]>(null as any);
+    }
+
+    getResourcePermissions(resourceId: string): Promise<PermissionDto[]> {
+        let url_ = this.baseUrl + "/api/v2/permissions/resources/{resourceId}/permissions";
+        if (resourceId === undefined || resourceId === null)
+            throw new Error("The parameter 'resourceId' must be defined.");
+        url_ = url_.replace("{resourceId}", encodeURIComponent("" + resourceId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetResourcePermissions(_response);
+        });
+    }
+
+    protected processGetResourcePermissions(response: Response): Promise<PermissionDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(PermissionDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PermissionDto[]>(null as any);
+    }
+
+    grantPermission(dto: GrantPermissionDto): Promise<PermissionDto> {
+        let url_ = this.baseUrl + "/api/v2/permissions/grant";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGrantPermission(_response);
+        });
+    }
+
+    protected processGrantPermission(response: Response): Promise<PermissionDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result201 = PermissionDto.fromJS(resultData201);
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PermissionDto>(null as any);
+    }
+
+    batchGrantPermissions(dto: BatchGrantPermissionDto): Promise<PermissionDto[]> {
+        let url_ = this.baseUrl + "/api/v2/permissions/grant/batch";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processBatchGrantPermissions(_response);
+        });
+    }
+
+    protected processBatchGrantPermissions(response: Response): Promise<PermissionDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData201)) {
+                result201 = [] as any;
+                for (let item of resultData201)
+                    result201!.push(PermissionDto.fromJS(item));
+            }
+            else {
+                result201 = <any>null;
+            }
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PermissionDto[]>(null as any);
+    }
+
+    revokePermission(id: string): Promise<OperationResultDto> {
+        let url_ = this.baseUrl + "/api/v2/permissions/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processRevokePermission(_response);
+        });
+    }
+
+    protected processRevokePermission(response: Response): Promise<OperationResultDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = OperationResultDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OperationResultDto>(null as any);
+    }
+
+    updatePermission(id: string, dto: UpdatePermissionDto): Promise<PermissionDto> {
+        let url_ = this.baseUrl + "/api/v2/permissions/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processUpdatePermission(_response);
+        });
+    }
+
+    protected processUpdatePermission(response: Response): Promise<PermissionDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PermissionDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PermissionDto>(null as any);
+    }
+
+    batchRevokePermissions(permissionIds: string[]): Promise<OperationResultDto> {
+        let url_ = this.baseUrl + "/api/v2/permissions/batch";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(permissionIds);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processBatchRevokePermissions(_response);
+        });
+    }
+
+    protected processBatchRevokePermissions(response: Response): Promise<OperationResultDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = OperationResultDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OperationResultDto>(null as any);
+    }
+}
+
 export interface IOrganizationClient {
 
     getAll(): Promise<OrganizationGroupApiDto[]>;
@@ -4667,6 +6226,8 @@ export interface IOrganizationClient {
     canInsert(name: string | null | undefined, parentId: string | null | undefined, excludeId: string | null | undefined): Promise<boolean>;
 
     getDeleteConfirmation(id: string): Promise<DeleteConfirmationApiDto>;
+
+    getMembers(id: string): Promise<GroupMemberApiDto[]>;
 }
 
 export class OrganizationClient extends WebApiClientBase implements IOrganizationClient {
@@ -5158,6 +6719,67 @@ export class OrganizationClient extends WebApiClientBase implements IOrganizatio
         }
         return Promise.resolve<DeleteConfirmationApiDto>(null as any);
     }
+
+    getMembers(id: string): Promise<GroupMemberApiDto[]> {
+        let url_ = this.baseUrl + "/api/Organization/{id}/members";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetMembers(_response);
+        });
+    }
+
+    protected processGetMembers(response: Response): Promise<GroupMemberApiDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(GroupMemberApiDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GroupMemberApiDto[]>(null as any);
+    }
 }
 
 export interface IPermissionClient {
@@ -5194,7 +6816,7 @@ export interface IPermissionClient {
 
     canInsertResource(name: string | null | undefined, clientId: string | null | undefined, excludeId: string | null | undefined): Promise<boolean>;
 
-    getResourceScopes(resourceId: string, clientId: string | null | undefined): Promise<ResourceScopeDto[]>;
+    getResourceScopes(resourceId: string, clientId: string | null | undefined): Promise<ResourceScopeDto2[]>;
 
     setResourceScopes(resourceId: string, clientId: string | null | undefined, scopeIds: string[]): Promise<number>;
 
@@ -5206,7 +6828,7 @@ export interface IPermissionClient {
 
     getResourceUserPermissions(resourceId: string, clientId: string | null | undefined): Promise<UserPermissionDto[]>;
 
-    getUserEffectivePermissions(userId: string, clientId: string | null | undefined): Promise<EffectivePermissionDto[]>;
+    getUserEffectivePermissions(userId: string, clientId: string | null | undefined): Promise<EffectivePermissionDto2[]>;
 
     hasPermission(userId: string, clientId: string | null | undefined, resourceId: string | null | undefined, scope: string | null | undefined): Promise<boolean>;
 
@@ -6095,7 +7717,7 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<boolean>(null as any);
     }
 
-    getResourceScopes(resourceId: string, clientId: string | null | undefined): Promise<ResourceScopeDto[]> {
+    getResourceScopes(resourceId: string, clientId: string | null | undefined): Promise<ResourceScopeDto2[]> {
         let url_ = this.baseUrl + "/api/Permission/resources/{resourceId}/scopes?";
         if (resourceId === undefined || resourceId === null)
             throw new Error("The parameter 'resourceId' must be defined.");
@@ -6118,7 +7740,7 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         });
     }
 
-    protected processGetResourceScopes(response: Response): Promise<ResourceScopeDto[]> {
+    protected processGetResourceScopes(response: Response): Promise<ResourceScopeDto2[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -6128,7 +7750,7 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
             if (Array.isArray(resultData200)) {
                 result200 = [] as any;
                 for (let item of resultData200)
-                    result200!.push(ResourceScopeDto.fromJS(item));
+                    result200!.push(ResourceScopeDto2.fromJS(item));
             }
             else {
                 result200 = <any>null;
@@ -6148,7 +7770,7 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<ResourceScopeDto[]>(null as any);
+        return Promise.resolve<ResourceScopeDto2[]>(null as any);
     }
 
     setResourceScopes(resourceId: string, clientId: string | null | undefined, scopeIds: string[]): Promise<number> {
@@ -6429,7 +8051,7 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<UserPermissionDto[]>(null as any);
     }
 
-    getUserEffectivePermissions(userId: string, clientId: string | null | undefined): Promise<EffectivePermissionDto[]> {
+    getUserEffectivePermissions(userId: string, clientId: string | null | undefined): Promise<EffectivePermissionDto2[]> {
         let url_ = this.baseUrl + "/api/Permission/users/{userId}/effective-permissions?";
         if (userId === undefined || userId === null)
             throw new Error("The parameter 'userId' must be defined.");
@@ -6452,7 +8074,7 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         });
     }
 
-    protected processGetUserEffectivePermissions(response: Response): Promise<EffectivePermissionDto[]> {
+    protected processGetUserEffectivePermissions(response: Response): Promise<EffectivePermissionDto2[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -6462,7 +8084,7 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
             if (Array.isArray(resultData200)) {
                 result200 = [] as any;
                 for (let item of resultData200)
-                    result200!.push(EffectivePermissionDto.fromJS(item));
+                    result200!.push(EffectivePermissionDto2.fromJS(item));
             }
             else {
                 result200 = <any>null;
@@ -6482,7 +8104,7 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<EffectivePermissionDto[]>(null as any);
+        return Promise.resolve<EffectivePermissionDto2[]>(null as any);
     }
 
     hasPermission(userId: string, clientId: string | null | undefined, resourceId: string | null | undefined, scope: string | null | undefined): Promise<boolean> {
@@ -7017,6 +8639,1768 @@ export class PersistedGrantsClient extends WebApiClientBase implements IPersiste
     }
 
     protected processDeleteBySubject(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+}
+
+export interface IRoleManagementClient {
+
+    getRoles(): Promise<RoleWithCountDto[]>;
+
+    createRole(dto: CreateRoleDto): Promise<RoleWithCountDto>;
+
+    getRole(id: string): Promise<RoleWithCountDto>;
+
+    updateRole(id: string, dto: UpdateRoleDto): Promise<FileResponse>;
+
+    deleteRole(id: string): Promise<FileResponse>;
+
+    getRoleUsers(id: string): Promise<RoleUserDto[]>;
+
+    getRoleClaims(id: string): Promise<RoleClaimDto[]>;
+
+    addRoleClaim(id: string, dto: AddRoleClaimDto): Promise<FileResponse>;
+
+    removeRoleClaim(id: string, claimType: string | null | undefined, claimValue: string | null | undefined): Promise<FileResponse>;
+}
+
+export class RoleManagementClient extends WebApiClientBase implements IRoleManagementClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super();
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    getRoles(): Promise<RoleWithCountDto[]> {
+        let url_ = this.baseUrl + "/api/role-management";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetRoles(_response);
+        });
+    }
+
+    protected processGetRoles(response: Response): Promise<RoleWithCountDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(RoleWithCountDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<RoleWithCountDto[]>(null as any);
+    }
+
+    createRole(dto: CreateRoleDto): Promise<RoleWithCountDto> {
+        let url_ = this.baseUrl + "/api/role-management";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processCreateRole(_response);
+        });
+    }
+
+    protected processCreateRole(response: Response): Promise<RoleWithCountDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = RoleWithCountDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<RoleWithCountDto>(null as any);
+    }
+
+    getRole(id: string): Promise<RoleWithCountDto> {
+        let url_ = this.baseUrl + "/api/role-management/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetRole(_response);
+        });
+    }
+
+    protected processGetRole(response: Response): Promise<RoleWithCountDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = RoleWithCountDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<RoleWithCountDto>(null as any);
+    }
+
+    updateRole(id: string, dto: UpdateRoleDto): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/role-management/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processUpdateRole(_response);
+        });
+    }
+
+    protected processUpdateRole(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    deleteRole(id: string): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/role-management/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processDeleteRole(_response);
+        });
+    }
+
+    protected processDeleteRole(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    getRoleUsers(id: string): Promise<RoleUserDto[]> {
+        let url_ = this.baseUrl + "/api/role-management/{id}/users";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetRoleUsers(_response);
+        });
+    }
+
+    protected processGetRoleUsers(response: Response): Promise<RoleUserDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(RoleUserDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<RoleUserDto[]>(null as any);
+    }
+
+    getRoleClaims(id: string): Promise<RoleClaimDto[]> {
+        let url_ = this.baseUrl + "/api/role-management/{id}/claims";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetRoleClaims(_response);
+        });
+    }
+
+    protected processGetRoleClaims(response: Response): Promise<RoleClaimDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(RoleClaimDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<RoleClaimDto[]>(null as any);
+    }
+
+    addRoleClaim(id: string, dto: AddRoleClaimDto): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/role-management/{id}/claims";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processAddRoleClaim(_response);
+        });
+    }
+
+    protected processAddRoleClaim(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    removeRoleClaim(id: string, claimType: string | null | undefined, claimValue: string | null | undefined): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/role-management/{id}/claims?";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (claimType !== undefined && claimType !== null)
+            url_ += "claimType=" + encodeURIComponent("" + claimType) + "&";
+        if (claimValue !== undefined && claimValue !== null)
+            url_ += "claimValue=" + encodeURIComponent("" + claimValue) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processRemoveRoleClaim(_response);
+        });
+    }
+
+    protected processRemoveRoleClaim(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+}
+
+export interface IUserManagementClient {
+
+    getUsers(search: string | null | undefined, isActive: boolean | null | undefined, emailConfirmed: boolean | null | undefined, roleId: string | null | undefined, organizationId: string | null | undefined, page: number | undefined, pageSize: number | undefined, sortBy: string | null | undefined, sortDirection: string | null | undefined): Promise<PagedUserResultDto>;
+
+    createUser(dto: CreateUserDto): Promise<UserDetailDto>;
+
+    getUser(id: string): Promise<UserDetailDto>;
+
+    updateUser(id: string, dto: UpdateUserDetailDto): Promise<FileResponse>;
+
+    deleteUser(id: string): Promise<FileResponse>;
+
+    getUserClaims(id: string): Promise<UserClaimDto[]>;
+
+    addUserClaim(id: string, dto: AddUserClaimDto): Promise<UserClaimDto>;
+
+    deleteUserClaim(id: string, claimId: number): Promise<FileResponse>;
+
+    addRoleToUser(id: string, roleId: string): Promise<FileResponse>;
+
+    removeRoleFromUser(id: string, roleId: string): Promise<FileResponse>;
+
+    getStats(): Promise<UserStatsDto>;
+
+    activate(id: string): Promise<FileResponse>;
+
+    deactivate(id: string): Promise<FileResponse>;
+
+    unlock(id: string): Promise<FileResponse>;
+
+    resetPassword(id: string, dto: ResetPasswordDto): Promise<FileResponse>;
+
+    setUserRoles(id: string, dto: SetUserRolesDto): Promise<FileResponse>;
+
+    getUserRoles(id: string): Promise<UserRoleDto[]>;
+
+    searchUsers(search: string | null | undefined, limit: number | undefined): Promise<UserBriefDto[]>;
+
+    checkUsernameAvailable(username: string | null | undefined, excludeId: string | null | undefined): Promise<AvailabilityDto>;
+
+    checkEmailAvailable(email: string | null | undefined, excludeId: string | null | undefined): Promise<AvailabilityDto>;
+
+    bulkOperation(dto: BulkUserOperationDto): Promise<BulkOperationResultDto>;
+
+    getUserDetail(id: string): Promise<UserDetailDto>;
+
+    updateUserDetail(id: string, dto: UpdateUserDetailDto): Promise<FileResponse>;
+}
+
+export class UserManagementClient extends WebApiClientBase implements IUserManagementClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super();
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    getUsers(search: string | null | undefined, isActive: boolean | null | undefined, emailConfirmed: boolean | null | undefined, roleId: string | null | undefined, organizationId: string | null | undefined, page: number | undefined, pageSize: number | undefined, sortBy: string | null | undefined, sortDirection: string | null | undefined): Promise<PagedUserResultDto> {
+        let url_ = this.baseUrl + "/api/user-management?";
+        if (search !== undefined && search !== null)
+            url_ += "search=" + encodeURIComponent("" + search) + "&";
+        if (isActive !== undefined && isActive !== null)
+            url_ += "isActive=" + encodeURIComponent("" + isActive) + "&";
+        if (emailConfirmed !== undefined && emailConfirmed !== null)
+            url_ += "emailConfirmed=" + encodeURIComponent("" + emailConfirmed) + "&";
+        if (roleId !== undefined && roleId !== null)
+            url_ += "roleId=" + encodeURIComponent("" + roleId) + "&";
+        if (organizationId !== undefined && organizationId !== null)
+            url_ += "organizationId=" + encodeURIComponent("" + organizationId) + "&";
+        if (page === null)
+            throw new Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        if (sortBy !== undefined && sortBy !== null)
+            url_ += "sortBy=" + encodeURIComponent("" + sortBy) + "&";
+        if (sortDirection !== undefined && sortDirection !== null)
+            url_ += "sortDirection=" + encodeURIComponent("" + sortDirection) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetUsers(_response);
+        });
+    }
+
+    protected processGetUsers(response: Response): Promise<PagedUserResultDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PagedUserResultDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PagedUserResultDto>(null as any);
+    }
+
+    createUser(dto: CreateUserDto): Promise<UserDetailDto> {
+        let url_ = this.baseUrl + "/api/user-management";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processCreateUser(_response);
+        });
+    }
+
+    protected processCreateUser(response: Response): Promise<UserDetailDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = UserDetailDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserDetailDto>(null as any);
+    }
+
+    getUser(id: string): Promise<UserDetailDto> {
+        let url_ = this.baseUrl + "/api/user-management/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetUser(_response);
+        });
+    }
+
+    protected processGetUser(response: Response): Promise<UserDetailDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = UserDetailDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserDetailDto>(null as any);
+    }
+
+    updateUser(id: string, dto: UpdateUserDetailDto): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/user-management/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processUpdateUser(_response);
+        });
+    }
+
+    protected processUpdateUser(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    deleteUser(id: string): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/user-management/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processDeleteUser(_response);
+        });
+    }
+
+    protected processDeleteUser(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    getUserClaims(id: string): Promise<UserClaimDto[]> {
+        let url_ = this.baseUrl + "/api/user-management/{id}/claims";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetUserClaims(_response);
+        });
+    }
+
+    protected processGetUserClaims(response: Response): Promise<UserClaimDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(UserClaimDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserClaimDto[]>(null as any);
+    }
+
+    addUserClaim(id: string, dto: AddUserClaimDto): Promise<UserClaimDto> {
+        let url_ = this.baseUrl + "/api/user-management/{id}/claims";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processAddUserClaim(_response);
+        });
+    }
+
+    protected processAddUserClaim(response: Response): Promise<UserClaimDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = UserClaimDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserClaimDto>(null as any);
+    }
+
+    deleteUserClaim(id: string, claimId: number): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/user-management/{id}/claims/{claimId}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (claimId === undefined || claimId === null)
+            throw new Error("The parameter 'claimId' must be defined.");
+        url_ = url_.replace("{claimId}", encodeURIComponent("" + claimId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processDeleteUserClaim(_response);
+        });
+    }
+
+    protected processDeleteUserClaim(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    addRoleToUser(id: string, roleId: string): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/user-management/{id}/roles/{roleId}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (roleId === undefined || roleId === null)
+            throw new Error("The parameter 'roleId' must be defined.");
+        url_ = url_.replace("{roleId}", encodeURIComponent("" + roleId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "POST",
+            headers: {
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processAddRoleToUser(_response);
+        });
+    }
+
+    protected processAddRoleToUser(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    removeRoleFromUser(id: string, roleId: string): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/user-management/{id}/roles/{roleId}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (roleId === undefined || roleId === null)
+            throw new Error("The parameter 'roleId' must be defined.");
+        url_ = url_.replace("{roleId}", encodeURIComponent("" + roleId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processRemoveRoleFromUser(_response);
+        });
+    }
+
+    protected processRemoveRoleFromUser(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    getStats(): Promise<UserStatsDto> {
+        let url_ = this.baseUrl + "/api/user-management/stats";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetStats(_response);
+        });
+    }
+
+    protected processGetStats(response: Response): Promise<UserStatsDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = UserStatsDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserStatsDto>(null as any);
+    }
+
+    activate(id: string): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/user-management/{id}/activate";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "POST",
+            headers: {
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processActivate(_response);
+        });
+    }
+
+    protected processActivate(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    deactivate(id: string): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/user-management/{id}/deactivate";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "POST",
+            headers: {
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processDeactivate(_response);
+        });
+    }
+
+    protected processDeactivate(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    unlock(id: string): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/user-management/{id}/unlock";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "POST",
+            headers: {
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processUnlock(_response);
+        });
+    }
+
+    protected processUnlock(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    resetPassword(id: string, dto: ResetPasswordDto): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/user-management/{id}/reset-password";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processResetPassword(_response);
+        });
+    }
+
+    protected processResetPassword(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    setUserRoles(id: string, dto: SetUserRolesDto): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/user-management/{id}/roles";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processSetUserRoles(_response);
+        });
+    }
+
+    protected processSetUserRoles(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    getUserRoles(id: string): Promise<UserRoleDto[]> {
+        let url_ = this.baseUrl + "/api/user-management/{id}/roles";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetUserRoles(_response);
+        });
+    }
+
+    protected processGetUserRoles(response: Response): Promise<UserRoleDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(UserRoleDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserRoleDto[]>(null as any);
+    }
+
+    searchUsers(search: string | null | undefined, limit: number | undefined): Promise<UserBriefDto[]> {
+        let url_ = this.baseUrl + "/api/user-management/search?";
+        if (search !== undefined && search !== null)
+            url_ += "search=" + encodeURIComponent("" + search) + "&";
+        if (limit === null)
+            throw new Error("The parameter 'limit' cannot be null.");
+        else if (limit !== undefined)
+            url_ += "limit=" + encodeURIComponent("" + limit) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processSearchUsers(_response);
+        });
+    }
+
+    protected processSearchUsers(response: Response): Promise<UserBriefDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(UserBriefDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserBriefDto[]>(null as any);
+    }
+
+    checkUsernameAvailable(username: string | null | undefined, excludeId: string | null | undefined): Promise<AvailabilityDto> {
+        let url_ = this.baseUrl + "/api/user-management/check-username?";
+        if (username !== undefined && username !== null)
+            url_ += "username=" + encodeURIComponent("" + username) + "&";
+        if (excludeId !== undefined && excludeId !== null)
+            url_ += "excludeId=" + encodeURIComponent("" + excludeId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processCheckUsernameAvailable(_response);
+        });
+    }
+
+    protected processCheckUsernameAvailable(response: Response): Promise<AvailabilityDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = AvailabilityDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<AvailabilityDto>(null as any);
+    }
+
+    checkEmailAvailable(email: string | null | undefined, excludeId: string | null | undefined): Promise<AvailabilityDto> {
+        let url_ = this.baseUrl + "/api/user-management/check-email?";
+        if (email !== undefined && email !== null)
+            url_ += "email=" + encodeURIComponent("" + email) + "&";
+        if (excludeId !== undefined && excludeId !== null)
+            url_ += "excludeId=" + encodeURIComponent("" + excludeId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processCheckEmailAvailable(_response);
+        });
+    }
+
+    protected processCheckEmailAvailable(response: Response): Promise<AvailabilityDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = AvailabilityDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<AvailabilityDto>(null as any);
+    }
+
+    bulkOperation(dto: BulkUserOperationDto): Promise<BulkOperationResultDto> {
+        let url_ = this.baseUrl + "/api/user-management/bulk";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processBulkOperation(_response);
+        });
+    }
+
+    protected processBulkOperation(response: Response): Promise<BulkOperationResultDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BulkOperationResultDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BulkOperationResultDto>(null as any);
+    }
+
+    getUserDetail(id: string): Promise<UserDetailDto> {
+        let url_ = this.baseUrl + "/api/user-management/{id}/detail";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetUserDetail(_response);
+        });
+    }
+
+    protected processGetUserDetail(response: Response): Promise<UserDetailDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = UserDetailDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserDetailDto>(null as any);
+    }
+
+    updateUserDetail(id: string, dto: UpdateUserDetailDto): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/user-management/{id}/detail";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processUpdateUserDetail(_response);
+        });
+    }
+
+    protected processUpdateUserDetail(response: Response): Promise<FileResponse> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200 || status === 206) {
@@ -11066,6 +14450,1254 @@ export interface IAuditLogDto {
     created: Date;
 }
 
+export class OrganizationDto implements IOrganizationDto {
+    id!: string;
+    tenantId!: string;
+    code!: string | undefined;
+    name!: string | undefined;
+    englishName!: string | undefined;
+    parentId!: string | undefined;
+    path!: string | undefined;
+    depth!: number;
+    sortOrder!: number;
+    managerUserId!: string | undefined;
+    managerName!: string | undefined;
+    description!: string | undefined;
+    inheritParentPermissions!: boolean;
+    isEnabled!: boolean;
+    memberCount!: number;
+    childCount!: number;
+    createdAt!: Date;
+    updatedAt!: Date | undefined;
+    children!: OrganizationDto[] | undefined;
+
+    constructor(data?: IOrganizationDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.tenantId = _data["tenantId"];
+            this.code = _data["code"];
+            this.name = _data["name"];
+            this.englishName = _data["englishName"];
+            this.parentId = _data["parentId"];
+            this.path = _data["path"];
+            this.depth = _data["depth"];
+            this.sortOrder = _data["sortOrder"];
+            this.managerUserId = _data["managerUserId"];
+            this.managerName = _data["managerName"];
+            this.description = _data["description"];
+            this.inheritParentPermissions = _data["inheritParentPermissions"];
+            this.isEnabled = _data["isEnabled"];
+            this.memberCount = _data["memberCount"];
+            this.childCount = _data["childCount"];
+            this.createdAt = _data["createdAt"] ? new Date(_data["createdAt"].toString()) : <any>undefined;
+            this.updatedAt = _data["updatedAt"] ? new Date(_data["updatedAt"].toString()) : <any>undefined;
+            if (Array.isArray(_data["children"])) {
+                this.children = [] as any;
+                for (let item of _data["children"])
+                    this.children!.push(OrganizationDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): OrganizationDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new OrganizationDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["tenantId"] = this.tenantId;
+        data["code"] = this.code;
+        data["name"] = this.name;
+        data["englishName"] = this.englishName;
+        data["parentId"] = this.parentId;
+        data["path"] = this.path;
+        data["depth"] = this.depth;
+        data["sortOrder"] = this.sortOrder;
+        data["managerUserId"] = this.managerUserId;
+        data["managerName"] = this.managerName;
+        data["description"] = this.description;
+        data["inheritParentPermissions"] = this.inheritParentPermissions;
+        data["isEnabled"] = this.isEnabled;
+        data["memberCount"] = this.memberCount;
+        data["childCount"] = this.childCount;
+        data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : <any>undefined;
+        data["updatedAt"] = this.updatedAt ? this.updatedAt.toISOString() : <any>undefined;
+        if (Array.isArray(this.children)) {
+            data["children"] = [];
+            for (let item of this.children)
+                data["children"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IOrganizationDto {
+    id: string;
+    tenantId: string;
+    code: string | undefined;
+    name: string | undefined;
+    englishName: string | undefined;
+    parentId: string | undefined;
+    path: string | undefined;
+    depth: number;
+    sortOrder: number;
+    managerUserId: string | undefined;
+    managerName: string | undefined;
+    description: string | undefined;
+    inheritParentPermissions: boolean;
+    isEnabled: boolean;
+    memberCount: number;
+    childCount: number;
+    createdAt: Date;
+    updatedAt: Date | undefined;
+    children: OrganizationDto[] | undefined;
+}
+
+export class OrganizationTreeNodeDto implements IOrganizationTreeNodeDto {
+    id!: string;
+    name!: string | undefined;
+    englishName!: string | undefined;
+    code!: string | undefined;
+    parentId!: string | undefined;
+    depth!: number;
+    managerName!: string | undefined;
+    memberCount!: number;
+    isRoot!: boolean;
+    children!: OrganizationTreeNodeDto[] | undefined;
+
+    constructor(data?: IOrganizationTreeNodeDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+            this.englishName = _data["englishName"];
+            this.code = _data["code"];
+            this.parentId = _data["parentId"];
+            this.depth = _data["depth"];
+            this.managerName = _data["managerName"];
+            this.memberCount = _data["memberCount"];
+            this.isRoot = _data["isRoot"];
+            if (Array.isArray(_data["children"])) {
+                this.children = [] as any;
+                for (let item of _data["children"])
+                    this.children!.push(OrganizationTreeNodeDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): OrganizationTreeNodeDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new OrganizationTreeNodeDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        data["englishName"] = this.englishName;
+        data["code"] = this.code;
+        data["parentId"] = this.parentId;
+        data["depth"] = this.depth;
+        data["managerName"] = this.managerName;
+        data["memberCount"] = this.memberCount;
+        data["isRoot"] = this.isRoot;
+        if (Array.isArray(this.children)) {
+            data["children"] = [];
+            for (let item of this.children)
+                data["children"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IOrganizationTreeNodeDto {
+    id: string;
+    name: string | undefined;
+    englishName: string | undefined;
+    code: string | undefined;
+    parentId: string | undefined;
+    depth: number;
+    managerName: string | undefined;
+    memberCount: number;
+    isRoot: boolean;
+    children: OrganizationTreeNodeDto[] | undefined;
+}
+
+export class OrganizationStatsDto implements IOrganizationStatsDto {
+    totalOrganizations!: number;
+    totalMembers!: number;
+    maxDepth!: number;
+
+    constructor(data?: IOrganizationStatsDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.totalOrganizations = _data["totalOrganizations"];
+            this.totalMembers = _data["totalMembers"];
+            this.maxDepth = _data["maxDepth"];
+        }
+    }
+
+    static fromJS(data: any): OrganizationStatsDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new OrganizationStatsDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["totalOrganizations"] = this.totalOrganizations;
+        data["totalMembers"] = this.totalMembers;
+        data["maxDepth"] = this.maxDepth;
+        return data;
+    }
+}
+
+export interface IOrganizationStatsDto {
+    totalOrganizations: number;
+    totalMembers: number;
+    maxDepth: number;
+}
+
+export class CreateOrganizationDto implements ICreateOrganizationDto {
+    name!: string | undefined;
+    englishName!: string | undefined;
+    code!: string | undefined;
+    parentId!: string | undefined;
+    managerUserId!: string | undefined;
+    description!: string | undefined;
+    sortOrder!: number;
+    inheritParentPermissions!: boolean;
+
+    constructor(data?: ICreateOrganizationDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.name = _data["name"];
+            this.englishName = _data["englishName"];
+            this.code = _data["code"];
+            this.parentId = _data["parentId"];
+            this.managerUserId = _data["managerUserId"];
+            this.description = _data["description"];
+            this.sortOrder = _data["sortOrder"];
+            this.inheritParentPermissions = _data["inheritParentPermissions"];
+        }
+    }
+
+    static fromJS(data: any): CreateOrganizationDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateOrganizationDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        data["englishName"] = this.englishName;
+        data["code"] = this.code;
+        data["parentId"] = this.parentId;
+        data["managerUserId"] = this.managerUserId;
+        data["description"] = this.description;
+        data["sortOrder"] = this.sortOrder;
+        data["inheritParentPermissions"] = this.inheritParentPermissions;
+        return data;
+    }
+}
+
+export interface ICreateOrganizationDto {
+    name: string | undefined;
+    englishName: string | undefined;
+    code: string | undefined;
+    parentId: string | undefined;
+    managerUserId: string | undefined;
+    description: string | undefined;
+    sortOrder: number;
+    inheritParentPermissions: boolean;
+}
+
+export class UpdateOrganizationDto implements IUpdateOrganizationDto {
+    name!: string | undefined;
+    englishName!: string | undefined;
+    code!: string | undefined;
+    parentId!: string | undefined;
+    managerUserId!: string | undefined;
+    description!: string | undefined;
+    sortOrder!: number;
+    inheritParentPermissions!: boolean;
+
+    constructor(data?: IUpdateOrganizationDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.name = _data["name"];
+            this.englishName = _data["englishName"];
+            this.code = _data["code"];
+            this.parentId = _data["parentId"];
+            this.managerUserId = _data["managerUserId"];
+            this.description = _data["description"];
+            this.sortOrder = _data["sortOrder"];
+            this.inheritParentPermissions = _data["inheritParentPermissions"];
+        }
+    }
+
+    static fromJS(data: any): UpdateOrganizationDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateOrganizationDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        data["englishName"] = this.englishName;
+        data["code"] = this.code;
+        data["parentId"] = this.parentId;
+        data["managerUserId"] = this.managerUserId;
+        data["description"] = this.description;
+        data["sortOrder"] = this.sortOrder;
+        data["inheritParentPermissions"] = this.inheritParentPermissions;
+        return data;
+    }
+}
+
+export interface IUpdateOrganizationDto {
+    name: string | undefined;
+    englishName: string | undefined;
+    code: string | undefined;
+    parentId: string | undefined;
+    managerUserId: string | undefined;
+    description: string | undefined;
+    sortOrder: number;
+    inheritParentPermissions: boolean;
+}
+
+export class OperationResultDto implements IOperationResultDto {
+    success!: boolean;
+    message!: string | undefined;
+    data!: any | undefined;
+
+    constructor(data?: IOperationResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.success = _data["success"];
+            this.message = _data["message"];
+            this.data = _data["data"];
+        }
+    }
+
+    static fromJS(data: any): OperationResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new OperationResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["success"] = this.success;
+        data["message"] = this.message;
+        data["data"] = this.data;
+        return data;
+    }
+}
+
+export interface IOperationResultDto {
+    success: boolean;
+    message: string | undefined;
+    data: any | undefined;
+}
+
+export class OrganizationMemberDto implements IOrganizationMemberDto {
+    id!: string;
+    organizationId!: string;
+    organizationName!: string | undefined;
+    userId!: string | undefined;
+    userName!: string | undefined;
+    displayName!: string | undefined;
+    email!: string | undefined;
+    positionId!: string | undefined;
+    positionName!: string | undefined;
+    memberRole!: string | undefined;
+    isPrimary!: boolean;
+    joinedAt!: Date;
+
+    constructor(data?: IOrganizationMemberDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.organizationId = _data["organizationId"];
+            this.organizationName = _data["organizationName"];
+            this.userId = _data["userId"];
+            this.userName = _data["userName"];
+            this.displayName = _data["displayName"];
+            this.email = _data["email"];
+            this.positionId = _data["positionId"];
+            this.positionName = _data["positionName"];
+            this.memberRole = _data["memberRole"];
+            this.isPrimary = _data["isPrimary"];
+            this.joinedAt = _data["joinedAt"] ? new Date(_data["joinedAt"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): OrganizationMemberDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new OrganizationMemberDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["organizationId"] = this.organizationId;
+        data["organizationName"] = this.organizationName;
+        data["userId"] = this.userId;
+        data["userName"] = this.userName;
+        data["displayName"] = this.displayName;
+        data["email"] = this.email;
+        data["positionId"] = this.positionId;
+        data["positionName"] = this.positionName;
+        data["memberRole"] = this.memberRole;
+        data["isPrimary"] = this.isPrimary;
+        data["joinedAt"] = this.joinedAt ? this.joinedAt.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IOrganizationMemberDto {
+    id: string;
+    organizationId: string;
+    organizationName: string | undefined;
+    userId: string | undefined;
+    userName: string | undefined;
+    displayName: string | undefined;
+    email: string | undefined;
+    positionId: string | undefined;
+    positionName: string | undefined;
+    memberRole: string | undefined;
+    isPrimary: boolean;
+    joinedAt: Date;
+}
+
+export class AddOrganizationMemberDto implements IAddOrganizationMemberDto {
+    organizationId!: string;
+    userId!: string | undefined;
+    positionId!: string | undefined;
+    memberRole!: string | undefined;
+    isPrimary!: boolean;
+
+    constructor(data?: IAddOrganizationMemberDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.organizationId = _data["organizationId"];
+            this.userId = _data["userId"];
+            this.positionId = _data["positionId"];
+            this.memberRole = _data["memberRole"];
+            this.isPrimary = _data["isPrimary"];
+        }
+    }
+
+    static fromJS(data: any): AddOrganizationMemberDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new AddOrganizationMemberDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["organizationId"] = this.organizationId;
+        data["userId"] = this.userId;
+        data["positionId"] = this.positionId;
+        data["memberRole"] = this.memberRole;
+        data["isPrimary"] = this.isPrimary;
+        return data;
+    }
+}
+
+export interface IAddOrganizationMemberDto {
+    organizationId: string;
+    userId: string | undefined;
+    positionId: string | undefined;
+    memberRole: string | undefined;
+    isPrimary: boolean;
+}
+
+export class PositionDto implements IPositionDto {
+    id!: string;
+    code!: string | undefined;
+    name!: string | undefined;
+    level!: number;
+    permissions!: string | undefined;
+    isEnabled!: boolean;
+
+    constructor(data?: IPositionDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.code = _data["code"];
+            this.name = _data["name"];
+            this.level = _data["level"];
+            this.permissions = _data["permissions"];
+            this.isEnabled = _data["isEnabled"];
+        }
+    }
+
+    static fromJS(data: any): PositionDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PositionDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["code"] = this.code;
+        data["name"] = this.name;
+        data["level"] = this.level;
+        data["permissions"] = this.permissions;
+        data["isEnabled"] = this.isEnabled;
+        return data;
+    }
+}
+
+export interface IPositionDto {
+    id: string;
+    code: string | undefined;
+    name: string | undefined;
+    level: number;
+    permissions: string | undefined;
+    isEnabled: boolean;
+}
+
+export class PermissionResourceDto implements IPermissionResourceDto {
+    id!: string;
+    clientId!: string | undefined;
+    clientName!: string | undefined;
+    code!: string | undefined;
+    name!: string | undefined;
+    description!: string | undefined;
+    uri!: string | undefined;
+    resourceType!: string | undefined;
+    parentId!: string | undefined;
+    sortOrder!: number;
+    isEnabled!: boolean;
+    children!: PermissionResourceDto[] | undefined;
+
+    constructor(data?: IPermissionResourceDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.clientId = _data["clientId"];
+            this.clientName = _data["clientName"];
+            this.code = _data["code"];
+            this.name = _data["name"];
+            this.description = _data["description"];
+            this.uri = _data["uri"];
+            this.resourceType = _data["resourceType"];
+            this.parentId = _data["parentId"];
+            this.sortOrder = _data["sortOrder"];
+            this.isEnabled = _data["isEnabled"];
+            if (Array.isArray(_data["children"])) {
+                this.children = [] as any;
+                for (let item of _data["children"])
+                    this.children!.push(PermissionResourceDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): PermissionResourceDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PermissionResourceDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["clientId"] = this.clientId;
+        data["clientName"] = this.clientName;
+        data["code"] = this.code;
+        data["name"] = this.name;
+        data["description"] = this.description;
+        data["uri"] = this.uri;
+        data["resourceType"] = this.resourceType;
+        data["parentId"] = this.parentId;
+        data["sortOrder"] = this.sortOrder;
+        data["isEnabled"] = this.isEnabled;
+        if (Array.isArray(this.children)) {
+            data["children"] = [];
+            for (let item of this.children)
+                data["children"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IPermissionResourceDto {
+    id: string;
+    clientId: string | undefined;
+    clientName: string | undefined;
+    code: string | undefined;
+    name: string | undefined;
+    description: string | undefined;
+    uri: string | undefined;
+    resourceType: string | undefined;
+    parentId: string | undefined;
+    sortOrder: number;
+    isEnabled: boolean;
+    children: PermissionResourceDto[] | undefined;
+}
+
+export class PermissionScopeDto implements IPermissionScopeDto {
+    id!: string;
+    code!: string | undefined;
+    name!: string | undefined;
+    description!: string | undefined;
+
+    constructor(data?: IPermissionScopeDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.code = _data["code"];
+            this.name = _data["name"];
+            this.description = _data["description"];
+        }
+    }
+
+    static fromJS(data: any): PermissionScopeDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PermissionScopeDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["code"] = this.code;
+        data["name"] = this.name;
+        data["description"] = this.description;
+        return data;
+    }
+}
+
+export interface IPermissionScopeDto {
+    id: string;
+    code: string | undefined;
+    name: string | undefined;
+    description: string | undefined;
+}
+
+export class PermissionDto implements IPermissionDto {
+    id!: string;
+    tenantId!: string | undefined;
+    subjectType!: string | undefined;
+    subjectId!: string | undefined;
+    subjectName!: string | undefined;
+    resourceId!: string;
+    resourceCode!: string | undefined;
+    resourceName!: string | undefined;
+    clientId!: string | undefined;
+    scopes!: string | undefined;
+    scopeList!: string[] | undefined;
+    inheritToChildren!: boolean;
+    isEnabled!: boolean;
+    grantedBy!: string | undefined;
+    grantedAt!: Date;
+    expiresAt!: Date | undefined;
+
+    constructor(data?: IPermissionDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.tenantId = _data["tenantId"];
+            this.subjectType = _data["subjectType"];
+            this.subjectId = _data["subjectId"];
+            this.subjectName = _data["subjectName"];
+            this.resourceId = _data["resourceId"];
+            this.resourceCode = _data["resourceCode"];
+            this.resourceName = _data["resourceName"];
+            this.clientId = _data["clientId"];
+            this.scopes = _data["scopes"];
+            if (Array.isArray(_data["scopeList"])) {
+                this.scopeList = [] as any;
+                for (let item of _data["scopeList"])
+                    this.scopeList!.push(item);
+            }
+            this.inheritToChildren = _data["inheritToChildren"];
+            this.isEnabled = _data["isEnabled"];
+            this.grantedBy = _data["grantedBy"];
+            this.grantedAt = _data["grantedAt"] ? new Date(_data["grantedAt"].toString()) : <any>undefined;
+            this.expiresAt = _data["expiresAt"] ? new Date(_data["expiresAt"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): PermissionDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PermissionDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["tenantId"] = this.tenantId;
+        data["subjectType"] = this.subjectType;
+        data["subjectId"] = this.subjectId;
+        data["subjectName"] = this.subjectName;
+        data["resourceId"] = this.resourceId;
+        data["resourceCode"] = this.resourceCode;
+        data["resourceName"] = this.resourceName;
+        data["clientId"] = this.clientId;
+        data["scopes"] = this.scopes;
+        if (Array.isArray(this.scopeList)) {
+            data["scopeList"] = [];
+            for (let item of this.scopeList)
+                data["scopeList"].push(item);
+        }
+        data["inheritToChildren"] = this.inheritToChildren;
+        data["isEnabled"] = this.isEnabled;
+        data["grantedBy"] = this.grantedBy;
+        data["grantedAt"] = this.grantedAt ? this.grantedAt.toISOString() : <any>undefined;
+        data["expiresAt"] = this.expiresAt ? this.expiresAt.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IPermissionDto {
+    id: string;
+    tenantId: string | undefined;
+    subjectType: string | undefined;
+    subjectId: string | undefined;
+    subjectName: string | undefined;
+    resourceId: string;
+    resourceCode: string | undefined;
+    resourceName: string | undefined;
+    clientId: string | undefined;
+    scopes: string | undefined;
+    scopeList: string[] | undefined;
+    inheritToChildren: boolean;
+    isEnabled: boolean;
+    grantedBy: string | undefined;
+    grantedAt: Date;
+    expiresAt: Date | undefined;
+}
+
+export class UserEffectivePermissionsDto implements IUserEffectivePermissionsDto {
+    userId!: string | undefined;
+    userName!: string | undefined;
+    permissions!: EffectivePermissionDto[] | undefined;
+
+    constructor(data?: IUserEffectivePermissionsDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.userId = _data["userId"];
+            this.userName = _data["userName"];
+            if (Array.isArray(_data["permissions"])) {
+                this.permissions = [] as any;
+                for (let item of _data["permissions"])
+                    this.permissions!.push(EffectivePermissionDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): UserEffectivePermissionsDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserEffectivePermissionsDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["userId"] = this.userId;
+        data["userName"] = this.userName;
+        if (Array.isArray(this.permissions)) {
+            data["permissions"] = [];
+            for (let item of this.permissions)
+                data["permissions"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IUserEffectivePermissionsDto {
+    userId: string | undefined;
+    userName: string | undefined;
+    permissions: EffectivePermissionDto[] | undefined;
+}
+
+export class EffectivePermissionDto implements IEffectivePermissionDto {
+    resourceId!: string;
+    resourceCode!: string | undefined;
+    resourceName!: string | undefined;
+    clientId!: string | undefined;
+    scopes!: string[] | undefined;
+    source!: string | undefined;
+    sourceId!: string | undefined;
+    sourceName!: string | undefined;
+
+    constructor(data?: IEffectivePermissionDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.resourceId = _data["resourceId"];
+            this.resourceCode = _data["resourceCode"];
+            this.resourceName = _data["resourceName"];
+            this.clientId = _data["clientId"];
+            if (Array.isArray(_data["scopes"])) {
+                this.scopes = [] as any;
+                for (let item of _data["scopes"])
+                    this.scopes!.push(item);
+            }
+            this.source = _data["source"];
+            this.sourceId = _data["sourceId"];
+            this.sourceName = _data["sourceName"];
+        }
+    }
+
+    static fromJS(data: any): EffectivePermissionDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new EffectivePermissionDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["resourceId"] = this.resourceId;
+        data["resourceCode"] = this.resourceCode;
+        data["resourceName"] = this.resourceName;
+        data["clientId"] = this.clientId;
+        if (Array.isArray(this.scopes)) {
+            data["scopes"] = [];
+            for (let item of this.scopes)
+                data["scopes"].push(item);
+        }
+        data["source"] = this.source;
+        data["sourceId"] = this.sourceId;
+        data["sourceName"] = this.sourceName;
+        return data;
+    }
+}
+
+export interface IEffectivePermissionDto {
+    resourceId: string;
+    resourceCode: string | undefined;
+    resourceName: string | undefined;
+    clientId: string | undefined;
+    scopes: string[] | undefined;
+    source: string | undefined;
+    sourceId: string | undefined;
+    sourceName: string | undefined;
+}
+
+export class PermissionCheckResultDto implements IPermissionCheckResultDto {
+    userId!: string | undefined;
+    resourceId!: string | undefined;
+    clientId!: string | undefined;
+    resourceCode!: string | undefined;
+    scope!: string | undefined;
+    hasPermission!: boolean;
+
+    constructor(data?: IPermissionCheckResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.userId = _data["userId"];
+            this.resourceId = _data["resourceId"];
+            this.clientId = _data["clientId"];
+            this.resourceCode = _data["resourceCode"];
+            this.scope = _data["scope"];
+            this.hasPermission = _data["hasPermission"];
+        }
+    }
+
+    static fromJS(data: any): PermissionCheckResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PermissionCheckResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["userId"] = this.userId;
+        data["resourceId"] = this.resourceId;
+        data["clientId"] = this.clientId;
+        data["resourceCode"] = this.resourceCode;
+        data["scope"] = this.scope;
+        data["hasPermission"] = this.hasPermission;
+        return data;
+    }
+}
+
+export interface IPermissionCheckResultDto {
+    userId: string | undefined;
+    resourceId: string | undefined;
+    clientId: string | undefined;
+    resourceCode: string | undefined;
+    scope: string | undefined;
+    hasPermission: boolean;
+}
+
+export class GrantPermissionDto implements IGrantPermissionDto {
+    subjectType!: string | undefined;
+    subjectId!: string | undefined;
+    subjectName!: string | undefined;
+    resourceId!: string;
+    scopes!: string[] | undefined;
+    inheritToChildren!: boolean;
+    expiresAt!: Date | undefined;
+
+    constructor(data?: IGrantPermissionDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.subjectType = _data["subjectType"];
+            this.subjectId = _data["subjectId"];
+            this.subjectName = _data["subjectName"];
+            this.resourceId = _data["resourceId"];
+            if (Array.isArray(_data["scopes"])) {
+                this.scopes = [] as any;
+                for (let item of _data["scopes"])
+                    this.scopes!.push(item);
+            }
+            this.inheritToChildren = _data["inheritToChildren"];
+            this.expiresAt = _data["expiresAt"] ? new Date(_data["expiresAt"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): GrantPermissionDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new GrantPermissionDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["subjectType"] = this.subjectType;
+        data["subjectId"] = this.subjectId;
+        data["subjectName"] = this.subjectName;
+        data["resourceId"] = this.resourceId;
+        if (Array.isArray(this.scopes)) {
+            data["scopes"] = [];
+            for (let item of this.scopes)
+                data["scopes"].push(item);
+        }
+        data["inheritToChildren"] = this.inheritToChildren;
+        data["expiresAt"] = this.expiresAt ? this.expiresAt.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IGrantPermissionDto {
+    subjectType: string | undefined;
+    subjectId: string | undefined;
+    subjectName: string | undefined;
+    resourceId: string;
+    scopes: string[] | undefined;
+    inheritToChildren: boolean;
+    expiresAt: Date | undefined;
+}
+
+export class BatchGrantPermissionDto implements IBatchGrantPermissionDto {
+    subjectType!: string | undefined;
+    subjectId!: string | undefined;
+    subjectName!: string | undefined;
+    resourceScopes!: ResourceScopeDto[] | undefined;
+    inheritToChildren!: boolean;
+
+    constructor(data?: IBatchGrantPermissionDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.subjectType = _data["subjectType"];
+            this.subjectId = _data["subjectId"];
+            this.subjectName = _data["subjectName"];
+            if (Array.isArray(_data["resourceScopes"])) {
+                this.resourceScopes = [] as any;
+                for (let item of _data["resourceScopes"])
+                    this.resourceScopes!.push(ResourceScopeDto.fromJS(item));
+            }
+            this.inheritToChildren = _data["inheritToChildren"];
+        }
+    }
+
+    static fromJS(data: any): BatchGrantPermissionDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BatchGrantPermissionDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["subjectType"] = this.subjectType;
+        data["subjectId"] = this.subjectId;
+        data["subjectName"] = this.subjectName;
+        if (Array.isArray(this.resourceScopes)) {
+            data["resourceScopes"] = [];
+            for (let item of this.resourceScopes)
+                data["resourceScopes"].push(item.toJSON());
+        }
+        data["inheritToChildren"] = this.inheritToChildren;
+        return data;
+    }
+}
+
+export interface IBatchGrantPermissionDto {
+    subjectType: string | undefined;
+    subjectId: string | undefined;
+    subjectName: string | undefined;
+    resourceScopes: ResourceScopeDto[] | undefined;
+    inheritToChildren: boolean;
+}
+
+export class ResourceScopeDto implements IResourceScopeDto {
+    resourceId!: string;
+    scopes!: string[] | undefined;
+
+    constructor(data?: IResourceScopeDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.resourceId = _data["resourceId"];
+            if (Array.isArray(_data["scopes"])) {
+                this.scopes = [] as any;
+                for (let item of _data["scopes"])
+                    this.scopes!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): ResourceScopeDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ResourceScopeDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["resourceId"] = this.resourceId;
+        if (Array.isArray(this.scopes)) {
+            data["scopes"] = [];
+            for (let item of this.scopes)
+                data["scopes"].push(item);
+        }
+        return data;
+    }
+}
+
+export interface IResourceScopeDto {
+    resourceId: string;
+    scopes: string[] | undefined;
+}
+
+export class UpdatePermissionDto implements IUpdatePermissionDto {
+    scopes!: string[] | undefined;
+    inheritToChildren!: boolean;
+    expiresAt!: Date | undefined;
+
+    constructor(data?: IUpdatePermissionDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["scopes"])) {
+                this.scopes = [] as any;
+                for (let item of _data["scopes"])
+                    this.scopes!.push(item);
+            }
+            this.inheritToChildren = _data["inheritToChildren"];
+            this.expiresAt = _data["expiresAt"] ? new Date(_data["expiresAt"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): UpdatePermissionDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdatePermissionDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.scopes)) {
+            data["scopes"] = [];
+            for (let item of this.scopes)
+                data["scopes"].push(item);
+        }
+        data["inheritToChildren"] = this.inheritToChildren;
+        data["expiresAt"] = this.expiresAt ? this.expiresAt.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IUpdatePermissionDto {
+    scopes: string[] | undefined;
+    inheritToChildren: boolean;
+    expiresAt: Date | undefined;
+}
+
 export class OrganizationGroupApiDto implements IOrganizationGroupApiDto {
     id!: string | undefined;
     name!: string | undefined;
@@ -11167,6 +15799,8 @@ export class OrganizationTreeApiDto implements IOrganizationTreeApiDto {
     isCeo!: boolean;
     isRoot!: boolean;
     childCount!: number;
+    memberCount!: number;
+    totalMemberCount!: number;
     children!: OrganizationTreeApiDto[] | undefined;
 
     constructor(data?: IOrganizationTreeApiDto) {
@@ -11192,6 +15826,8 @@ export class OrganizationTreeApiDto implements IOrganizationTreeApiDto {
             this.isCeo = _data["isCeo"];
             this.isRoot = _data["isRoot"];
             this.childCount = _data["childCount"];
+            this.memberCount = _data["memberCount"];
+            this.totalMemberCount = _data["totalMemberCount"];
             if (Array.isArray(_data["children"])) {
                 this.children = [] as any;
                 for (let item of _data["children"])
@@ -11221,6 +15857,8 @@ export class OrganizationTreeApiDto implements IOrganizationTreeApiDto {
         data["isCeo"] = this.isCeo;
         data["isRoot"] = this.isRoot;
         data["childCount"] = this.childCount;
+        data["memberCount"] = this.memberCount;
+        data["totalMemberCount"] = this.totalMemberCount;
         if (Array.isArray(this.children)) {
             data["children"] = [];
             for (let item of this.children)
@@ -11243,6 +15881,8 @@ export interface IOrganizationTreeApiDto {
     isCeo: boolean;
     isRoot: boolean;
     childCount: number;
+    memberCount: number;
+    totalMemberCount: number;
     children: OrganizationTreeApiDto[] | undefined;
 }
 
@@ -11348,6 +15988,70 @@ export interface IDeleteConfirmationApiDto {
     descendants: OrganizationGroupApiDto[] | undefined;
     totalCount: number;
     hasDescendants: boolean;
+}
+
+export class GroupMemberApiDto implements IGroupMemberApiDto {
+    groupId!: string | undefined;
+    userId!: string | undefined;
+    userName!: string | undefined;
+    displayName!: string | undefined;
+    email!: string | undefined;
+    groupName!: string | undefined;
+    groupPath!: string | undefined;
+    joinedAt!: Date | undefined;
+
+    constructor(data?: IGroupMemberApiDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.groupId = _data["groupId"];
+            this.userId = _data["userId"];
+            this.userName = _data["userName"];
+            this.displayName = _data["displayName"];
+            this.email = _data["email"];
+            this.groupName = _data["groupName"];
+            this.groupPath = _data["groupPath"];
+            this.joinedAt = _data["joinedAt"] ? new Date(_data["joinedAt"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): GroupMemberApiDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new GroupMemberApiDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["groupId"] = this.groupId;
+        data["userId"] = this.userId;
+        data["userName"] = this.userName;
+        data["displayName"] = this.displayName;
+        data["email"] = this.email;
+        data["groupName"] = this.groupName;
+        data["groupPath"] = this.groupPath;
+        data["joinedAt"] = this.joinedAt ? this.joinedAt.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IGroupMemberApiDto {
+    groupId: string | undefined;
+    userId: string | undefined;
+    userName: string | undefined;
+    displayName: string | undefined;
+    email: string | undefined;
+    groupName: string | undefined;
+    groupPath: string | undefined;
+    joinedAt: Date | undefined;
 }
 
 export class CreateOrganizationGroupApiDto implements ICreateOrganizationGroupApiDto {
@@ -11636,9 +16340,10 @@ export interface IClientStatsDto {
 
 export class UserBriefDto implements IUserBriefDto {
     id!: string | undefined;
-    username!: string | undefined;
+    userName!: string | undefined;
     email!: string | undefined;
-    fullName!: string | undefined;
+    displayName!: string | undefined;
+    isActive!: boolean;
 
     constructor(data?: IUserBriefDto) {
         if (data) {
@@ -11652,9 +16357,10 @@ export class UserBriefDto implements IUserBriefDto {
     init(_data?: any) {
         if (_data) {
             this.id = _data["id"];
-            this.username = _data["username"];
+            this.userName = _data["userName"];
             this.email = _data["email"];
-            this.fullName = _data["fullName"];
+            this.displayName = _data["displayName"];
+            this.isActive = _data["isActive"];
         }
     }
 
@@ -11668,18 +16374,20 @@ export class UserBriefDto implements IUserBriefDto {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
-        data["username"] = this.username;
+        data["userName"] = this.userName;
         data["email"] = this.email;
-        data["fullName"] = this.fullName;
+        data["displayName"] = this.displayName;
+        data["isActive"] = this.isActive;
         return data;
     }
 }
 
 export interface IUserBriefDto {
     id: string | undefined;
-    username: string | undefined;
+    userName: string | undefined;
     email: string | undefined;
-    fullName: string | undefined;
+    displayName: string | undefined;
+    isActive: boolean;
 }
 
 export class GroupBriefDto implements IGroupBriefDto {
@@ -12126,7 +16834,7 @@ export interface IUpdateResourceDto {
     scopeIds: string[] | undefined;
 }
 
-export class ResourceScopeDto implements IResourceScopeDto {
+export class ResourceScopeDto2 implements IResourceScopeDto2 {
     resourceId!: string | undefined;
     resourceName!: string | undefined;
     scopeId!: string | undefined;
@@ -12134,7 +16842,7 @@ export class ResourceScopeDto implements IResourceScopeDto {
     clientId!: string | undefined;
     insDate!: Date | undefined;
 
-    constructor(data?: IResourceScopeDto) {
+    constructor(data?: IResourceScopeDto2) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -12154,9 +16862,9 @@ export class ResourceScopeDto implements IResourceScopeDto {
         }
     }
 
-    static fromJS(data: any): ResourceScopeDto {
+    static fromJS(data: any): ResourceScopeDto2 {
         data = typeof data === 'object' ? data : {};
-        let result = new ResourceScopeDto();
+        let result = new ResourceScopeDto2();
         result.init(data);
         return result;
     }
@@ -12173,7 +16881,7 @@ export class ResourceScopeDto implements IResourceScopeDto {
     }
 }
 
-export interface IResourceScopeDto {
+export interface IResourceScopeDto2 {
     resourceId: string | undefined;
     resourceName: string | undefined;
     scopeId: string | undefined;
@@ -12330,7 +17038,7 @@ export interface ISetUserPermissionDto {
     scopes: string[] | undefined;
 }
 
-export class EffectivePermissionDto implements IEffectivePermissionDto {
+export class EffectivePermissionDto2 implements IEffectivePermissionDto2 {
     resourceId!: string | undefined;
     resourceName!: string | undefined;
     clientId!: string | undefined;
@@ -12341,7 +17049,7 @@ export class EffectivePermissionDto implements IEffectivePermissionDto {
     sourceGroupId!: string | undefined;
     sourceGroupName!: string | undefined;
 
-    constructor(data?: IEffectivePermissionDto) {
+    constructor(data?: IEffectivePermissionDto2) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -12368,9 +17076,9 @@ export class EffectivePermissionDto implements IEffectivePermissionDto {
         }
     }
 
-    static fromJS(data: any): EffectivePermissionDto {
+    static fromJS(data: any): EffectivePermissionDto2 {
         data = typeof data === 'object' ? data : {};
-        let result = new EffectivePermissionDto();
+        let result = new EffectivePermissionDto2();
         result.init(data);
         return result;
     }
@@ -12394,7 +17102,7 @@ export class EffectivePermissionDto implements IEffectivePermissionDto {
     }
 }
 
-export interface IEffectivePermissionDto {
+export interface IEffectivePermissionDto2 {
     resourceId: string | undefined;
     resourceName: string | undefined;
     clientId: string | undefined;
@@ -12832,6 +17540,1241 @@ export interface IPersistedGrantsApiDto {
     totalCount: number;
     pageSize: number;
     persistedGrants: PersistedGrantApiDto[] | undefined;
+}
+
+export class RoleWithCountDto implements IRoleWithCountDto {
+    id!: string | undefined;
+    name!: string | undefined;
+    normalizedName!: string | undefined;
+    description!: string | undefined;
+    userCount!: number;
+
+    constructor(data?: IRoleWithCountDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+            this.normalizedName = _data["normalizedName"];
+            this.description = _data["description"];
+            this.userCount = _data["userCount"];
+        }
+    }
+
+    static fromJS(data: any): RoleWithCountDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new RoleWithCountDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        data["normalizedName"] = this.normalizedName;
+        data["description"] = this.description;
+        data["userCount"] = this.userCount;
+        return data;
+    }
+}
+
+export interface IRoleWithCountDto {
+    id: string | undefined;
+    name: string | undefined;
+    normalizedName: string | undefined;
+    description: string | undefined;
+    userCount: number;
+}
+
+export class CreateRoleDto implements ICreateRoleDto {
+    name!: string;
+    description!: string | undefined;
+
+    constructor(data?: ICreateRoleDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.name = _data["name"];
+            this.description = _data["description"];
+        }
+    }
+
+    static fromJS(data: any): CreateRoleDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateRoleDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        data["description"] = this.description;
+        return data;
+    }
+}
+
+export interface ICreateRoleDto {
+    name: string;
+    description: string | undefined;
+}
+
+export class UpdateRoleDto implements IUpdateRoleDto {
+    name!: string;
+    description!: string | undefined;
+
+    constructor(data?: IUpdateRoleDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.name = _data["name"];
+            this.description = _data["description"];
+        }
+    }
+
+    static fromJS(data: any): UpdateRoleDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateRoleDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        data["description"] = this.description;
+        return data;
+    }
+}
+
+export interface IUpdateRoleDto {
+    name: string;
+    description: string | undefined;
+}
+
+export class RoleUserDto implements IRoleUserDto {
+    id!: string | undefined;
+    userName!: string | undefined;
+    email!: string | undefined;
+    displayName!: string | undefined;
+    isActive!: boolean;
+    createdAt!: Date;
+
+    constructor(data?: IRoleUserDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.userName = _data["userName"];
+            this.email = _data["email"];
+            this.displayName = _data["displayName"];
+            this.isActive = _data["isActive"];
+            this.createdAt = _data["createdAt"] ? new Date(_data["createdAt"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): RoleUserDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new RoleUserDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["userName"] = this.userName;
+        data["email"] = this.email;
+        data["displayName"] = this.displayName;
+        data["isActive"] = this.isActive;
+        data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IRoleUserDto {
+    id: string | undefined;
+    userName: string | undefined;
+    email: string | undefined;
+    displayName: string | undefined;
+    isActive: boolean;
+    createdAt: Date;
+}
+
+export class RoleClaimDto implements IRoleClaimDto {
+    roleId!: string | undefined;
+    claimType!: string | undefined;
+    claimValue!: string | undefined;
+
+    constructor(data?: IRoleClaimDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.roleId = _data["roleId"];
+            this.claimType = _data["claimType"];
+            this.claimValue = _data["claimValue"];
+        }
+    }
+
+    static fromJS(data: any): RoleClaimDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new RoleClaimDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["roleId"] = this.roleId;
+        data["claimType"] = this.claimType;
+        data["claimValue"] = this.claimValue;
+        return data;
+    }
+}
+
+export interface IRoleClaimDto {
+    roleId: string | undefined;
+    claimType: string | undefined;
+    claimValue: string | undefined;
+}
+
+export class AddRoleClaimDto implements IAddRoleClaimDto {
+    claimType!: string;
+    claimValue!: string;
+
+    constructor(data?: IAddRoleClaimDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.claimType = _data["claimType"];
+            this.claimValue = _data["claimValue"];
+        }
+    }
+
+    static fromJS(data: any): AddRoleClaimDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new AddRoleClaimDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["claimType"] = this.claimType;
+        data["claimValue"] = this.claimValue;
+        return data;
+    }
+}
+
+export interface IAddRoleClaimDto {
+    claimType: string;
+    claimValue: string;
+}
+
+export class PagedUserResultDto implements IPagedUserResultDto {
+    items!: UserListItemDto[] | undefined;
+    totalCount!: number;
+    pageIndex!: number;
+    pageSize!: number;
+    totalPages!: number;
+
+    constructor(data?: IPagedUserResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items!.push(UserListItemDto.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+            this.pageIndex = _data["pageIndex"];
+            this.pageSize = _data["pageSize"];
+            this.totalPages = _data["totalPages"];
+        }
+    }
+
+    static fromJS(data: any): PagedUserResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PagedUserResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["totalCount"] = this.totalCount;
+        data["pageIndex"] = this.pageIndex;
+        data["pageSize"] = this.pageSize;
+        data["totalPages"] = this.totalPages;
+        return data;
+    }
+}
+
+export interface IPagedUserResultDto {
+    items: UserListItemDto[] | undefined;
+    totalCount: number;
+    pageIndex: number;
+    pageSize: number;
+    totalPages: number;
+}
+
+export class UserListItemDto implements IUserListItemDto {
+    id!: string | undefined;
+    userName!: string | undefined;
+    email!: string | undefined;
+    displayName!: string | undefined;
+    firstName!: string | undefined;
+    lastName!: string | undefined;
+    isActive!: boolean;
+    emailConfirmed!: boolean;
+    lockoutEnd!: Date | undefined;
+    createdAt!: Date;
+    roles!: string[] | undefined;
+
+    constructor(data?: IUserListItemDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.userName = _data["userName"];
+            this.email = _data["email"];
+            this.displayName = _data["displayName"];
+            this.firstName = _data["firstName"];
+            this.lastName = _data["lastName"];
+            this.isActive = _data["isActive"];
+            this.emailConfirmed = _data["emailConfirmed"];
+            this.lockoutEnd = _data["lockoutEnd"] ? new Date(_data["lockoutEnd"].toString()) : <any>undefined;
+            this.createdAt = _data["createdAt"] ? new Date(_data["createdAt"].toString()) : <any>undefined;
+            if (Array.isArray(_data["roles"])) {
+                this.roles = [] as any;
+                for (let item of _data["roles"])
+                    this.roles!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): UserListItemDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserListItemDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["userName"] = this.userName;
+        data["email"] = this.email;
+        data["displayName"] = this.displayName;
+        data["firstName"] = this.firstName;
+        data["lastName"] = this.lastName;
+        data["isActive"] = this.isActive;
+        data["emailConfirmed"] = this.emailConfirmed;
+        data["lockoutEnd"] = this.lockoutEnd ? this.lockoutEnd.toISOString() : <any>undefined;
+        data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : <any>undefined;
+        if (Array.isArray(this.roles)) {
+            data["roles"] = [];
+            for (let item of this.roles)
+                data["roles"].push(item);
+        }
+        return data;
+    }
+}
+
+export interface IUserListItemDto {
+    id: string | undefined;
+    userName: string | undefined;
+    email: string | undefined;
+    displayName: string | undefined;
+    firstName: string | undefined;
+    lastName: string | undefined;
+    isActive: boolean;
+    emailConfirmed: boolean;
+    lockoutEnd: Date | undefined;
+    createdAt: Date;
+    roles: string[] | undefined;
+}
+
+export class UserDetailDto implements IUserDetailDto {
+    id!: string | undefined;
+    userName!: string | undefined;
+    email!: string | undefined;
+    emailConfirmed!: boolean;
+    phoneNumber!: string | undefined;
+    phoneNumberConfirmed!: boolean;
+    twoFactorEnabled!: boolean;
+    lockoutEnabled!: boolean;
+    lockoutEnd!: Date | undefined;
+    accessFailedCount!: number;
+    firstName!: string | undefined;
+    lastName!: string | undefined;
+    displayName!: string | undefined;
+    primaryOrganizationId!: string | undefined;
+    primaryOrganizationName!: string | undefined;
+    tenantId!: string | undefined;
+    isActive!: boolean;
+    createdAt!: Date;
+    updatedAt!: Date | undefined;
+    roles!: string[] | undefined;
+    claims!: UserClaimSimpleDto[] | undefined;
+
+    constructor(data?: IUserDetailDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.userName = _data["userName"];
+            this.email = _data["email"];
+            this.emailConfirmed = _data["emailConfirmed"];
+            this.phoneNumber = _data["phoneNumber"];
+            this.phoneNumberConfirmed = _data["phoneNumberConfirmed"];
+            this.twoFactorEnabled = _data["twoFactorEnabled"];
+            this.lockoutEnabled = _data["lockoutEnabled"];
+            this.lockoutEnd = _data["lockoutEnd"] ? new Date(_data["lockoutEnd"].toString()) : <any>undefined;
+            this.accessFailedCount = _data["accessFailedCount"];
+            this.firstName = _data["firstName"];
+            this.lastName = _data["lastName"];
+            this.displayName = _data["displayName"];
+            this.primaryOrganizationId = _data["primaryOrganizationId"];
+            this.primaryOrganizationName = _data["primaryOrganizationName"];
+            this.tenantId = _data["tenantId"];
+            this.isActive = _data["isActive"];
+            this.createdAt = _data["createdAt"] ? new Date(_data["createdAt"].toString()) : <any>undefined;
+            this.updatedAt = _data["updatedAt"] ? new Date(_data["updatedAt"].toString()) : <any>undefined;
+            if (Array.isArray(_data["roles"])) {
+                this.roles = [] as any;
+                for (let item of _data["roles"])
+                    this.roles!.push(item);
+            }
+            if (Array.isArray(_data["claims"])) {
+                this.claims = [] as any;
+                for (let item of _data["claims"])
+                    this.claims!.push(UserClaimSimpleDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): UserDetailDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserDetailDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["userName"] = this.userName;
+        data["email"] = this.email;
+        data["emailConfirmed"] = this.emailConfirmed;
+        data["phoneNumber"] = this.phoneNumber;
+        data["phoneNumberConfirmed"] = this.phoneNumberConfirmed;
+        data["twoFactorEnabled"] = this.twoFactorEnabled;
+        data["lockoutEnabled"] = this.lockoutEnabled;
+        data["lockoutEnd"] = this.lockoutEnd ? this.lockoutEnd.toISOString() : <any>undefined;
+        data["accessFailedCount"] = this.accessFailedCount;
+        data["firstName"] = this.firstName;
+        data["lastName"] = this.lastName;
+        data["displayName"] = this.displayName;
+        data["primaryOrganizationId"] = this.primaryOrganizationId;
+        data["primaryOrganizationName"] = this.primaryOrganizationName;
+        data["tenantId"] = this.tenantId;
+        data["isActive"] = this.isActive;
+        data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : <any>undefined;
+        data["updatedAt"] = this.updatedAt ? this.updatedAt.toISOString() : <any>undefined;
+        if (Array.isArray(this.roles)) {
+            data["roles"] = [];
+            for (let item of this.roles)
+                data["roles"].push(item);
+        }
+        if (Array.isArray(this.claims)) {
+            data["claims"] = [];
+            for (let item of this.claims)
+                data["claims"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IUserDetailDto {
+    id: string | undefined;
+    userName: string | undefined;
+    email: string | undefined;
+    emailConfirmed: boolean;
+    phoneNumber: string | undefined;
+    phoneNumberConfirmed: boolean;
+    twoFactorEnabled: boolean;
+    lockoutEnabled: boolean;
+    lockoutEnd: Date | undefined;
+    accessFailedCount: number;
+    firstName: string | undefined;
+    lastName: string | undefined;
+    displayName: string | undefined;
+    primaryOrganizationId: string | undefined;
+    primaryOrganizationName: string | undefined;
+    tenantId: string | undefined;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date | undefined;
+    roles: string[] | undefined;
+    claims: UserClaimSimpleDto[] | undefined;
+}
+
+export class UserClaimSimpleDto implements IUserClaimSimpleDto {
+    type!: string | undefined;
+    value!: string | undefined;
+
+    constructor(data?: IUserClaimSimpleDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.type = _data["type"];
+            this.value = _data["value"];
+        }
+    }
+
+    static fromJS(data: any): UserClaimSimpleDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserClaimSimpleDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["type"] = this.type;
+        data["value"] = this.value;
+        return data;
+    }
+}
+
+export interface IUserClaimSimpleDto {
+    type: string | undefined;
+    value: string | undefined;
+}
+
+export class UpdateUserDetailDto implements IUpdateUserDetailDto {
+    userName!: string;
+    email!: string;
+    firstName!: string | undefined;
+    lastName!: string | undefined;
+    displayName!: string | undefined;
+    phoneNumber!: string | undefined;
+    primaryOrganizationId!: string | undefined;
+    isActive!: boolean;
+    emailConfirmed!: boolean;
+    lockoutEnabled!: boolean;
+    twoFactorEnabled!: boolean;
+
+    constructor(data?: IUpdateUserDetailDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.userName = _data["userName"];
+            this.email = _data["email"];
+            this.firstName = _data["firstName"];
+            this.lastName = _data["lastName"];
+            this.displayName = _data["displayName"];
+            this.phoneNumber = _data["phoneNumber"];
+            this.primaryOrganizationId = _data["primaryOrganizationId"];
+            this.isActive = _data["isActive"];
+            this.emailConfirmed = _data["emailConfirmed"];
+            this.lockoutEnabled = _data["lockoutEnabled"];
+            this.twoFactorEnabled = _data["twoFactorEnabled"];
+        }
+    }
+
+    static fromJS(data: any): UpdateUserDetailDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateUserDetailDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["userName"] = this.userName;
+        data["email"] = this.email;
+        data["firstName"] = this.firstName;
+        data["lastName"] = this.lastName;
+        data["displayName"] = this.displayName;
+        data["phoneNumber"] = this.phoneNumber;
+        data["primaryOrganizationId"] = this.primaryOrganizationId;
+        data["isActive"] = this.isActive;
+        data["emailConfirmed"] = this.emailConfirmed;
+        data["lockoutEnabled"] = this.lockoutEnabled;
+        data["twoFactorEnabled"] = this.twoFactorEnabled;
+        return data;
+    }
+}
+
+export interface IUpdateUserDetailDto {
+    userName: string;
+    email: string;
+    firstName: string | undefined;
+    lastName: string | undefined;
+    displayName: string | undefined;
+    phoneNumber: string | undefined;
+    primaryOrganizationId: string | undefined;
+    isActive: boolean;
+    emailConfirmed: boolean;
+    lockoutEnabled: boolean;
+    twoFactorEnabled: boolean;
+}
+
+export class UserClaimDto implements IUserClaimDto {
+    id!: number;
+    userId!: string | undefined;
+    claimType!: string | undefined;
+    claimValue!: string | undefined;
+
+    constructor(data?: IUserClaimDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.userId = _data["userId"];
+            this.claimType = _data["claimType"];
+            this.claimValue = _data["claimValue"];
+        }
+    }
+
+    static fromJS(data: any): UserClaimDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserClaimDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["userId"] = this.userId;
+        data["claimType"] = this.claimType;
+        data["claimValue"] = this.claimValue;
+        return data;
+    }
+}
+
+export interface IUserClaimDto {
+    id: number;
+    userId: string | undefined;
+    claimType: string | undefined;
+    claimValue: string | undefined;
+}
+
+export class AddUserClaimDto implements IAddUserClaimDto {
+    claimType!: string;
+    claimValue!: string;
+
+    constructor(data?: IAddUserClaimDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.claimType = _data["claimType"];
+            this.claimValue = _data["claimValue"];
+        }
+    }
+
+    static fromJS(data: any): AddUserClaimDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new AddUserClaimDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["claimType"] = this.claimType;
+        data["claimValue"] = this.claimValue;
+        return data;
+    }
+}
+
+export interface IAddUserClaimDto {
+    claimType: string;
+    claimValue: string;
+}
+
+export class UserStatsDto implements IUserStatsDto {
+    totalUsers!: number;
+    activeUsers!: number;
+    inactiveUsers!: number;
+    lockedUsers!: number;
+    unconfirmedUsers!: number;
+    recentRegistrations!: number;
+    roleDistribution!: RoleDistributionDto[] | undefined;
+
+    constructor(data?: IUserStatsDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.totalUsers = _data["totalUsers"];
+            this.activeUsers = _data["activeUsers"];
+            this.inactiveUsers = _data["inactiveUsers"];
+            this.lockedUsers = _data["lockedUsers"];
+            this.unconfirmedUsers = _data["unconfirmedUsers"];
+            this.recentRegistrations = _data["recentRegistrations"];
+            if (Array.isArray(_data["roleDistribution"])) {
+                this.roleDistribution = [] as any;
+                for (let item of _data["roleDistribution"])
+                    this.roleDistribution!.push(RoleDistributionDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): UserStatsDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserStatsDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["totalUsers"] = this.totalUsers;
+        data["activeUsers"] = this.activeUsers;
+        data["inactiveUsers"] = this.inactiveUsers;
+        data["lockedUsers"] = this.lockedUsers;
+        data["unconfirmedUsers"] = this.unconfirmedUsers;
+        data["recentRegistrations"] = this.recentRegistrations;
+        if (Array.isArray(this.roleDistribution)) {
+            data["roleDistribution"] = [];
+            for (let item of this.roleDistribution)
+                data["roleDistribution"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IUserStatsDto {
+    totalUsers: number;
+    activeUsers: number;
+    inactiveUsers: number;
+    lockedUsers: number;
+    unconfirmedUsers: number;
+    recentRegistrations: number;
+    roleDistribution: RoleDistributionDto[] | undefined;
+}
+
+export class RoleDistributionDto implements IRoleDistributionDto {
+    roleId!: string | undefined;
+    roleName!: string | undefined;
+    userCount!: number;
+    percentage!: number;
+
+    constructor(data?: IRoleDistributionDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.roleId = _data["roleId"];
+            this.roleName = _data["roleName"];
+            this.userCount = _data["userCount"];
+            this.percentage = _data["percentage"];
+        }
+    }
+
+    static fromJS(data: any): RoleDistributionDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new RoleDistributionDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["roleId"] = this.roleId;
+        data["roleName"] = this.roleName;
+        data["userCount"] = this.userCount;
+        data["percentage"] = this.percentage;
+        return data;
+    }
+}
+
+export interface IRoleDistributionDto {
+    roleId: string | undefined;
+    roleName: string | undefined;
+    userCount: number;
+    percentage: number;
+}
+
+export class ResetPasswordDto implements IResetPasswordDto {
+    newPassword!: string;
+    confirmPassword!: string;
+
+    constructor(data?: IResetPasswordDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.newPassword = _data["newPassword"];
+            this.confirmPassword = _data["confirmPassword"];
+        }
+    }
+
+    static fromJS(data: any): ResetPasswordDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ResetPasswordDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["newPassword"] = this.newPassword;
+        data["confirmPassword"] = this.confirmPassword;
+        return data;
+    }
+}
+
+export interface IResetPasswordDto {
+    newPassword: string;
+    confirmPassword: string;
+}
+
+export class SetUserRolesDto implements ISetUserRolesDto {
+    roleIds!: string[] | undefined;
+
+    constructor(data?: ISetUserRolesDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["roleIds"])) {
+                this.roleIds = [] as any;
+                for (let item of _data["roleIds"])
+                    this.roleIds!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): SetUserRolesDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new SetUserRolesDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.roleIds)) {
+            data["roleIds"] = [];
+            for (let item of this.roleIds)
+                data["roleIds"].push(item);
+        }
+        return data;
+    }
+}
+
+export interface ISetUserRolesDto {
+    roleIds: string[] | undefined;
+}
+
+export class UserRoleDto implements IUserRoleDto {
+    userId!: string | undefined;
+    roleId!: string | undefined;
+    roleName!: string | undefined;
+
+    constructor(data?: IUserRoleDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.userId = _data["userId"];
+            this.roleId = _data["roleId"];
+            this.roleName = _data["roleName"];
+        }
+    }
+
+    static fromJS(data: any): UserRoleDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserRoleDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["userId"] = this.userId;
+        data["roleId"] = this.roleId;
+        data["roleName"] = this.roleName;
+        return data;
+    }
+}
+
+export interface IUserRoleDto {
+    userId: string | undefined;
+    roleId: string | undefined;
+    roleName: string | undefined;
+}
+
+export class AvailabilityDto implements IAvailabilityDto {
+    available!: boolean;
+
+    constructor(data?: IAvailabilityDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.available = _data["available"];
+        }
+    }
+
+    static fromJS(data: any): AvailabilityDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new AvailabilityDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["available"] = this.available;
+        return data;
+    }
+}
+
+export interface IAvailabilityDto {
+    available: boolean;
+}
+
+export class BulkOperationResultDto implements IBulkOperationResultDto {
+    success!: boolean;
+    processedCount!: number;
+    failedCount!: number;
+    errors!: string[] | undefined;
+
+    constructor(data?: IBulkOperationResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.success = _data["success"];
+            this.processedCount = _data["processedCount"];
+            this.failedCount = _data["failedCount"];
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): BulkOperationResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BulkOperationResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["success"] = this.success;
+        data["processedCount"] = this.processedCount;
+        data["failedCount"] = this.failedCount;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        return data;
+    }
+}
+
+export interface IBulkOperationResultDto {
+    success: boolean;
+    processedCount: number;
+    failedCount: number;
+    errors: string[] | undefined;
+}
+
+export class BulkUserOperationDto implements IBulkUserOperationDto {
+    userIds!: string[];
+    operation!: string;
+    roleId!: string | undefined;
+
+    constructor(data?: IBulkUserOperationDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+        if (!data) {
+            this.userIds = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["userIds"])) {
+                this.userIds = [] as any;
+                for (let item of _data["userIds"])
+                    this.userIds!.push(item);
+            }
+            this.operation = _data["operation"];
+            this.roleId = _data["roleId"];
+        }
+    }
+
+    static fromJS(data: any): BulkUserOperationDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BulkUserOperationDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.userIds)) {
+            data["userIds"] = [];
+            for (let item of this.userIds)
+                data["userIds"].push(item);
+        }
+        data["operation"] = this.operation;
+        data["roleId"] = this.roleId;
+        return data;
+    }
+}
+
+export interface IBulkUserOperationDto {
+    userIds: string[];
+    operation: string;
+    roleId: string | undefined;
+}
+
+export class CreateUserDto implements ICreateUserDto {
+    userName!: string;
+    email!: string;
+    password!: string;
+    confirmPassword!: string;
+    firstName!: string | undefined;
+    lastName!: string | undefined;
+    displayName!: string | undefined;
+    phoneNumber!: string | undefined;
+    primaryOrganizationId!: string | undefined;
+    tenantId!: string | undefined;
+    isActive!: boolean;
+    emailConfirmed!: boolean;
+    roles!: string[] | undefined;
+
+    constructor(data?: ICreateUserDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.userName = _data["userName"];
+            this.email = _data["email"];
+            this.password = _data["password"];
+            this.confirmPassword = _data["confirmPassword"];
+            this.firstName = _data["firstName"];
+            this.lastName = _data["lastName"];
+            this.displayName = _data["displayName"];
+            this.phoneNumber = _data["phoneNumber"];
+            this.primaryOrganizationId = _data["primaryOrganizationId"];
+            this.tenantId = _data["tenantId"];
+            this.isActive = _data["isActive"];
+            this.emailConfirmed = _data["emailConfirmed"];
+            if (Array.isArray(_data["roles"])) {
+                this.roles = [] as any;
+                for (let item of _data["roles"])
+                    this.roles!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): CreateUserDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateUserDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["userName"] = this.userName;
+        data["email"] = this.email;
+        data["password"] = this.password;
+        data["confirmPassword"] = this.confirmPassword;
+        data["firstName"] = this.firstName;
+        data["lastName"] = this.lastName;
+        data["displayName"] = this.displayName;
+        data["phoneNumber"] = this.phoneNumber;
+        data["primaryOrganizationId"] = this.primaryOrganizationId;
+        data["tenantId"] = this.tenantId;
+        data["isActive"] = this.isActive;
+        data["emailConfirmed"] = this.emailConfirmed;
+        if (Array.isArray(this.roles)) {
+            data["roles"] = [];
+            for (let item of this.roles)
+                data["roles"].push(item);
+        }
+        return data;
+    }
+}
+
+export interface ICreateUserDto {
+    userName: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    firstName: string | undefined;
+    lastName: string | undefined;
+    displayName: string | undefined;
+    phoneNumber: string | undefined;
+    primaryOrganizationId: string | undefined;
+    tenantId: string | undefined;
+    isActive: boolean;
+    emailConfirmed: boolean;
+    roles: string[] | undefined;
 }
 
 export class BaseRoleDtoOfString implements IBaseRoleDtoOfString {

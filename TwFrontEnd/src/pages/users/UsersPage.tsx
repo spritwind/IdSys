@@ -5,7 +5,7 @@
  * 使用者管理頁面 - 含組織架構分群顯示
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Users,
@@ -28,14 +28,12 @@ import {
     X,
     Check,
     Building2,
-    FolderTree,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import clsx from 'clsx';
 import * as userApi from '../../services/userApi';
 import { organizationApi } from '../../services/organizationApi';
 import type { UserListDto, RoleDto, UserSearchParams, UserStatsDto } from '../../types/user';
-import type { OrganizationTreeNode } from '../../types/organization';
+import type { OrganizationTreeNode, OrganizationMember } from '../../types/organization';
 import UserDetailModal from './components/UserDetailModal';
 import UserCreateModal from './components/UserCreateModal';
 import ResetPasswordModal from './components/ResetPasswordModal';
@@ -47,7 +45,7 @@ import DeleteConfirmModal from './components/DeleteConfirmModal';
 function StatCard({ icon: Icon, label, value, color }: {
     icon: React.ElementType;
     label: string;
-    value: number;
+    value: number | undefined;
     color: string;
 }) {
     return (
@@ -62,7 +60,7 @@ function StatCard({ icon: Icon, label, value, color }: {
                 </div>
                 <div>
                     <p className="text-sm text-gray-400">{label}</p>
-                    <p className="text-2xl font-semibold text-white">{value.toLocaleString()}</p>
+                    <p className="text-2xl font-semibold text-white">{(value ?? 0).toLocaleString()}</p>
                 </div>
             </div>
         </motion.div>
@@ -109,75 +107,6 @@ function RoleBadge({ role }: { role: string }) {
     );
 }
 
-// 組織樹狀結構項目
-function OrganizationTreeItem({
-    org,
-    selectedId,
-    onSelect,
-    depth = 0,
-}: {
-    org: OrganizationTreeNode;
-    selectedId?: string;
-    onSelect: (org: OrganizationTreeNode | null) => void;
-    depth?: number;
-}) {
-    const [expanded, setExpanded] = useState(depth < 2);
-    const hasChildren = org.children && org.children.length > 0;
-    const isSelected = org.id === selectedId;
-
-    return (
-        <div>
-            <div
-                className={clsx(
-                    'flex items-center gap-2 py-2 px-2 rounded-lg cursor-pointer transition-colors',
-                    isSelected
-                        ? 'bg-amber-500/20 text-white'
-                        : 'hover:bg-white/5 text-[var(--color-text-secondary)]'
-                )}
-                style={{ paddingLeft: `${depth * 12 + 8}px` }}
-                onClick={() => onSelect(org)}
-            >
-                {hasChildren ? (
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setExpanded(!expanded);
-                        }}
-                        className="p-0.5 hover:bg-white/10 rounded"
-                    >
-                        {expanded ? (
-                            <ChevronDown size={14} />
-                        ) : (
-                            <ChevronRight size={14} />
-                        )}
-                    </button>
-                ) : (
-                    <div className="w-4" />
-                )}
-                <Building2 size={14} className={isSelected ? 'text-amber-400' : ''} />
-                <span className="text-sm truncate flex-1">{org.name}</span>
-                {org.childCount > 0 && (
-                    <span className="text-xs text-gray-500">{org.childCount}</span>
-                )}
-            </div>
-
-            {hasChildren && expanded && (
-                <div>
-                    {org.children!.map((child: OrganizationTreeNode) => (
-                        <OrganizationTreeItem
-                            key={child.id}
-                            org={child}
-                            selectedId={selectedId}
-                            onSelect={onSelect}
-                            depth={depth + 1}
-                        />
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-}
-
 export default function UsersPage() {
     // 狀態
     const [users, setUsers] = useState<UserListDto[]>([]);
@@ -191,7 +120,6 @@ export default function UsersPage() {
     // 組織架構
     const [organizations, setOrganizations] = useState<OrganizationTreeNode[]>([]);
     const [selectedOrg, setSelectedOrg] = useState<OrganizationTreeNode | null>(null);
-    const [showOrgTree, setShowOrgTree] = useState(true);
 
     // 搜尋與篩選
     const [searchTerm, setSearchTerm] = useState('');
@@ -222,32 +150,73 @@ export default function UsersPage() {
         loadOrganizations();
     }, []);
 
+    // 將組織成員轉換為使用者列表格式
+    const convertMemberToUserList = (member: OrganizationMember): UserListDto => ({
+        id: member.userId,
+        userName: member.userName,
+        email: member.email || '',
+        displayName: member.displayName || member.userName,
+        isActive: true, // 組織成員預設為啟用
+        emailConfirmed: true,
+        createdAt: member.joinedAt || new Date().toISOString(),
+        roles: [], // 需要另外查詢使用者角色
+    });
+
     // 載入資料
     const loadData = useCallback(async () => {
         setLoading(true);
         try {
-            const params: UserSearchParams = {
-                search: searchTerm || undefined,
-                roleId: filterRole || undefined,
-                isActive: filterStatus === 'active' ? true : filterStatus === 'inactive' ? false : undefined,
-                organizationId: selectedOrg?.id || undefined,
-                page: currentPage,
-                pageSize,
-            };
-
-            const [usersResult, rolesResult] = await Promise.all([
-                userApi.getUsers(params),
-                userApi.getRoles(),
-            ]);
-
-            setUsers(usersResult.items);
-            setTotalCount(usersResult.totalCount);
+            // 載入角色列表
+            const rolesResult = await userApi.getRoles();
             setRoles(rolesResult);
 
             // 載入統計（首次載入時）
             if (!stats) {
                 const statsResult = await userApi.getUserStats();
                 setStats(statsResult);
+            }
+
+            // 根據是否選擇組織決定載入方式
+            if (selectedOrg) {
+                // 使用組織成員 API
+                const members = await organizationApi.getMembers(selectedOrg.id);
+
+                // 轉換為 UserListDto 格式
+                let userList = members.map(convertMemberToUserList);
+
+                // 前端篩選（搜尋、角色、狀態）
+                if (searchTerm) {
+                    const term = searchTerm.toLowerCase();
+                    userList = userList.filter(u =>
+                        u.userName.toLowerCase().includes(term) ||
+                        (u.email?.toLowerCase().includes(term)) ||
+                        (u.displayName?.toLowerCase().includes(term))
+                    );
+                }
+
+                if (filterRole) {
+                    userList = userList.filter(u => u.roles.some(r => r === filterRole));
+                }
+
+                // 分頁
+                const startIdx = (currentPage - 1) * pageSize;
+                const paginatedUsers = userList.slice(startIdx, startIdx + pageSize);
+
+                setUsers(paginatedUsers);
+                setTotalCount(userList.length);
+            } else {
+                // 無組織選擇時，使用一般使用者 API
+                const params: UserSearchParams = {
+                    search: searchTerm || undefined,
+                    roleId: filterRole || undefined,
+                    isActive: filterStatus === 'active' ? true : filterStatus === 'inactive' ? false : undefined,
+                    page: currentPage,
+                    pageSize,
+                };
+
+                const usersResult = await userApi.getUsers(params);
+                setUsers(usersResult.items);
+                setTotalCount(usersResult.totalCount);
             }
         } catch (error) {
             console.error('Failed to load users:', error);
@@ -382,6 +351,56 @@ export default function UsersPage() {
             {/* 搜尋與篩選 */}
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4">
                 <div className="flex flex-col md:flex-row gap-4">
+                    {/* 組織選擇 */}
+                    <div className="relative min-w-[200px]">
+                        <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <select
+                            value={selectedOrg?.id || ''}
+                            onChange={(e) => {
+                                const orgId = e.target.value;
+                                if (!orgId) {
+                                    handleSelectOrg(null);
+                                } else {
+                                    // 在組織樹中尋找對應的節點
+                                    const findOrg = (nodes: OrganizationTreeNode[]): OrganizationTreeNode | null => {
+                                        for (const node of nodes) {
+                                            if (node.id === orgId) return node;
+                                            if (node.children?.length) {
+                                                const found = findOrg(node.children);
+                                                if (found) return found;
+                                            }
+                                        }
+                                        return null;
+                                    };
+                                    const org = findOrg(organizations);
+                                    if (org) handleSelectOrg(org);
+                                }
+                            }}
+                            className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-amber-500/50 appearance-none cursor-pointer"
+                        >
+                            <option value="" className="bg-gray-800">全部組織</option>
+                            {(() => {
+                                // 扁平化組織樹並加入縮排
+                                const flattenOrgs = (nodes: OrganizationTreeNode[], depth = 0): { id: string; name: string; depth: number }[] => {
+                                    const result: { id: string; name: string; depth: number }[] = [];
+                                    for (const node of nodes) {
+                                        result.push({ id: node.id, name: node.name, depth });
+                                        if (node.children?.length) {
+                                            result.push(...flattenOrgs(node.children, depth + 1));
+                                        }
+                                    }
+                                    return result;
+                                };
+                                return flattenOrgs(organizations).map((org) => (
+                                    <option key={org.id} value={org.id} className="bg-gray-800">
+                                        {'　'.repeat(org.depth)}{org.name}
+                                    </option>
+                                ));
+                            })()}
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    </div>
+
                     {/* 搜尋框 */}
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />

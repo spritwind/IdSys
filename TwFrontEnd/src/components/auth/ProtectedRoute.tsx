@@ -48,11 +48,15 @@ export function ProtectedRoute({
         }
     }, [isLoading, isAuthenticated, user, location.pathname]);
 
-    // 重置登入狀態當認證成功時
+    // 重置登入狀態當認證成功時（延遲重置以避免競態條件）
     useEffect(() => {
         if (isAuthenticated) {
-            loginTriggered.current = false;
-            logRoute('Login triggered flag reset (authenticated)');
+            // 延遲重置，避免導航期間的狀態抖動觸發重複登入
+            const timer = setTimeout(() => {
+                loginTriggered.current = false;
+                logRoute('Login triggered flag reset (authenticated) - delayed');
+            }, 2000); // 2秒後才重置，足夠時間讓導航完成
+            return () => clearTimeout(timer);
         }
     }, [isAuthenticated]);
 
@@ -196,7 +200,7 @@ function AccessDenied({
 
                     {/* 返回按鈕 */}
                     <a
-                        href="/dashboard"
+                        href={`${import.meta.env.BASE_URL}dashboard`}
                         className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg shadow-blue-500/25"
                     >
                         返回儀表板

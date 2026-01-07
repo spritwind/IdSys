@@ -68,7 +68,7 @@ export function CallbackPage() {
                         <p className="text-slate-600 mb-6">{error.message || '發生未知錯誤，請稍後再試。'}</p>
 
                         <a
-                            href="/auth/login"
+                            href={`${import.meta.env.BASE_URL}auth/login`}
                             className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg shadow-blue-500/25"
                         >
                             重新登入

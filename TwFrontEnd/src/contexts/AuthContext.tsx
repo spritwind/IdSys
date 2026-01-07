@@ -20,6 +20,8 @@ const userManager = new UserManager({
 
 // 防止重複處理回調的標記
 let callbackProcessing = false;
+// 標記是否剛完成回調（防止導航後重新載入）
+let justCompletedCallback = false;
 
 // 建立 Context
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -141,10 +143,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const handleCallback = async () => {
             const currentPath = window.location.pathname;
-            logAuth('handleCallback started', { path: currentPath, search: window.location.search });
+            const basePath = import.meta.env.BASE_URL.replace(/\/$/, ''); // 移除結尾斜線
+            logAuth('handleCallback started', { path: currentPath, basePath, search: window.location.search });
 
             // 處理登入回調 - 只處理認證，導航由 CallbackPage 處理
-            if (currentPath === '/auth/callback') {
+            // 支援有或沒有基礎路徑的情況
+            const isAuthCallback = currentPath === `${basePath}/auth/callback` || currentPath === '/auth/callback';
+            if (isAuthCallback) {
                 try {
                     // 檢查 URL 是否有授權碼
                     const urlParams = new URLSearchParams(window.location.search);
@@ -162,13 +167,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                             setOidcUser(callbackUser);
                             setStatus('authenticated');
                             setError(null);
+                            // 標記剛完成回調，防止導航到 dashboard 時觸發 loadUser 造成狀態重置
+                            justCompletedCallback = true;
                             logAuth('Callback successful, user authenticated', {
                                 sub: callbackUser.profile?.sub,
                                 expiresAt: callbackUser.expires_at,
                             });
 
                             // 清除 URL 中的授權碼，防止重新整理時再次使用
-                            window.history.replaceState({}, '', '/auth/callback');
+                            window.history.replaceState({}, '', `${basePath}/auth/callback`);
                         } finally {
                             callbackProcessing = false;
                         }
@@ -187,7 +194,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
 
             // 處理靜默更新回調
-            if (currentPath === '/auth/silent-renew') {
+            const isSilentRenew = currentPath === `${basePath}/auth/silent-renew` || currentPath === '/auth/silent-renew';
+            if (isSilentRenew) {
                 try {
                     logAuth('Processing silent renew callback');
                     await userManager.signinSilentCallback();
@@ -198,6 +206,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
 
             // 一般頁面：載入使用者（從 sessionStorage 讀取已存在的 token）
+            // 如果剛完成回調，跳過 loadUser 以避免狀態重置
+            if (justCompletedCallback) {
+                logAuth('Skipping loadUser - just completed callback');
+                justCompletedCallback = false; // 重置標記，下次可正常載入
+                return;
+            }
             logAuth('Normal page, loading user from storage');
             await loadUser();
         };

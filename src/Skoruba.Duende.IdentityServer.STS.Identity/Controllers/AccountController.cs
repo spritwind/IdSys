@@ -28,6 +28,7 @@ using Skoruba.Duende.IdentityServer.Shared.Configuration.Configuration.Identity;
 using Skoruba.Duende.IdentityServer.STS.Identity.Configuration;
 using Skoruba.Duende.IdentityServer.STS.Identity.Helpers;
 using Skoruba.Duende.IdentityServer.STS.Identity.Helpers.Localization;
+using Skoruba.Duende.IdentityServer.STS.Identity.Services;
 using Skoruba.Duende.IdentityServer.STS.Identity.ViewModels.Account;
 
 namespace Skoruba.Duende.IdentityServer.STS.Identity.Controllers
@@ -52,6 +53,7 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.Controllers
         private readonly IdentityOptions _identityOptions;
         private readonly ILogger<AccountController<TUser, TKey>> _logger;
         private readonly IIdentityProviderStore _identityProviderStore;
+        private readonly ILoginAuditService _loginAuditService;
 
         public AccountController(
             UserResolver<TUser> userResolver,
@@ -67,7 +69,8 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.Controllers
             RegisterConfiguration registerConfiguration,
             IdentityOptions identityOptions,
             ILogger<AccountController<TUser, TKey>> logger,
-            IIdentityProviderStore identityProviderStore)
+            IIdentityProviderStore identityProviderStore,
+            ILoginAuditService loginAuditService = null)
         {
             _userResolver = userResolver;
             _userManager = userManager;
@@ -83,10 +86,12 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.Controllers
             _identityOptions = identityOptions;
             _logger = logger;
             _identityProviderStore = identityProviderStore;
+            _loginAuditService = loginAuditService;
         }
 
         /// <summary>
         /// Entry point into the login workflow
+        /// 優化：自動導向 Google OAuth 以減少跳轉次數
         /// </summary>
         [HttpGet]
         [AllowAnonymous]
@@ -95,10 +100,39 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.Controllers
             // build a model so we know what to show on the login page
             var vm = await BuildLoginViewModelAsync(returnUrl);
 
+            // 檢查是否應該自動導向 Google OAuth
+            var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+
+            // 檢查 acr_values 是否指定 Google IdP
+            var requestedIdp = context?.AcrValues?.FirstOrDefault(x => x.StartsWith("idp:"))?.Substring(4);
+            var shouldAutoRedirectToGoogle = requestedIdp?.Equals("Google", StringComparison.OrdinalIgnoreCase) == true;
+
+            // 如果明確指定 Google IdP，直接導向
+            if (shouldAutoRedirectToGoogle)
+            {
+                var googleProvider = vm.ExternalProviders.FirstOrDefault(x =>
+                    x.AuthenticationScheme.Equals("Google", StringComparison.OrdinalIgnoreCase));
+                if (googleProvider != null)
+                {
+                    return ExternalLogin(googleProvider.AuthenticationScheme, returnUrl);
+                }
+            }
+
+            // 如果禁用本地登入且只有一個外部提供者（通常是 Google），自動導向
             if (vm.EnableLocalLogin == false && vm.ExternalProviders.Count() == 1)
             {
                 // only one option for logging in
                 return ExternalLogin(vm.ExternalProviders.First().AuthenticationScheme, returnUrl);
+            }
+
+            // 新增：如果只有 Google 一個外部 IdP 且沒有本地登入，自動導向
+            // 這樣可以跳過顯示登入頁面
+            var googleOnlyProvider = vm.ExternalProviders.FirstOrDefault(x =>
+                x.AuthenticationScheme.Equals("Google", StringComparison.OrdinalIgnoreCase));
+            if (googleOnlyProvider != null && vm.ExternalProviders.Count() == 1)
+            {
+                // 只有 Google 一個外部提供者，直接導向
+                return ExternalLogin(googleOnlyProvider.AuthenticationScheme, returnUrl);
             }
 
             return View(vm);
@@ -382,47 +416,219 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.Controllers
             return View();
         }
 
+        /// <summary>
+        /// 處理外部登入回調
+        /// 優化：直接跳回客戶端，不顯示確認頁面，並記錄審計日誌
+        /// </summary>
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
         {
+            // 取得客戶端資訊用於審計日誌
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+            var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+            var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+            var clientId = context?.Client?.ClientId ?? "Unknown";
+            var redirectUri = context?.RedirectUri ?? returnUrl;
+
             if (remoteError != null)
             {
-                ModelState.AddModelError(string.Empty, _localizer["ErrorExternalProvider", remoteError]);
+                _logger.LogWarning("External login error: {Error}", remoteError);
 
+                // 記錄登入失敗
+                if (_loginAuditService != null)
+                {
+                    await _loginAuditService.LogExternalLoginFailureAsync(
+                        "Unknown",
+                        "External",
+                        $"Remote error: {remoteError}",
+                        ipAddress,
+                        userAgent);
+                }
+
+                ModelState.AddModelError(string.Empty, _localizer["ErrorExternalProvider", remoteError]);
                 return View(nameof(Login));
             }
+
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
+                _logger.LogWarning("External login info is null");
                 return RedirectToAction(nameof(Login));
             }
 
-            // Sign in the user with this external login provider if the user already has a login.
-            var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false);
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            var displayName = info.Principal.Identity?.Name ?? email;
+
+            // 使用 isPersistent: true 來延長 SSO Session
+            var result = await _signInManager.ExternalLoginSignInAsync(
+                info.LoginProvider,
+                info.ProviderKey,
+                isPersistent: true,  // 延長 Session 有效期
+                bypassTwoFactor: true);
+
             if (result.Succeeded)
             {
+                // 取得用戶資訊用於審計日誌
+                var existingUser = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+                var userId = existingUser?.Id?.ToString() ?? "Unknown";
+
+                _logger.LogInformation(
+                    "External login success: User={UserId}, Provider={Provider}",
+                    userId, info.LoginProvider);
+
+                // 記錄登入成功到 AuditLog
+                if (_loginAuditService != null && existingUser != null)
+                {
+                    await _loginAuditService.LogExternalLoginSuccessAsync(
+                        userId,
+                        displayName,
+                        email,
+                        info.LoginProvider,
+                        clientId,
+                        redirectUri,
+                        ipAddress,
+                        userAgent);
+                }
+
+                // 觸發登入成功事件
+                await _events.RaiseAsync(new UserLoginSuccessEvent(
+                    existingUser?.UserName,
+                    userId,
+                    displayName,
+                    clientId: clientId));
+
+                // 直接跳回客戶端
                 return RedirectToLocal(returnUrl);
             }
+
             if (result.RequiresTwoFactor)
             {
                 return RedirectToAction(nameof(LoginWith2fa), new { ReturnUrl = returnUrl });
             }
+
             if (result.IsLockedOut)
             {
+                // 記錄帳號被鎖定
+                if (_loginAuditService != null)
+                {
+                    await _loginAuditService.LogExternalLoginFailureAsync(
+                        email,
+                        info.LoginProvider,
+                        "Account locked out",
+                        ipAddress,
+                        userAgent);
+                }
                 return View("Lockout");
             }
 
-            // 自動使用外部登入資訊建立帳號
-            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-            var userName = info.Principal.Identity.Name ?? email?.Split('@')[0];
+            // 用戶不存在，檢查是否允許自動建立帳號
+            var userName = info.Principal.Identity?.Name ?? email?.Split('@')[0];
+            var firstName = info.Principal.FindFirstValue(ClaimTypes.GivenName) ?? "";
+            var lastName = info.Principal.FindFirstValue(ClaimTypes.Surname) ?? "";
 
+            // 檢查 Client 是否允許自動註冊外部登入用戶
+            // 可以在 Client 的 Properties 中設定 "AutoRegisterExternalUsers" = "true"
+            var autoRegisterEnabled = await IsAutoRegisterEnabledForClientAsync(context);
+
+            if (!autoRegisterEnabled)
+            {
+                // Client 不允許自動註冊，顯示手動確認頁面
+                _logger.LogInformation(
+                    "Auto registration disabled for client {ClientId}, showing confirmation page",
+                    clientId);
+
+                if (_loginAuditService != null)
+                {
+                    await _loginAuditService.LogExternalLoginFailureAsync(
+                        email,
+                        info.LoginProvider,
+                        "Auto registration disabled for this client",
+                        ipAddress,
+                        userAgent);
+                }
+
+                ViewData["ReturnUrl"] = returnUrl;
+                ViewData["LoginProvider"] = info.LoginProvider;
+                return View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel { Email = email, UserName = userName });
+            }
+
+            // 🆕 檢查 Email 網域限制（只允許 @uccapital.com.tw）
+            var allowedDomain = "@uccapital.com.tw";
+            if (!string.IsNullOrEmpty(email) && !email.EndsWith(allowedDomain, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogWarning(
+                    "External login rejected: Email domain not allowed. Email={Email}, Provider={Provider}",
+                    email, info.LoginProvider);
+
+                if (_loginAuditService != null)
+                {
+                    await _loginAuditService.LogExternalLoginFailureAsync(
+                        email,
+                        info.LoginProvider,
+                        $"Email domain not allowed. Only {allowedDomain} is permitted.",
+                        ipAddress,
+                        userAgent);
+                }
+
+                ModelState.AddModelError(string.Empty, $"只允許 {allowedDomain} 網域的 Email 註冊。");
+                ViewData["ReturnUrl"] = returnUrl;
+                ViewData["LoginProvider"] = info.LoginProvider;
+                return View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel { Email = email, UserName = userName });
+            }
+
+            // 🆕 檢查是否已有相同 Email 的用戶（自動關聯）
+            var existingUserByEmail = await _userManager.FindByEmailAsync(email);
+            if (existingUserByEmail != null)
+            {
+                // 自動將外部登入關聯到現有用戶
+                var addLoginResult = await _userManager.AddLoginAsync(existingUserByEmail, info);
+                if (addLoginResult.Succeeded)
+                {
+                    await _signInManager.SignInAsync(existingUserByEmail, isPersistent: true);
+
+                    _logger.LogInformation(
+                        "External login linked to existing user: User={UserId}, Email={Email}, Provider={Provider}",
+                        existingUserByEmail.Id, email, info.LoginProvider);
+
+                    if (_loginAuditService != null)
+                    {
+                        await _loginAuditService.LogExternalLoginSuccessAsync(
+                            existingUserByEmail.Id.ToString(),
+                            displayName,
+                            email,
+                            info.LoginProvider,
+                            clientId,
+                            redirectUri,
+                            ipAddress,
+                            userAgent);
+                    }
+
+                    await _events.RaiseAsync(new UserLoginSuccessEvent(
+                        existingUserByEmail.UserName,
+                        existingUserByEmail.Id.ToString(),
+                        displayName,
+                        clientId: clientId));
+
+                    return RedirectToLocal(returnUrl);
+                }
+
+                // 關聯失敗（可能已經存在）
+                _logger.LogWarning(
+                    "Failed to link external login to existing user: {Errors}",
+                    string.Join(", ", addLoginResult.Errors.Select(e => e.Description)));
+            }
+
+            // 🆕 自動建立帳號（包含完整欄位）
             var user = new TUser
             {
-                UserName = userName,
+                UserName = email, // 使用 Email 作為 UserName
                 Email = email,
                 EmailConfirmed = true // 外部登入的 Email 已驗證
             };
+
+            // 🆕 設定 UserIdentity 自訂欄位（透過反射，因為 TUser 是泛型）
+            SetUserIdentityProperties(user, firstName, lastName, displayName);
 
             var createResult = await _userManager.CreateAsync(user);
             if (createResult.Succeeded)
@@ -430,9 +636,35 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.Controllers
                 createResult = await _userManager.AddLoginAsync(user, info);
                 if (createResult.Succeeded)
                 {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    // 使用 isPersistent: true 延長 Session
+                    await _signInManager.SignInAsync(user, isPersistent: true);
 
-                    // 儲存註冊成功訊息到 TempData，以便在目標頁面顯示
+                    _logger.LogInformation(
+                        "New user created via external login: User={UserId}, Email={Email}, Provider={Provider}",
+                        user.Id, email, info.LoginProvider);
+
+                    // 記錄新用戶登入成功
+                    if (_loginAuditService != null)
+                    {
+                        await _loginAuditService.LogExternalLoginSuccessAsync(
+                            user.Id.ToString(),
+                            displayName,
+                            email,
+                            info.LoginProvider,
+                            clientId,
+                            redirectUri,
+                            ipAddress,
+                            userAgent);
+                    }
+
+                    // 觸發登入成功事件
+                    await _events.RaiseAsync(new UserLoginSuccessEvent(
+                        user.UserName,
+                        user.Id.ToString(),
+                        displayName,
+                        clientId: clientId));
+
+                    // 儲存註冊成功訊息到 TempData
                     TempData["RegistrationSuccess"] = true;
                     TempData["RegistrationUserName"] = userName;
                     TempData["RegistrationEmail"] = email;
@@ -443,6 +675,18 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.Controllers
                 }
             }
 
+            // 記錄註冊失敗
+            if (_loginAuditService != null)
+            {
+                var errorMessage = string.Join(", ", createResult.Errors.Select(e => e.Description));
+                await _loginAuditService.LogExternalLoginFailureAsync(
+                    email,
+                    info.LoginProvider,
+                    $"Auto registration failed: {errorMessage}",
+                    ipAddress,
+                    userAgent);
+            }
+
             // 如果自動註冊失敗，回到手動確認頁面
             foreach (var error in createResult.Errors)
             {
@@ -451,6 +695,85 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             ViewData["LoginProvider"] = info.LoginProvider;
             return View("ExternalLoginConfirmation", new ExternalLoginConfirmationViewModel { Email = email, UserName = userName });
+        }
+
+        /// <summary>
+        /// 設定 UserIdentity 自訂欄位
+        /// 使用反射設定，以相容泛型 TUser
+        /// </summary>
+        private void SetUserIdentityProperties(TUser user, string firstName, string lastName, string displayName)
+        {
+            var userType = user.GetType();
+
+            // 預設值
+            var defaultTenantId = new Guid("72B3A6BF-EC79-4451-B223-003FA2A95340");
+            var defaultOrganizationId = new Guid("1A8416C3-558A-48CC-AEB3-D10FD4F10843"); // 未分類
+
+            // FirstName
+            var firstNameProp = userType.GetProperty("FirstName");
+            firstNameProp?.SetValue(user, firstName);
+
+            // LastName
+            var lastNameProp = userType.GetProperty("LastName");
+            lastNameProp?.SetValue(user, lastName);
+
+            // DisplayName (中文：姓+名，英文：名+姓)
+            var displayNameProp = userType.GetProperty("DisplayName");
+            var calculatedDisplayName = !string.IsNullOrEmpty(displayName)
+                ? displayName
+                : $"{lastName}{firstName}".Trim();
+            if (string.IsNullOrEmpty(calculatedDisplayName))
+            {
+                calculatedDisplayName = user.Email?.Split('@')[0] ?? "User";
+            }
+            displayNameProp?.SetValue(user, calculatedDisplayName);
+
+            // TenantId
+            var tenantIdProp = userType.GetProperty("TenantId");
+            tenantIdProp?.SetValue(user, defaultTenantId);
+
+            // PrimaryOrganizationId
+            var orgIdProp = userType.GetProperty("PrimaryOrganizationId");
+            orgIdProp?.SetValue(user, defaultOrganizationId);
+
+            // IsActive
+            var isActiveProp = userType.GetProperty("IsActive");
+            isActiveProp?.SetValue(user, true);
+
+            // CreatedAt
+            var createdAtProp = userType.GetProperty("CreatedAt");
+            createdAtProp?.SetValue(user, DateTime.Now);
+        }
+
+        /// <summary>
+        /// 檢查 Client 是否允許自動註冊外部登入用戶
+        /// Client 可以在 Properties 中設定 "AutoRegisterExternalUsers" = "true" 來啟用
+        /// 預設為 true（為了向後兼容）
+        /// </summary>
+        private async Task<bool> IsAutoRegisterEnabledForClientAsync(AuthorizationRequest context)
+        {
+            if (context?.Client?.ClientId == null)
+            {
+                // 沒有 Client 資訊，預設允許自動註冊
+                return true;
+            }
+
+            var client = await _clientStore.FindEnabledClientByIdAsync(context.Client.ClientId);
+            if (client?.Properties == null || !client.Properties.Any())
+            {
+                // 沒有設定 Properties，預設允許自動註冊
+                return true;
+            }
+
+            // 檢查 AutoRegisterExternalUsers 屬性
+            // 如果明確設定為 "false"，則不允許自動註冊
+            if (client.Properties.TryGetValue("AutoRegisterExternalUsers", out var value))
+            {
+                return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
+            }
+
+            // 預設允許自動註冊
+            return true;
         }
 
         [HttpPost]

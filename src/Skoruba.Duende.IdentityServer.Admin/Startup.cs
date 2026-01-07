@@ -22,6 +22,9 @@ using Skoruba.Duende.IdentityServer.Shared.Configuration.Helpers;
 using Skoruba.Duende.IdentityServer.Shared.Dtos;
 using Skoruba.Duende.IdentityServer.Shared.Dtos.Identity;
 using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Extensions;
+using Skoruba.Duende.IdentityServer.Admin.UI.Api.ExceptionHandling;
+using Skoruba.Duende.IdentityServer.Admin.UI.Api.Resources;
+using ApiStartupHelpers = Skoruba.Duende.IdentityServer.Admin.UI.Api.Helpers.StartupHelpers;
 
 namespace Skoruba.Duende.IdentityServer.Admin
 {
@@ -75,12 +78,24 @@ namespace Skoruba.Duende.IdentityServer.Admin
             // Add email senders which is currently setup for SendGrid and SMTP
             services.AddEmailSenders(Configuration);
 
-            // UC Capital: 註冊組織架構服務
+            // UC Capital: 註冊組織架構服務 (Keycloak 舊表)
             var connectionString = Configuration.GetConnectionString("IdentityDbConnection");
             services.AddOrganizationServices(connectionString);
 
-            // UC Capital: 註冊權限控管服務
+            // UC Capital: 註冊權限控管服務 (Keycloak 舊表)
             services.AddPermissionServices(connectionString);
+
+            // UC Capital: 註冊多租戶服務 (新架構)
+            services.AddMultiTenantServices(connectionString);
+
+            // UC Capital: 註冊 Admin.UI.Api 控制器所需的服務
+            services.AddScoped<ControllerExceptionFilterAttribute>();
+            services.AddScoped<IApiErrorResources, ApiErrorResources>();
+
+            // UC Capital: 註冊 Admin.UI.Api 控制器 (REST API)
+            // 讓 MVC 能夠發現 Admin.UI.Api 程序集中的控制器
+            services.AddControllers()
+                .AddApplicationPart(typeof(ApiStartupHelpers).Assembly);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
@@ -100,6 +115,8 @@ namespace Skoruba.Duende.IdentityServer.Admin
             {
                 endpoint.MapIdentityServerAdminUI();
                 endpoint.MapIdentityServerAdminUIHealthChecks();
+                // UC Capital: 映射 REST API 控制器路由
+                endpoint.MapControllers();
             });
         }
 

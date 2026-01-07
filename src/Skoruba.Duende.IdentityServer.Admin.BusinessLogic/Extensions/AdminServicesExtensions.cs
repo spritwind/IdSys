@@ -100,5 +100,26 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Extensions
 
             return services;
         }
+
+        /// <summary>
+        /// 註冊多租戶服務 (UC Capital - 新架構)
+        /// 包含 Tenants, Organizations, Groups, Positions, Deputies, Permissions
+        /// </summary>
+        public static IServiceCollection AddMultiTenantServices(this IServiceCollection services, string connectionString)
+        {
+            // DbContext
+            services.AddDbContext<MultiTenantDbContext>(options =>
+                options.UseSqlServer(connectionString));
+
+            // Repositories
+            services.AddTransient<IMultiTenantOrganizationRepository, MultiTenantOrganizationRepository>();
+            services.AddTransient<IMultiTenantPermissionRepository, MultiTenantPermissionRepository>();
+
+            // Services
+            services.AddTransient<IMultiTenantOrganizationService, MultiTenantOrganizationService>();
+            services.AddTransient<IMultiTenantPermissionService, MultiTenantPermissionService>();
+
+            return services;
+        }
     }
 }

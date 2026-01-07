@@ -221,7 +221,7 @@ export default function Overview() {
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-lg font-semibold text-white">最近活動</h2>
                             <a
-                                href="/logs/audit"
+                                href={`${import.meta.env.BASE_URL}logs/audit`}
                                 className="text-sm text-[var(--color-accent-primary)] hover:underline"
                             >
                                 查看全部

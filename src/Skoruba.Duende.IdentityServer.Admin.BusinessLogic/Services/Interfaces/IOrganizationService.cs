@@ -42,6 +42,11 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services.Interfaces
         /// </summary>
         Task<bool> CanInsertGroupAsync(string name, string parentId, string excludeId = null, CancellationToken cancellationToken = default);
 
+        /// <summary>
+        /// 取得群組成員列表
+        /// </summary>
+        Task<List<GroupMemberDto>> GetGroupMembersAsync(string groupId, CancellationToken cancellationToken = default);
+
         #endregion
 
         #region 新增/修改/刪除方法
