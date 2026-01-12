@@ -18,6 +18,8 @@ using Skoruba.Duende.IdentityServer.STS.Identity.Configuration.Constants;
 using Skoruba.Duende.IdentityServer.STS.Identity.Configuration.Interfaces;
 using Skoruba.Duende.IdentityServer.STS.Identity.Helpers;
 using Skoruba.Duende.IdentityServer.STS.Identity.Services;
+using Skoruba.Duende.IdentityServer.Admin.EntityFramework.DbContexts;
+using Duende.IdentityServer.Validation;
 
 namespace Skoruba.Duende.IdentityServer.STS.Identity
 {
@@ -91,6 +93,42 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity
 
             // 註冊登入審計服務
             services.AddScoped<ILoginAuditService, LoginAuditService>();
+
+            // 註冊 Token 管理服務（JWT 撤銷驗證）
+            RegisterTokenManagementServices(services);
+        }
+
+        /// <summary>
+        /// 註冊 Token 管理服務（JWT 撤銷驗證）
+        /// </summary>
+        public virtual void RegisterTokenManagementServices(IServiceCollection services)
+        {
+            var databaseProvider = Configuration.GetSection(nameof(DatabaseProviderConfiguration)).Get<DatabaseProviderConfiguration>();
+            var connectionString = Configuration.GetConnectionString(ConfigurationConsts.ConfigurationDbConnectionStringKey);
+
+            // 註冊 TokenManagementDbContext
+            switch (databaseProvider?.ProviderType)
+            {
+                case DatabaseProviderType.SqlServer:
+                default:
+                    services.AddDbContext<TokenManagementDbContext>(options =>
+                        options.UseSqlServer(connectionString));
+                    break;
+                case DatabaseProviderType.PostgreSQL:
+                    services.AddDbContext<TokenManagementDbContext>(options =>
+                        options.UseNpgsql(connectionString));
+                    break;
+                case DatabaseProviderType.MySql:
+                    services.AddDbContext<TokenManagementDbContext>(options =>
+                        options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+                    break;
+            }
+
+            // 註冊 JWT 撤銷驗證器
+            services.AddSingleton<IJwtRevocationValidator, JwtRevocationValidator>();
+
+            // 裝飾 IIntrospectionRequestValidator 以支援撤銷檢查
+            services.Decorate<IIntrospectionRequestValidator, CustomIntrospectionRequestValidator>();
         }
 
         /// <summary>

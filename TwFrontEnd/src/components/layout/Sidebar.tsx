@@ -57,6 +57,7 @@ const menuItems: MenuItem[] = [
             { icon: Globe, label: '外部提供者', path: '/identity-providers' },
             { icon: KeyRound, label: '持久化授權', path: '/grants' },
             { icon: Key, label: '加密金鑰', path: '/keys' },
+            { icon: Shield, label: 'Token 管理', path: '/token-management' },
         ],
     },
     {

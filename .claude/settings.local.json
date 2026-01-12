@@ -42,7 +42,28 @@
       "Bash(\"C:\\\\Program Files\\\\dotnet\\\\dotnet.exe\" --version)",
       "Bash(dotnet publish:*)",
       "Bash(git log:*)",
-      "Bash(powershell -ExecutionPolicy Bypass -File \"c:\\\\Users\\\\User\\\\SideProject\\\\Duende.IdentityServer.Admin\\\\publish-production.ps1\")"
+      "Bash(powershell -ExecutionPolicy Bypass -File \"c:\\\\Users\\\\User\\\\SideProject\\\\Duende.IdentityServer.Admin\\\\publish-production.ps1\")",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "Bash(ping:*)",
+      "Bash(timeout /t 10 /nobreak)",
+      "Bash(powershell -ExecutionPolicy Bypass -Command \"Set-Location ''c:\\\\Users\\\\User\\\\SideProject\\\\Duende.IdentityServer.Admin\\\\TwFrontEnd''; Start-Process npm -ArgumentList ''run'',''dev'' -WindowStyle Normal\")",
+      "Bash(xcopy:*)",
+      "Bash(grep:*)",
+      "Bash(npx gulp scripts)",
+      "WebFetch(domain:docs.google.com)",
+      "WebFetch(domain:prs.uccapital.com.tw)",
+      "Skill(ralph-wiggum:ralph-loop)",
+      "Skill(ralph-wiggum:ralph-loop:*)",
+      "Bash(git -C \"c:\\\\Users\\\\User\\\\SideProject\\\\Duende.IdentityServer.Admin\" status)",
+      "Bash(git -C \"c:\\\\Users\\\\User\\\\SideProject\\\\Duende.IdentityServer.Admin\" log --oneline -5)",
+      "Bash(git -C \"c:\\\\Users\\\\User\\\\SideProject\\\\Duende.IdentityServer.Admin\" diff --stat HEAD)",
+      "Bash(git -C \"c:\\\\Users\\\\User\\\\SideProject\\\\Duende.IdentityServer.Admin\" add TwFrontEnd/ src/ docs/ publish-production.ps1)",
+      "Bash(git -C \"c:\\\\Users\\\\User\\\\SideProject\\\\Duende.IdentityServer.Admin\" commit -m \"$\\(cat <<''EOF''\nfeat: 新增 IdentityServer 設定頁面與多租戶權限系統\n\n前端功能 \\(TwFrontEnd\\):\n- 新增 IdentityServer 設定頁面，含客戶端、API 資源、API 範圍、身份資源管理\n- 新增各資源的編輯頁面 \\(ClientEditPage, ApiResourceEditPage 等\\)\n- 修正 UsersPage 統計卡片 undefined 錯誤\n- 更新 vite.config.ts 代理設定，正確路由 IdentityServer API\n- 移除舊版 IdentityServer 選單\n\n後端功能:\n- 新增多租戶組織架構 Entity 與 Repository\n- 新增多租戶權限管理 API\n- 擴充 OrganizationService 支援群組管理\n- 新增 UserManagement 與 RoleManagement Controller\n\n文件:\n- 新增 STS-API-GUIDE.md - STS API 完整說明文件\n- 新增 INTEGRATION-GUIDE.md - 系統整合開發手冊\n- 新增 DATABASE-STRUCTURE.md - 資料庫結構說明\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C \"c:\\\\Users\\\\User\\\\SideProject\\\\Duende.IdentityServer.Admin\" push uc main)",
+      "Bash(git -C \"c:\\\\Users\\\\User\\\\SideProject\\\\Duende.IdentityServer.Admin\" add TwFrontEnd/src/pages/identity-server/)",
+      "Bash(git -C \"c:\\\\Users\\\\User\\\\SideProject\\\\Duende.IdentityServer.Admin\" commit -m \"$\\(cat <<''EOF''\nfix: 修正新增頁面無限轉圈問題\n\n修正 IdentityServer 設定頁面的編輯元件：\n- ClientEditPage, ApiResourceEditPage, ApiScopeEditPage, IdentityResourceEditPage\n- 當路由為 /new（無 id 參數）時，id 為 undefined 而非 ''new''\n- 修改 isNew 判斷邏輯為 !id || id === ''new''\n- 修改 loading 初始值為 false\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(del \"c:\\\\Users\\\\User\\\\SideProject\\\\Duende.IdentityServer.Admin\\\\src\\\\Skoruba.Duende.IdentityServer.Admin.EntityFramework\\\\Entities\\\\RevokedToken.cs\")"
     ]
   }
 }

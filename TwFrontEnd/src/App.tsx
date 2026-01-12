@@ -24,6 +24,7 @@ import {
     ApiScopeEditPage,
     IdentityResourceEditPage,
 } from './pages/identity-server';
+import TokenManagementPage from './pages/token-management/TokenManagementPage';
 import './index.css';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
@@ -274,6 +275,7 @@ function App() {
                         <Route path="/grants" element={<GrantsPage />} />
                         <Route path="/grants/:id" element={<GrantsPage />} />
                         <Route path="/keys" element={<KeysPage />} />
+                        <Route path="/token-management" element={<TokenManagementPage />} />
 
                         {/* Logs */}
                         <Route path="/logs/audit" element={<AuditLogsPage />} />

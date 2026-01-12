@@ -30,6 +30,13 @@ using Skoruba.Duende.IdentityServer.Admin.UI.Api.Resources;
 using Skoruba.Duende.IdentityServer.Shared.Configuration.Helpers;
 using Skoruba.Duende.IdentityServer.Shared.Dtos;
 using Skoruba.Duende.IdentityServer.Shared.Dtos.Identity;
+using Microsoft.EntityFrameworkCore;
+using Skoruba.Duende.IdentityServer.Admin.EntityFramework.DbContexts;
+using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories;
+using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories.Interfaces;
+using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services;
+using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services.Interfaces;
+using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Configuration.Configuration;
 
 namespace Skoruba.Duende.IdentityServer.Admin.Api
 {
@@ -79,6 +86,9 @@ namespace Skoruba.Duende.IdentityServer.Admin.Api
 
             // UC Capital - 多租戶服務 (新架構)
             services.AddMultiTenantServices(connectionString);
+
+            // UC Capital - Token 管理服務 (JWT 撤銷)
+            RegisterTokenManagementServices(services);
 
             services.AddSwaggerServices(adminApiConfiguration);
             
@@ -139,6 +149,39 @@ namespace Skoruba.Duende.IdentityServer.Admin.Api
         public virtual void UseAuthentication(IApplicationBuilder app)
         {
             app.UseAuthentication();
+        }
+
+        /// <summary>
+        /// 註冊 Token 管理服務
+        /// </summary>
+        public virtual void RegisterTokenManagementServices(IServiceCollection services)
+        {
+            var databaseProvider = Configuration.GetSection(nameof(DatabaseProviderConfiguration)).Get<DatabaseProviderConfiguration>();
+            var connectionString = Configuration.GetConnectionString("ConfigurationDbConnection");
+
+            // 註冊 TokenManagementDbContext
+            switch (databaseProvider?.ProviderType)
+            {
+                case DatabaseProviderType.SqlServer:
+                default:
+                    services.AddDbContext<TokenManagementDbContext>(options =>
+                        options.UseSqlServer(connectionString));
+                    break;
+                case DatabaseProviderType.PostgreSQL:
+                    services.AddDbContext<TokenManagementDbContext>(options =>
+                        options.UseNpgsql(connectionString));
+                    break;
+                case DatabaseProviderType.MySql:
+                    services.AddDbContext<TokenManagementDbContext>(options =>
+                        options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+                    break;
+            }
+
+            // 註冊 Repository
+            services.AddScoped<IRevokedTokenRepository, RevokedTokenRepository>();
+
+            // 註冊 Service
+            services.AddScoped<ITokenManagementService, TokenManagementService>();
         }
     }
 }

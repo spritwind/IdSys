@@ -1083,7 +1083,10 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.Controllers
                 .Where(x => x.DisplayName != null)
                 .Select(x => new ExternalProvider
                 {
-                    DisplayName = x.DisplayName ?? x.Name,
+                    // 將 Google 顯示名稱改為 UC SSO
+                    DisplayName = x.Name.Equals("Google", StringComparison.OrdinalIgnoreCase)
+                        ? "UC SSO"
+                        : (x.DisplayName ?? x.Name),
                     AuthenticationScheme = x.Name
                 }).ToList();
 
@@ -1092,10 +1095,15 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.Controllers
                 .Select(x => new ExternalProvider
                 {
                     AuthenticationScheme = x.Scheme,
-                    DisplayName = x.DisplayName
+                    // 將 Google 顯示名稱改為 UC SSO
+                    DisplayName = x.Scheme.Equals("Google", StringComparison.OrdinalIgnoreCase)
+                        ? "UC SSO"
+                        : x.DisplayName
                 });
 
-            providers.AddRange(dynamicSchemes);
+            // 去除重複的 Provider (以 AuthenticationScheme 為準)
+            var existingSchemes = providers.Select(p => p.AuthenticationScheme).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            providers.AddRange(dynamicSchemes.Where(d => !existingSchemes.Contains(d.AuthenticationScheme)));
 
             var allowLocal = true;
             if (context?.Client.ClientId != null)
