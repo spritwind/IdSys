@@ -1,6 +1,7 @@
 // UC Capital - Token Management Service Interface
 // Token 管理服務介面
 
+using System.Threading.Tasks;
 using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Dtos.TokenManagement;
 
 namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services.Interfaces

@@ -1,6 +1,9 @@
 // UC Capital - Token Management DTOs
 // Token 管理資料傳輸物件
 
+using System;
+using System.Collections.Generic;
+
 namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Dtos.TokenManagement
 {
     /// <summary>

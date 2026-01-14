@@ -90,6 +90,9 @@ namespace Skoruba.Duende.IdentityServer.Admin.Api
             // UC Capital - Token 管理服務 (JWT 撤銷)
             RegisterTokenManagementServices(services);
 
+            // UC Capital - HttpClient for OIDC API
+            services.AddHttpClient();
+
             services.AddSwaggerServices(adminApiConfiguration);
             
             services.AddIdSHealthChecks<IdentityServerConfigurationDbContext, IdentityServerPersistedGrantDbContext, AdminIdentityDbContext, AdminLogDbContext, AdminAuditLogDbContext, IdentityServerDataProtectionDbContext>(Configuration, adminApiConfiguration);

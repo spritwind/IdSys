@@ -57,7 +57,18 @@ export interface AuthContextType {
 }
 
 /**
+ * 安全取得字串值
+ */
+function safeString(value: unknown): string {
+    if (typeof value === 'string' && value.trim().length > 0) {
+        return value.trim();
+    }
+    return '';
+}
+
+/**
  * 從 OIDC User 提取使用者資訊
+ * 加強防禦性檢查，避免 Token 缺少 claims 時崩潰
  */
 export function extractUserInfo(user: User | null): UserInfo | null {
     if (!user?.profile) {
@@ -66,10 +77,20 @@ export function extractUserInfo(user: User | null): UserInfo | null {
 
     const profile = user.profile;
 
-    // 提取角色
+    // 提取角色 - 加強防禦性檢查
     let roles: string[] = [];
-    if (profile.role) {
-        roles = Array.isArray(profile.role) ? profile.role : [profile.role];
+    try {
+        if (profile.role != null) {
+            if (Array.isArray(profile.role)) {
+                // 過濾掉 null/undefined 並確保都是字串
+                roles = profile.role.filter((r): r is string => typeof r === 'string' && r.length > 0);
+            } else if (typeof profile.role === 'string' && profile.role.length > 0) {
+                roles = [profile.role];
+            }
+        }
+    } catch (e) {
+        console.warn('[Auth] Failed to extract roles from profile', profile.role, e);
+        roles = [];
     }
 
     // 判斷是否為管理員
@@ -81,15 +102,20 @@ export function extractUserInfo(user: User | null): UserInfo | null {
             r === 'Administrator'
     );
 
+    // 安全取得名稱
+    const name = safeString(profile.name) || safeString(profile.preferred_username) || '使用者';
+    const username = safeString(profile.preferred_username) || safeString(profile.name) || '';
+    const email = safeString(profile.email);
+
     return {
         id: profile.sub || '',
-        username: profile.preferred_username || profile.name || '',
-        email: profile.email || '',
+        username,
+        email,
         emailVerified: profile.email_verified === true,
-        name: profile.name || profile.preferred_username || '',
-        givenName: profile.given_name,
-        familyName: profile.family_name,
-        picture: profile.picture,
+        name,
+        givenName: safeString(profile.given_name) || undefined,
+        familyName: safeString(profile.family_name) || undefined,
+        picture: safeString(profile.picture) || undefined,
         roles,
         isAdmin,
     };

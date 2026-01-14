@@ -1,6 +1,9 @@
 // UC Capital - Revoked Token Repository Interface
 // 撤銷 Token Repository 介面
 
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Entities;
 
 namespace Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories.Interfaces

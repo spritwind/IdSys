@@ -343,14 +343,16 @@ export default function RolesPage() {
     const [selectedRole, setSelectedRole] = useState<RoleDto | null>(null);
     const [actionMenuRole, setActionMenuRole] = useState<string | null>(null);
 
-    // 載入資料
+    // 載入資料 - 加強防禦性檢查
     const loadData = useCallback(async () => {
         setLoading(true);
         try {
             const rolesData = await userApi.getRoles();
-            setRoles(rolesData);
+            // 確保 API 回傳的是陣列
+            setRoles(Array.isArray(rolesData) ? rolesData : []);
         } catch (error) {
             toast.error('載入角色失敗');
+            setRoles([]); // 發生錯誤時設為空陣列
         } finally {
             setLoading(false);
         }
@@ -360,12 +362,12 @@ export default function RolesPage() {
         loadData();
     }, [loadData]);
 
-    // 篩選角色
-    const filteredRoles = roles.filter(
+    // 篩選角色 - 確保 roles 是陣列
+    const filteredRoles = Array.isArray(roles) ? roles.filter(
         (role) =>
-            role.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            role.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             role.description?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    ) : [];
 
     // 操作
     const handleCreate = () => {

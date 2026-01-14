@@ -27,15 +27,20 @@ export function Header() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // 使用者頭像 initials
-    const initials = user?.name
-        ? user.name
-              .split(' ')
-              .map((n) => n[0])
-              .join('')
-              .toUpperCase()
-              .slice(0, 2)
-        : 'U';
+    // 使用者頭像 initials - 加強防禦性檢查
+    const getInitials = (name: string | undefined): string => {
+        if (!name || typeof name !== 'string' || name.trim().length === 0) {
+            return 'U';
+        }
+        const parts = name.trim().split(' ').filter(part => part.length > 0);
+        if (parts.length === 0) return 'U';
+        return parts
+            .map((n) => n[0] || '')
+            .join('')
+            .toUpperCase()
+            .slice(0, 2) || 'U';
+    };
+    const initials = getInitials(user?.name);
 
     const handleLogout = () => {
         setShowUserMenu(false);
@@ -134,15 +139,15 @@ export function Header() {
                                         </div>
                                     </div>
 
-                                    {/* Role Tags */}
-                                    {user?.roles && user.roles.length > 0 && (
+                                    {/* Role Tags - 加強 null 安全檢查 */}
+                                    {Array.isArray(user?.roles) && user.roles.length > 0 && (
                                         <div className="mt-3 flex flex-wrap gap-1">
-                                            {user.roles.slice(0, 3).map((role) => (
+                                            {user.roles.slice(0, 3).map((role, index) => (
                                                 <span
-                                                    key={role}
+                                                    key={role || index}
                                                     className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
                                                 >
-                                                    {role}
+                                                    {role || ''}
                                                 </span>
                                             ))}
                                             {user.roles.length > 3 && (

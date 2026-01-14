@@ -166,9 +166,9 @@ export default function UsersPage() {
     const loadData = useCallback(async () => {
         setLoading(true);
         try {
-            // 載入角色列表
+            // 載入角色列表 - 確保結果是陣列
             const rolesResult = await userApi.getRoles();
-            setRoles(rolesResult);
+            setRoles(Array.isArray(rolesResult) ? rolesResult : []);
 
             // 載入統計（首次載入時）
             if (!stats) {
@@ -195,7 +195,8 @@ export default function UsersPage() {
                 }
 
                 if (filterRole) {
-                    userList = userList.filter(u => u.roles.some(r => r === filterRole));
+                    // 確保 u.roles 是陣列後再使用 .some()
+                    userList = userList.filter(u => Array.isArray(u.roles) && u.roles.some(r => r === filterRole));
                 }
 
                 // 分頁

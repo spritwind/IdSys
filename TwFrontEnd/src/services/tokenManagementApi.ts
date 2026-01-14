@@ -5,7 +5,7 @@
  * Token 管理 API 服務
  */
 
-import { apiClient } from './api';
+import { api as apiClient } from './api';
 
 // ============ Types ============
 

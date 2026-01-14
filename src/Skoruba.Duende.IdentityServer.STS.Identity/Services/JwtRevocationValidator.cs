@@ -2,8 +2,13 @@
 // JWT 撤銷驗證器
 // 攔截 Introspection 請求，檢查 JWT Token 是否在撤銷清單中
 
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Duende.IdentityServer.Validation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Skoruba.Duende.IdentityServer.Admin.EntityFramework.DbContexts;
 
 namespace Skoruba.Duende.IdentityServer.STS.Identity.Services

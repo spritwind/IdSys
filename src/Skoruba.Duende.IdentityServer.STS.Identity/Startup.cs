@@ -20,6 +20,8 @@ using Skoruba.Duende.IdentityServer.STS.Identity.Helpers;
 using Skoruba.Duende.IdentityServer.STS.Identity.Services;
 using Skoruba.Duende.IdentityServer.Admin.EntityFramework.DbContexts;
 using Duende.IdentityServer.Validation;
+using Duende.IdentityServer.ResponseHandling;
+using Scrutor;
 
 namespace Skoruba.Duende.IdentityServer.STS.Identity
 {
@@ -129,6 +131,10 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity
 
             // 裝飾 IIntrospectionRequestValidator 以支援撤銷檢查
             services.Decorate<IIntrospectionRequestValidator, CustomIntrospectionRequestValidator>();
+
+            // 裝飾 ITokenRevocationResponseGenerator 以記錄 JWT 撤銷
+            // 這樣當呼叫標準 /connect/revocation 端點時，也會記錄到 RevokedTokens 表
+            services.Decorate<ITokenRevocationResponseGenerator, CustomTokenRevocationResponseGenerator>();
         }
 
         /// <summary>

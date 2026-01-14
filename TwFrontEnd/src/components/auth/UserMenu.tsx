@@ -48,10 +48,20 @@ export function UserMenu() {
         );
     }
 
-    // 使用者頭像
-    const initials = user?.name
-        ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-        : 'U';
+    // 使用者頭像 - 加強防禦性檢查
+    const getInitials = (name: string | undefined): string => {
+        if (!name || typeof name !== 'string' || name.trim().length === 0) {
+            return 'U';
+        }
+        const parts = name.trim().split(' ').filter(part => part.length > 0);
+        if (parts.length === 0) return 'U';
+        return parts
+            .map((n) => n[0] || '')
+            .join('')
+            .toUpperCase()
+            .slice(0, 2) || 'U';
+    };
+    const initials = getInitials(user?.name);
 
     return (
         <div className="relative" ref={menuRef}>
@@ -117,15 +127,15 @@ export function UserMenu() {
                             </div>
                         </div>
 
-                        {/* 角色標籤 */}
-                        {user?.roles && user.roles.length > 0 && (
+                        {/* 角色標籤 - 加強 null 安全檢查 */}
+                        {Array.isArray(user?.roles) && user.roles.length > 0 && (
                             <div className="mt-3 flex flex-wrap gap-1">
-                                {user.roles.slice(0, 3).map((role) => (
+                                {user.roles.slice(0, 3).map((role, index) => (
                                     <span
-                                        key={role}
+                                        key={role || index}
                                         className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700"
                                     >
-                                        {role}
+                                        {role || ''}
                                     </span>
                                 ))}
                                 {user.roles.length > 3 && (

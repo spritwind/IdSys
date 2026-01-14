@@ -21,7 +21,6 @@ import {
     ChevronLeft,
     ChevronRight,
     Check,
-    X,
     Trash2,
     Timer,
 } from 'lucide-react';

@@ -1,12 +1,16 @@
 // UC Capital - Revoked Token Repository Implementation
 // 撤銷 Token Repository 實作
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Skoruba.Duende.IdentityServer.Admin.EntityFramework.DbContexts;
 using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Entities;
 using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories.Interfaces;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories
 {
