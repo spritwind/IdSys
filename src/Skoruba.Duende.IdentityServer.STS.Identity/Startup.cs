@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -22,6 +23,8 @@ using Skoruba.Duende.IdentityServer.Admin.EntityFramework.DbContexts;
 using Duende.IdentityServer.Validation;
 using Duende.IdentityServer.ResponseHandling;
 using Scrutor;
+using NSwag;
+using NSwag.Generation.Processors.Security;
 
 namespace Skoruba.Duende.IdentityServer.STS.Identity
 {
@@ -96,8 +99,87 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity
             // 註冊登入審計服務
             services.AddScoped<ILoginAuditService, LoginAuditService>();
 
+            // 註冊 HttpClientFactory (用於 OIDC 文件 API)
+            services.AddHttpClient();
+
             // 註冊 Token 管理服務（JWT 撤銷驗證）
             RegisterTokenManagementServices(services);
+
+            // 註冊 Swagger/OpenAPI 服務
+            RegisterSwaggerServices(services);
+        }
+
+        /// <summary>
+        /// 註冊 Swagger/OpenAPI 服務
+        /// </summary>
+        public virtual void RegisterSwaggerServices(IServiceCollection services)
+        {
+            services.AddEndpointsApiExplorer();
+            services.AddOpenApiDocument(configure =>
+            {
+                configure.Title = "UC Capital Identity Server (STS)";
+                configure.Version = "v1";
+                configure.Description = @"## Duende IdentityServer - Security Token Service
+
+此服務提供 OAuth 2.0 / OpenID Connect 標準端點，負責身份驗證與 Token 發放。
+
+## 標準 OIDC 端點
+
+| 端點 | 路徑 | 說明 |
+|------|------|------|
+| Discovery | `/.well-known/openid-configuration` | OIDC 設定文件 |
+| JWKS | `/.well-known/openid-configuration/jwks` | JSON Web Key Set (公鑰) |
+| Authorize | `/connect/authorize` | 授權端點 |
+| Token | `/connect/token` | Token 交換端點 |
+| UserInfo | `/connect/userinfo` | 使用者資訊端點 |
+| Revocation | `/connect/revocation` | Token 撤銷端點 |
+| Introspection | `/connect/introspect` | Token 檢驗端點 |
+| End Session | `/connect/endsession` | 登出端點 |
+
+## 支援的 OAuth 2.0 Grant Types
+
+- **Authorization Code + PKCE** (推薦用於 SPA/Mobile)
+- **Client Credentials** (用於 Machine-to-Machine)
+- **Refresh Token** (用於更新 Access Token)
+
+## JWT Token 特性
+
+JWT Token 是**無狀態 (Stateless)** 的：
+- 本地驗證使用 JWKS 公鑰，速度快但無法偵測撤銷
+- 遠端驗證使用 Introspection，可偵測撤銷但需網路請求
+
+## 參考文件
+
+- [Duende IdentityServer 文件](https://docs.duendesoftware.com/)
+- [OAuth 2.0 RFC 6749](https://tools.ietf.org/html/rfc6749)
+- [OpenID Connect Core](https://openid.net/specs/openid-connect-core-1_0.html)
+- [PKCE RFC 7636](https://tools.ietf.org/html/rfc7636)
+";
+
+                configure.UseControllerSummaryAsTagDescription = true;
+
+                configure.AddSecurity("OAuth2", new OpenApiSecurityScheme
+                {
+                    Type = OpenApiSecuritySchemeType.OAuth2,
+                    Flows = new OpenApiOAuthFlows
+                    {
+                        AuthorizationCode = new OpenApiOAuthFlow
+                        {
+                            AuthorizationUrl = "/connect/authorize",
+                            TokenUrl = "/connect/token",
+                            Scopes = new Dictionary<string, string>
+                            {
+                                { "openid", "OpenID Connect 身份識別" },
+                                { "profile", "使用者基本資訊" },
+                                { "email", "使用者 Email" },
+                                { "offline_access", "Refresh Token 支援" }
+                            }
+                        }
+                    }
+                });
+
+                configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("OAuth2"));
+            });
         }
 
         /// <summary>
@@ -187,6 +269,16 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity
             app.UseCors("IdentityServerCors");
 
             app.UseStaticFiles();
+
+            // 啟用 Swagger UI
+            app.UseOpenApi();
+            app.UseSwaggerUi(settings =>
+            {
+                settings.Path = "/swagger";
+                settings.DocumentPath = "/swagger/v1/swagger.json";
+                settings.DocExpansion = "list";
+            });
+
             UseAuthentication(app);
 
             // Add custom security headers
