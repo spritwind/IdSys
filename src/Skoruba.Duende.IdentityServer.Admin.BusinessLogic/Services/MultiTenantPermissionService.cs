@@ -104,8 +104,9 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
                 ResourceName = p.Resource?.Name,
                 ClientId = p.Resource?.ClientId,
                 Scopes = ParseScopes(p.Scopes),
-                Source = p.SubjectType,
-                SourceId = p.SubjectId
+                Source = p.SubjectType == "User" && p.SubjectId == userId ? "Direct" : p.SubjectType,
+                SourceId = p.SubjectId,
+                SourceName = p.SubjectName
             }).ToList();
 
             return new UserEffectivePermissionsDto

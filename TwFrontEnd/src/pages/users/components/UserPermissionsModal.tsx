@@ -208,6 +208,7 @@ export default function UserPermissionsModal({ user, onClose, onSave }: Props) {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [clientFilter, setClientFilter] = useState('');
 
     // 資料
     const [resources, setResources] = useState<PermissionResourceDto[]>([]);
@@ -236,6 +237,21 @@ export default function UserPermissionsModal({ user, onClose, onSave }: Props) {
             });
         return result;
     }, [effectivePermissions]);
+
+    // 提取 Client 選項
+    const clientOptions = useMemo(() => {
+        const clients = new Map<string, string>();
+        const extract = (items: PermissionResourceDto[]) => {
+            for (const item of items) {
+                if (item.clientId && !clients.has(item.clientId)) {
+                    clients.set(item.clientId, item.clientName || item.clientId);
+                }
+                if (item.children) extract(item.children);
+            }
+        };
+        extract(resources);
+        return Array.from(clients.entries()).map(([id, name]) => ({ id, name }));
+    }, [resources]);
 
     // 載入資料
     useEffect(() => {
@@ -303,35 +319,64 @@ export default function UserPermissionsModal({ user, onClose, onSave }: Props) {
 
     // 篩選資源
     const filteredResources = useMemo(() => {
-        if (!searchTerm) return resources;
+        let result = resources;
 
-        const search = searchTerm.toLowerCase();
-        const filterRecursive = (items: PermissionResourceDto[]): PermissionResourceDto[] => {
-            return items
-                .map((item) => ({
-                    ...item,
-                    children: item.children ? filterRecursive(item.children) : [],
-                }))
-                .filter(
-                    (item) =>
-                        item.name.toLowerCase().includes(search) ||
-                        item.code.toLowerCase().includes(search) ||
-                        (item.children && item.children.length > 0)
-                );
-        };
-        return filterRecursive(resources);
-    }, [resources, searchTerm]);
+        if (clientFilter) {
+            const filterByClient = (items: PermissionResourceDto[]): PermissionResourceDto[] => {
+                return items
+                    .map((item) => ({
+                        ...item,
+                        children: item.children ? filterByClient(item.children) : [],
+                    }))
+                    .filter(
+                        (item) =>
+                            item.clientId === clientFilter ||
+                            (item.children && item.children.length > 0)
+                    );
+            };
+            result = filterByClient(result);
+        }
+
+        if (searchTerm) {
+            const search = searchTerm.toLowerCase();
+            const filterBySearch = (items: PermissionResourceDto[]): PermissionResourceDto[] => {
+                return items
+                    .map((item) => ({
+                        ...item,
+                        children: item.children ? filterBySearch(item.children) : [],
+                    }))
+                    .filter(
+                        (item) =>
+                            item.name.toLowerCase().includes(search) ||
+                            item.code.toLowerCase().includes(search) ||
+                            (item.children && item.children.length > 0)
+                    );
+            };
+            result = filterBySearch(result);
+        }
+
+        return result;
+    }, [resources, searchTerm, clientFilter]);
 
     // 篩選有效權限
     const filteredEffectivePermissions = useMemo(() => {
-        if (!searchTerm) return effectivePermissions;
-        const search = searchTerm.toLowerCase();
-        return effectivePermissions.filter(
-            (p) =>
-                p.resourceName?.toLowerCase().includes(search) ||
-                p.resourceCode?.toLowerCase().includes(search)
-        );
-    }, [effectivePermissions, searchTerm]);
+        let result = effectivePermissions;
+
+        if (clientFilter) {
+            result = result.filter((p) => p.clientId === clientFilter);
+        }
+
+        if (searchTerm) {
+            const search = searchTerm.toLowerCase();
+            result = result.filter(
+                (p) =>
+                    p.resourceName?.toLowerCase().includes(search) ||
+                    p.resourceCode?.toLowerCase().includes(search)
+            );
+        }
+
+        return result;
+    }, [effectivePermissions, searchTerm, clientFilter]);
 
     // 檢查是否有變更
     const hasChanges = useMemo(() => {
@@ -463,17 +508,33 @@ export default function UserPermissionsModal({ user, onClose, onSave }: Props) {
                     </button>
                 </div>
 
-                {/* Search */}
+                {/* Search & Client Filter */}
                 <div className="px-6 py-3 border-b border-white/10">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="搜尋資源..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
-                        />
+                    <div className="flex gap-3">
+                        {clientOptions.length > 1 && (
+                            <select
+                                value={clientFilter}
+                                onChange={(e) => setClientFilter(e.target.value)}
+                                className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500/50 min-w-[160px]"
+                            >
+                                <option value="" className="bg-gray-800">全部 Client</option>
+                                {clientOptions.map((c) => (
+                                    <option key={c.id} value={c.id} className="bg-gray-800">
+                                        {c.name}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="搜尋資源..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
+                            />
+                        </div>
                     </div>
 
                     {activeTab === 'direct' && (

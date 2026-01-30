@@ -1,0 +1,190 @@
+{
+	"info": {
+		"_postman_id": "prs-permission-api-collection",
+		"name": "PRS Permission Query API",
+		"description": "UC Capital PRS 權限查詢 API 測試集合",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://Prs.Uccapital.com.tw/admin-api",
+			"type": "string"
+		},
+		{
+			"key": "clientId",
+			"value": "riskcontrolsystemweb",
+			"type": "string"
+		},
+		{
+			"key": "clientSecret",
+			"value": "secret_18147fb44689b27a5c6bbf6ea7c1e9864f926e489688c562f88fea2c24558f04",
+			"type": "string",
+			"description": "riskcontrolsystemweb 的 Client Secret"
+		},
+		{
+			"key": "idToken",
+			"value": "eyJhbGciOiJSUzI1NiIsImtpZCI6IkRENTdCQThCQUI3NzBDNjY2NzgxN0RCRkEwNEYxMUY0NkE0REQ1MTdSUzI1NiIsIng1dCI6IjNWZTZpNnQzREdabmdYMl9vRThSOUdwTjFSYyIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL1Bycy5VY2NhcGl0YWwuY29tLnR3L3N0cyIsIm5iZiI6MTc2ODQ1NDMzMSwiaWF0IjoxNzY4NDU0MzMxLCJleHAiOjE3Njg0NTQ2MzEsImF1ZCI6InJpc2tjb250cm9sc3lzdGVtd2ViIiwiYW1yIjpbImV4dGVybmFsIl0sImF0X2hhc2giOiJBS3o3NS16RmNYcHpLM1lMY29KZmpRIiwic2lkIjoiMkZERkI5Qzg4RkNFRjYyNkJCODgzMjJGMkJGRUM5RjEiLCJzdWIiOiJlMTlhZTU3Zi1kMGYzLTQ1OTUtYmVjNy1hZDJmNjA0YWM3ZmIiLCJhdXRoX3RpbWUiOjE3Njg0NTQyOTAsImlkcCI6Ikdvb2dsZSJ9.IPgK4AmK--1TFz0Rp8OgnE2OSPAddsOG1mmwDRx6K2X8zBtMjP5mqROe2Wg_rR1KDDsGDf7AopMVoEYzytT27sSC3Bti3g0SVVuFWJ4213-t_nhmaTmOGUEIkFjyvwAANRsPDmjS9uCKqUT-0miWtcqr0BBCyIVoMfoqVUC67frG6CQIcxQfiH6wyp2Xxw5hmjPlpPjsk1lbebt6Lx2DNBiNlJ4rmo32cSyyDvMHVgA9pCMdq45S-2Rd1-skXcDPxIi3rqhMgdvCyeQoDJbBiU9bT_omNM-1Hl0DQbhMigeH-ypfXRl32MGGuaA4EmYvddnTJ-ceTZyWRAiVMN-BbFa-h8roE_1l8r7wIyccuc8_VanyJpwDOe20QtOgqHvjLxcihNgurx9Pe6jN5rpYpArie8B4S_5b9VcxmeapxzGvPCkiuls4nHBlpR7gqvOwOuxH6demvQ7w-vXPgPzAtrEzk1V0KszlL1u3Kw8ht1nmXxA6-xw-7yEu3Zj7FWzvMav6q83tS1NORX_6MXkc4SrkVDxE6KKRpCO2eF2VFrPMT0HtHXLIUpKyi11EeLrtzppWSoX34O5ZYU_RWGacLi_xLPvBA-_yIad-hjsnELs1AjIzKIbHQy90WSYe8TfJcyAAYH7hzHL70jUhok3V5rfA0OVt340QS131w_CIXek",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "eyJhbGciOiJSUzI1NiIsImtpZCI6IkRENTdCQThCQUI3NzBDNjY2NzgxN0RCRkEwNEYxMUY0NkE0REQ1MTdSUzI1NiIsIng1dCI6IjNWZTZpNnQzREdabmdYMl9vRThSOUdwTjFSYyIsInR5cCI6ImF0K2p3dCJ9.eyJpc3MiOiJodHRwczovL1Bycy5VY2NhcGl0YWwuY29tLnR3L3N0cyIsIm5iZiI6MTc2ODQ1NDMzMSwiaWF0IjoxNzY4NDU0MzMxLCJleHAiOjE3Njg0NTc5MzEsInNjb3BlIjpbIm9wZW5pZCIsInByb2ZpbGUiLCJlbWFpbCIsInJvbGVzIiwib2ZmbGluZV9hY2Nlc3MiXSwiYW1yIjpbImV4dGVybmFsIl0sImNsaWVudF9pZCI6InJpc2tjb250cm9sc3lzdGVtd2ViIiwic3ViIjoiZTE5YWU1N2YtZDBmMy00NTk1LWJlYzctYWQyZjYwNGFjN2ZiIiwiYXV0aF90aW1lIjoxNzY4NDU0MjkwLCJpZHAiOiJHb29nbGUiLCJzaWQiOiIyRkRGQjlDODhGQ0VGNjI2QkI4ODMyMkYyQkZFQzlGMSIsImp0aSI6IjBGQjdDOTQwRDFDOUVFOURFQzZGQTMyM0QyNDI1QjQ1In0.mW0MQF-36f-V2m5LABLwbagkqvHbEZ01tK9zwq-mSjCoDblygFdoXeBQrRFNv8dhDOGv8DeDAZcnEdzQpyBMSJ8ZeVNxA7BFqYWlyQWqRphyjdM9Ga8ouckciX0CZxyii3h2Mq4OAMCaoFP_jWR0lV93eLz5-z8bEa68U1MhHvFkm_FJDVpV54_nOqyj4FvNwucHR60_ZzLThDhpyJP0cQc3z4qsz3H-1mB3ZYMOqN7OnkztucWMYfZb-Nx5ZRehO1NKUcC4Dq-7SX85McvEqJ29n-JdSgqL-3wmtHrqPDBhOdKVbHK29OZT-pLIKmDRHAqP32NMzfNeoqX9OeUShxTmqMALc8aFPZ3DRNb-TbZJX-c0q4W3qJr_dK2Od_Xur9hYrKPA_dxdCfKkcocy2g4XCvGzed4vV9yEZhbhw2ctZ5m25Qj-LG1RD_ocFQjfqHXkDYUEHlM6lkkurBBTyhXFkmfVGDwrZ39dVDqKc5YMNZkomNO_L54wi2iUE4PNPtv9iTl-9Kb7T0F_QmJeDDcWhHhYta8IdeMG1UjkxV1oGcOqaxlb7vJ2yJlSFrgG1Nva6ynB-NO13akYy49uaSUslQV2kB0udRi3Ya9D-uMCPs31QybxRu03ftYulkUarruBGjAnV3Gd0pc9jAQyc_NwRkDBdn-PuOpimZmOrlM",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/prs/permissions/health",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "prs", "permissions", "health"]
+				},
+				"description": "健康檢查端點，確認 API 是否正常運作"
+			},
+			"response": []
+		},
+		{
+			"name": "Query Permissions (查詢完整權限)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"clientId\": \"{{clientId}}\",\n    \"clientSecret\": \"{{clientSecret}}\",\n    \"idToken\": \"{{idToken}}\",\n    \"accessToken\": \"{{accessToken}}\",\n    \"systemId\": \"riskcontrolsystemweb\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/prs/permissions/query",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "prs", "permissions", "query"]
+				},
+				"description": "查詢使用者在指定系統的完整權限清單\n\n**參數說明：**\n- clientId: Client ID\n- clientSecret: Client Secret\n- idToken: JWT ID Token\n- accessToken: JWT Access Token\n- systemId: (選填) 系統代碼，不填則查詢所有系統"
+			},
+			"response": []
+		},
+		{
+			"name": "Check Permission - module_login (檢查全部權限)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"clientId\": \"{{clientId}}\",\n    \"clientSecret\": \"{{clientSecret}}\",\n    \"idToken\": \"{{idToken}}\",\n    \"accessToken\": \"{{accessToken}}\",\n    \"resource\": \"module_login\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/prs/permissions/check",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "prs", "permissions", "check"]
+				},
+				"description": "檢查使用者在 module_login 的全部權限 (不帶 scopes 則檢查 @r@c@u@d@e 全部)\n\n**參數說明：**\n- clientId: Client ID\n- clientSecret: Client Secret\n- idToken: JWT ID Token\n- accessToken: JWT Access Token\n- resource: 資源代碼\n- scopes: (選填) 權限範圍，若不帶則檢查全部 (@r=讀取, @c=建立, @u=更新, @d=刪除, @e=匯出)\n\n**回應格式 (HTTP 200)：**\n```json\n{\n  \"@r\": { \"allowed\": true },\n  \"@c\": { \"allowed\": false },\n  \"@u\": { \"allowed\": false },\n  \"@d\": { \"allowed\": false },\n  \"@e\": { \"allowed\": false }\n}\n```\n\n**錯誤回應格式 (HTTP 401)：**\n```json\n{\n  \"@r\": { \"allowed\": false, \"error\": \"token_expired\", \"errorDescription\": \"The token has expired\" },\n  ...\n}\n```"
+			},
+			"response": []
+		},
+		{
+			"name": "Check Permission - module_查詢 (檢查查詢權限)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"clientId\": \"{{clientId}}\",\n    \"clientSecret\": \"{{clientSecret}}\",\n    \"idToken\": \"{{idToken}}\",\n    \"accessToken\": \"{{accessToken}}\",\n    \"resource\": \"module_查詢\",\n    \"scopes\": \"@r\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/prs/permissions/check",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "prs", "permissions", "check"]
+				},
+				"description": "檢查使用者是否有 module_查詢 的讀取權限"
+			},
+			"response": []
+		},
+		{
+			"name": "Check Permission - module_詳細資訊 (檢查匯出權限)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"clientId\": \"{{clientId}}\",\n    \"clientSecret\": \"{{clientSecret}}\",\n    \"idToken\": \"{{idToken}}\",\n    \"accessToken\": \"{{accessToken}}\",\n    \"resource\": \"module_詳細資訊\",\n    \"scopes\": \"@r@e\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/prs/permissions/check",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "prs", "permissions", "check"]
+				},
+				"description": "檢查使用者是否有 module_詳細資訊 的讀取+匯出權限"
+			},
+			"response": []
+		},
+		{
+			"name": "Check Permission - module_交易說明 (檢查編輯權限)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"clientId\": \"{{clientId}}\",\n    \"clientSecret\": \"{{clientSecret}}\",\n    \"idToken\": \"{{idToken}}\",\n    \"accessToken\": \"{{accessToken}}\",\n    \"resource\": \"module_交易說明\",\n    \"scopes\": \"@r@c@u@d\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/prs/permissions/check",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "prs", "permissions", "check"]
+				},
+				"description": "檢查使用者是否有 module_交易說明 的完整編輯權限 (CRUD)"
+			},
+			"response": []
+		},
+		{
+			"name": "Check Permission - module_風控簽核 (檢查簽核權限)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"clientId\": \"{{clientId}}\",\n    \"clientSecret\": \"{{clientSecret}}\",\n    \"idToken\": \"{{idToken}}\",\n    \"accessToken\": \"{{accessToken}}\",\n    \"resource\": \"module_風控簽核\",\n    \"scopes\": \"@r@c@u@d\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/prs/permissions/check",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "prs", "permissions", "check"]
+				},
+				"description": "檢查使用者是否有 module_風控簽核 的完整編輯權限"
+			},
+			"response": []
+		}
+	]
+}

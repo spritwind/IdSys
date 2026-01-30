@@ -130,6 +130,43 @@ docker-compose up -d
 - `identityserverdata.json` - Clients 與 Resources 種子資料
 - `identitydata.json` - 管理員使用者種子資料
 
+## 發佈 (Publish)
+
+所有專案的發佈產出統一放置於專案根目錄的 `publish/` 資料夾，結構如下：
+
+```
+publish/
+├── Admin/          # Admin MVC 管理介面
+├── Admin.Api/      # Admin REST API
+├── STS.Identity/   # Security Token Service
+├── TwFrontEnd/     # React 前端 (原始名稱)
+└── app/            # React 前端 (部署名稱，與 TwFrontEnd 內容相同)
+```
+
+### 前端發佈
+
+```bash
+# 在 TwFrontEnd 資料夾中執行
+npm run build
+
+# 將 dist/ 內容複製到 publish 資料夾
+cp -r dist/* ../publish/TwFrontEnd/
+cp -r dist/* ../publish/app/
+```
+
+### 後端發佈
+
+```bash
+# Admin MVC
+dotnet publish src/Skoruba.Duende.IdentityServer.Admin -c Release -o publish/Admin
+
+# Admin API
+dotnet publish src/Skoruba.Duende.IdentityServer.Admin.Api -c Release -o publish/Admin.Api
+
+# STS Identity
+dotnet publish src/Skoruba.Duende.IdentityServer.STS.Identity -c Release -o publish/STS.Identity
+```
+
 ## 驗證與授權
 
 授權使用 appsettings.json 中設定的 `AdministrationRole` 宣告。預設角色為 `SkorubaIdentityAdminAdministrator`。原則透過 `AddAuthorizationPolicies()` 註冊。

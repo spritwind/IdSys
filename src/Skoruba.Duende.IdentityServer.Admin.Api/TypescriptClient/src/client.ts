@@ -4650,30 +4650,75 @@ export class LogsClient extends WebApiClientBase implements ILogsClient {
 
 export interface IMultiTenantOrganizationClient {
 
+    /**
+     * 取得所有組織
+     * @param tenantId (optional) 
+     */
     getAll(tenantId: string | null | undefined): Promise<OrganizationDto[]>;
 
+    /**
+     * 新增組織
+     * @param tenantId (optional) 
+     */
     create(tenantId: string | null | undefined, dto: CreateOrganizationDto): Promise<OrganizationDto>;
 
+    /**
+     * 取得組織樹狀結構
+     * @param tenantId (optional) 
+     */
     getTree(tenantId: string | null | undefined): Promise<OrganizationTreeNodeDto[]>;
 
+    /**
+     * 根據 ID 取得組織
+     */
     getById(id: string): Promise<OrganizationDto>;
 
+    /**
+     * 更新組織
+     */
     update(id: string, dto: UpdateOrganizationDto): Promise<OrganizationDto>;
 
+    /**
+     * 刪除組織
+     * @param includeDescendants (optional) 
+     */
     delete(id: string, includeDescendants: boolean | undefined): Promise<OperationResultDto>;
 
+    /**
+     * 取得子組織
+     */
     getChildren(id: string): Promise<OrganizationDto[]>;
 
+    /**
+     * 取得組織統計
+     * @param tenantId (optional) 
+     */
     getStats(tenantId: string | null | undefined): Promise<OrganizationStatsDto>;
 
+    /**
+     * 取得組織成員
+     */
     getMembers(id: string): Promise<OrganizationMemberDto[]>;
 
+    /**
+     * 新增組織成員
+     */
     addMember(id: string, dto: AddOrganizationMemberDto): Promise<OrganizationMemberDto>;
 
+    /**
+     * 移除組織成員
+     */
     removeMember(id: string, userId: string): Promise<OperationResultDto>;
 
+    /**
+     * 取得所有職位
+     * @param tenantId (optional) 
+     */
     getPositions(tenantId: string | null | undefined): Promise<PositionDto[]>;
 
+    /**
+     * 取得使用者所屬組織
+     */
     getUserOrganizations(userId: string): Promise<OrganizationMemberDto[]>;
 }
 
@@ -4688,6 +4733,10 @@ export class MultiTenantOrganizationClient extends WebApiClientBase implements I
         this.baseUrl = baseUrl ?? "";
     }
 
+    /**
+     * 取得所有組織
+     * @param tenantId (optional) 
+     */
     getAll(tenantId: string | null | undefined): Promise<OrganizationDto[]> {
         let url_ = this.baseUrl + "/api/v2/organizations?";
         if (tenantId !== undefined && tenantId !== null)
@@ -4741,6 +4790,10 @@ export class MultiTenantOrganizationClient extends WebApiClientBase implements I
         return Promise.resolve<OrganizationDto[]>(null as any);
     }
 
+    /**
+     * 新增組織
+     * @param tenantId (optional) 
+     */
     create(tenantId: string | null | undefined, dto: CreateOrganizationDto): Promise<OrganizationDto> {
         let url_ = this.baseUrl + "/api/v2/organizations?";
         if (tenantId !== undefined && tenantId !== null)
@@ -4798,6 +4851,10 @@ export class MultiTenantOrganizationClient extends WebApiClientBase implements I
         return Promise.resolve<OrganizationDto>(null as any);
     }
 
+    /**
+     * 取得組織樹狀結構
+     * @param tenantId (optional) 
+     */
     getTree(tenantId: string | null | undefined): Promise<OrganizationTreeNodeDto[]> {
         let url_ = this.baseUrl + "/api/v2/organizations/tree?";
         if (tenantId !== undefined && tenantId !== null)
@@ -4851,6 +4908,9 @@ export class MultiTenantOrganizationClient extends WebApiClientBase implements I
         return Promise.resolve<OrganizationTreeNodeDto[]>(null as any);
     }
 
+    /**
+     * 根據 ID 取得組織
+     */
     getById(id: string): Promise<OrganizationDto> {
         let url_ = this.baseUrl + "/api/v2/organizations/{id}";
         if (id === undefined || id === null)
@@ -4905,6 +4965,9 @@ export class MultiTenantOrganizationClient extends WebApiClientBase implements I
         return Promise.resolve<OrganizationDto>(null as any);
     }
 
+    /**
+     * 更新組織
+     */
     update(id: string, dto: UpdateOrganizationDto): Promise<OrganizationDto> {
         let url_ = this.baseUrl + "/api/v2/organizations/{id}";
         if (id === undefined || id === null)
@@ -4970,6 +5033,10 @@ export class MultiTenantOrganizationClient extends WebApiClientBase implements I
         return Promise.resolve<OrganizationDto>(null as any);
     }
 
+    /**
+     * 刪除組織
+     * @param includeDescendants (optional) 
+     */
     delete(id: string, includeDescendants: boolean | undefined): Promise<OperationResultDto> {
         let url_ = this.baseUrl + "/api/v2/organizations/{id}?";
         if (id === undefined || id === null)
@@ -5028,6 +5095,9 @@ export class MultiTenantOrganizationClient extends WebApiClientBase implements I
         return Promise.resolve<OperationResultDto>(null as any);
     }
 
+    /**
+     * 取得子組織
+     */
     getChildren(id: string): Promise<OrganizationDto[]> {
         let url_ = this.baseUrl + "/api/v2/organizations/{id}/children";
         if (id === undefined || id === null)
@@ -5082,6 +5152,10 @@ export class MultiTenantOrganizationClient extends WebApiClientBase implements I
         return Promise.resolve<OrganizationDto[]>(null as any);
     }
 
+    /**
+     * 取得組織統計
+     * @param tenantId (optional) 
+     */
     getStats(tenantId: string | null | undefined): Promise<OrganizationStatsDto> {
         let url_ = this.baseUrl + "/api/v2/organizations/stats?";
         if (tenantId !== undefined && tenantId !== null)
@@ -5128,6 +5202,9 @@ export class MultiTenantOrganizationClient extends WebApiClientBase implements I
         return Promise.resolve<OrganizationStatsDto>(null as any);
     }
 
+    /**
+     * 取得組織成員
+     */
     getMembers(id: string): Promise<OrganizationMemberDto[]> {
         let url_ = this.baseUrl + "/api/v2/organizations/{id}/members";
         if (id === undefined || id === null)
@@ -5182,6 +5259,9 @@ export class MultiTenantOrganizationClient extends WebApiClientBase implements I
         return Promise.resolve<OrganizationMemberDto[]>(null as any);
     }
 
+    /**
+     * 新增組織成員
+     */
     addMember(id: string, dto: AddOrganizationMemberDto): Promise<OrganizationMemberDto> {
         let url_ = this.baseUrl + "/api/v2/organizations/{id}/members";
         if (id === undefined || id === null)
@@ -5240,6 +5320,9 @@ export class MultiTenantOrganizationClient extends WebApiClientBase implements I
         return Promise.resolve<OrganizationMemberDto>(null as any);
     }
 
+    /**
+     * 移除組織成員
+     */
     removeMember(id: string, userId: string): Promise<OperationResultDto> {
         let url_ = this.baseUrl + "/api/v2/organizations/{id}/members/{userId}";
         if (id === undefined || id === null)
@@ -5297,6 +5380,10 @@ export class MultiTenantOrganizationClient extends WebApiClientBase implements I
         return Promise.resolve<OperationResultDto>(null as any);
     }
 
+    /**
+     * 取得所有職位
+     * @param tenantId (optional) 
+     */
     getPositions(tenantId: string | null | undefined): Promise<PositionDto[]> {
         let url_ = this.baseUrl + "/api/v2/organizations/positions?";
         if (tenantId !== undefined && tenantId !== null)
@@ -5350,6 +5437,9 @@ export class MultiTenantOrganizationClient extends WebApiClientBase implements I
         return Promise.resolve<PositionDto[]>(null as any);
     }
 
+    /**
+     * 取得使用者所屬組織
+     */
     getUserOrganizations(userId: string): Promise<OrganizationMemberDto[]> {
         let url_ = this.baseUrl + "/api/v2/organizations/users/{userId}/organizations";
         if (userId === undefined || userId === null)
@@ -5407,32 +5497,80 @@ export class MultiTenantOrganizationClient extends WebApiClientBase implements I
 
 export interface IMultiTenantPermissionClient {
 
+    /**
+     * 取得所有資源
+     * @param clientId (optional) 
+     */
     getResources(clientId: string | null | undefined): Promise<PermissionResourceDto[]>;
 
+    /**
+     * 取得資源樹狀結構
+     * @param clientId (optional) 
+     */
     getResourceTree(clientId: string | null | undefined): Promise<PermissionResourceDto[]>;
 
+    /**
+     * 根據 ID 取得資源
+     */
     getResourceById(id: string): Promise<PermissionResourceDto>;
 
+    /**
+     * 取得所有權限範圍
+     */
     getScopes(): Promise<PermissionScopeDto[]>;
 
+    /**
+     * 取得使用者的直接權限
+     */
     getUserPermissions(userId: string): Promise<PermissionDto[]>;
 
+    /**
+     * 取得使用者的有效權限（包含繼承）
+     */
     getUserEffectivePermissions(userId: string): Promise<UserEffectivePermissionsDto>;
 
+    /**
+     * 檢查使用者是否有特定權限
+     * @param resourceId (optional) 
+     * @param clientId (optional) 
+     * @param resourceCode (optional) 
+     * @param scope (optional) 
+     */
     checkUserPermission(userId: string, resourceId: string | null | undefined, clientId: string | null | undefined, resourceCode: string | null | undefined, scope: string | null | undefined): Promise<PermissionCheckResultDto>;
 
+    /**
+     * 取得組織的權限
+     */
     getOrganizationPermissions(organizationId: string): Promise<PermissionDto[]>;
 
+    /**
+     * 取得資源的權限
+     */
     getResourcePermissions(resourceId: string): Promise<PermissionDto[]>;
 
+    /**
+     * 授予權限
+     */
     grantPermission(dto: GrantPermissionDto): Promise<PermissionDto>;
 
+    /**
+     * 批次授予權限
+     */
     batchGrantPermissions(dto: BatchGrantPermissionDto): Promise<PermissionDto[]>;
 
+    /**
+     * 撤銷權限
+     */
     revokePermission(id: string): Promise<OperationResultDto>;
 
+    /**
+     * 更新權限
+     */
     updatePermission(id: string, dto: UpdatePermissionDto): Promise<PermissionDto>;
 
+    /**
+     * 批次撤銷權限
+     */
     batchRevokePermissions(permissionIds: string[]): Promise<OperationResultDto>;
 }
 
@@ -5447,6 +5585,10 @@ export class MultiTenantPermissionClient extends WebApiClientBase implements IMu
         this.baseUrl = baseUrl ?? "";
     }
 
+    /**
+     * 取得所有資源
+     * @param clientId (optional) 
+     */
     getResources(clientId: string | null | undefined): Promise<PermissionResourceDto[]> {
         let url_ = this.baseUrl + "/api/v2/permissions/resources?";
         if (clientId !== undefined && clientId !== null)
@@ -5500,6 +5642,10 @@ export class MultiTenantPermissionClient extends WebApiClientBase implements IMu
         return Promise.resolve<PermissionResourceDto[]>(null as any);
     }
 
+    /**
+     * 取得資源樹狀結構
+     * @param clientId (optional) 
+     */
     getResourceTree(clientId: string | null | undefined): Promise<PermissionResourceDto[]> {
         let url_ = this.baseUrl + "/api/v2/permissions/resources/tree?";
         if (clientId !== undefined && clientId !== null)
@@ -5553,6 +5699,9 @@ export class MultiTenantPermissionClient extends WebApiClientBase implements IMu
         return Promise.resolve<PermissionResourceDto[]>(null as any);
     }
 
+    /**
+     * 根據 ID 取得資源
+     */
     getResourceById(id: string): Promise<PermissionResourceDto> {
         let url_ = this.baseUrl + "/api/v2/permissions/resources/{id}";
         if (id === undefined || id === null)
@@ -5607,6 +5756,9 @@ export class MultiTenantPermissionClient extends WebApiClientBase implements IMu
         return Promise.resolve<PermissionResourceDto>(null as any);
     }
 
+    /**
+     * 取得所有權限範圍
+     */
     getScopes(): Promise<PermissionScopeDto[]> {
         let url_ = this.baseUrl + "/api/v2/permissions/scopes";
         url_ = url_.replace(/[?&]$/, "");
@@ -5658,6 +5810,9 @@ export class MultiTenantPermissionClient extends WebApiClientBase implements IMu
         return Promise.resolve<PermissionScopeDto[]>(null as any);
     }
 
+    /**
+     * 取得使用者的直接權限
+     */
     getUserPermissions(userId: string): Promise<PermissionDto[]> {
         let url_ = this.baseUrl + "/api/v2/permissions/users/{userId}";
         if (userId === undefined || userId === null)
@@ -5712,6 +5867,9 @@ export class MultiTenantPermissionClient extends WebApiClientBase implements IMu
         return Promise.resolve<PermissionDto[]>(null as any);
     }
 
+    /**
+     * 取得使用者的有效權限（包含繼承）
+     */
     getUserEffectivePermissions(userId: string): Promise<UserEffectivePermissionsDto> {
         let url_ = this.baseUrl + "/api/v2/permissions/users/{userId}/effective";
         if (userId === undefined || userId === null)
@@ -5759,6 +5917,13 @@ export class MultiTenantPermissionClient extends WebApiClientBase implements IMu
         return Promise.resolve<UserEffectivePermissionsDto>(null as any);
     }
 
+    /**
+     * 檢查使用者是否有特定權限
+     * @param resourceId (optional) 
+     * @param clientId (optional) 
+     * @param resourceCode (optional) 
+     * @param scope (optional) 
+     */
     checkUserPermission(userId: string, resourceId: string | null | undefined, clientId: string | null | undefined, resourceCode: string | null | undefined, scope: string | null | undefined): Promise<PermissionCheckResultDto> {
         let url_ = this.baseUrl + "/api/v2/permissions/users/{userId}/check?";
         if (userId === undefined || userId === null)
@@ -5814,6 +5979,9 @@ export class MultiTenantPermissionClient extends WebApiClientBase implements IMu
         return Promise.resolve<PermissionCheckResultDto>(null as any);
     }
 
+    /**
+     * 取得組織的權限
+     */
     getOrganizationPermissions(organizationId: string): Promise<PermissionDto[]> {
         let url_ = this.baseUrl + "/api/v2/permissions/organizations/{organizationId}";
         if (organizationId === undefined || organizationId === null)
@@ -5868,6 +6036,9 @@ export class MultiTenantPermissionClient extends WebApiClientBase implements IMu
         return Promise.resolve<PermissionDto[]>(null as any);
     }
 
+    /**
+     * 取得資源的權限
+     */
     getResourcePermissions(resourceId: string): Promise<PermissionDto[]> {
         let url_ = this.baseUrl + "/api/v2/permissions/resources/{resourceId}/permissions";
         if (resourceId === undefined || resourceId === null)
@@ -5922,6 +6093,9 @@ export class MultiTenantPermissionClient extends WebApiClientBase implements IMu
         return Promise.resolve<PermissionDto[]>(null as any);
     }
 
+    /**
+     * 授予權限
+     */
     grantPermission(dto: GrantPermissionDto): Promise<PermissionDto> {
         let url_ = this.baseUrl + "/api/v2/permissions/grant";
         url_ = url_.replace(/[?&]$/, "");
@@ -5977,6 +6151,9 @@ export class MultiTenantPermissionClient extends WebApiClientBase implements IMu
         return Promise.resolve<PermissionDto>(null as any);
     }
 
+    /**
+     * 批次授予權限
+     */
     batchGrantPermissions(dto: BatchGrantPermissionDto): Promise<PermissionDto[]> {
         let url_ = this.baseUrl + "/api/v2/permissions/grant/batch";
         url_ = url_.replace(/[?&]$/, "");
@@ -6039,6 +6216,9 @@ export class MultiTenantPermissionClient extends WebApiClientBase implements IMu
         return Promise.resolve<PermissionDto[]>(null as any);
     }
 
+    /**
+     * 撤銷權限
+     */
     revokePermission(id: string): Promise<OperationResultDto> {
         let url_ = this.baseUrl + "/api/v2/permissions/{id}";
         if (id === undefined || id === null)
@@ -6093,6 +6273,9 @@ export class MultiTenantPermissionClient extends WebApiClientBase implements IMu
         return Promise.resolve<OperationResultDto>(null as any);
     }
 
+    /**
+     * 更新權限
+     */
     updatePermission(id: string, dto: UpdatePermissionDto): Promise<PermissionDto> {
         let url_ = this.baseUrl + "/api/v2/permissions/{id}";
         if (id === undefined || id === null)
@@ -6158,6 +6341,9 @@ export class MultiTenantPermissionClient extends WebApiClientBase implements IMu
         return Promise.resolve<PermissionDto>(null as any);
     }
 
+    /**
+     * 批次撤銷權限
+     */
     batchRevokePermissions(permissionIds: string[]): Promise<OperationResultDto> {
         let url_ = this.baseUrl + "/api/v2/permissions/batch";
         url_ = url_.replace(/[?&]$/, "");
@@ -6207,26 +6393,582 @@ export class MultiTenantPermissionClient extends WebApiClientBase implements IMu
     }
 }
 
+export interface IOidcClient {
+
+    /**
+     * Discovery Document - 取得 OIDC 設定文件
+     * @return Discovery Document JSON
+     */
+    getDiscoveryDocument(): Promise<any>;
+
+    /**
+     * Authorization Endpoint - 取得授權 URL
+     * @param request 授權請求參數
+     * @return 授權 URL
+     */
+    getAuthorizeUrl(request: AuthorizeUrlRequest): Promise<AuthorizeUrlResponse>;
+
+    /**
+     * Token Endpoint - 授權碼交換 Token
+     * @param request Token 請求
+     * @return Token Response
+     */
+    exchangeToken(request: TokenRequest): Promise<any>;
+
+    /**
+     * Token Refresh - 刷新 Access Token
+     * @param request 刷新請求
+     * @return Token Response
+     */
+    refreshToken(request: RefreshTokenRequest): Promise<any>;
+
+    /**
+     * Client Credentials - 機器對機器認證
+     * @param request Client Credentials 請求
+     * @return Token Response
+     */
+    getClientCredentialsToken(request: ClientCredentialsRequest): Promise<any>;
+
+    /**
+     * Introspection Endpoint - Token 內省（遠端驗證）
+     * @param request 內省請求
+     * @return Token 資訊
+     */
+    introspectToken(request: IntrospectRequest): Promise<any>;
+
+    /**
+     * Revocation Endpoint - Token 撤銷
+     * @param request 撤銷請求
+     * @return 撤銷結果
+     */
+    revokeToken(request: RevokeRequest): Promise<RevokeResponse>;
+
+    /**
+     * UserInfo Endpoint - 取得使用者資訊
+     * @param accessToken (optional) Access Token
+     * @return 使用者資訊
+     */
+    getUserInfo(accessToken: string | null | undefined): Promise<any>;
+
+    /**
+     * End Session Endpoint - 取得登出 URL
+     * @param request 登出請求
+     * @return 登出 URL
+     */
+    getLogoutUrl(request: LogoutUrlRequest): Promise<LogoutUrlResponse>;
+}
+
+export class OidcClient extends WebApiClientBase implements IOidcClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super();
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * Discovery Document - 取得 OIDC 設定文件
+     * @return Discovery Document JSON
+     */
+    getDiscoveryDocument(): Promise<any> {
+        let url_ = this.baseUrl + "/.well-known/openid-configuration";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetDiscoveryDocument(_response);
+        });
+    }
+
+    protected processGetDiscoveryDocument(response: Response): Promise<any> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<any>(null as any);
+    }
+
+    /**
+     * Authorization Endpoint - 取得授權 URL
+     * @param request 授權請求參數
+     * @return 授權 URL
+     */
+    getAuthorizeUrl(request: AuthorizeUrlRequest): Promise<AuthorizeUrlResponse> {
+        let url_ = this.baseUrl + "/connect/authorize-url";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetAuthorizeUrl(_response);
+        });
+    }
+
+    protected processGetAuthorizeUrl(response: Response): Promise<AuthorizeUrlResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = AuthorizeUrlResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<AuthorizeUrlResponse>(null as any);
+    }
+
+    /**
+     * Token Endpoint - 授權碼交換 Token
+     * @param request Token 請求
+     * @return Token Response
+     */
+    exchangeToken(request: TokenRequest): Promise<any> {
+        let url_ = this.baseUrl + "/connect/token";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processExchangeToken(_response);
+        });
+    }
+
+    protected processExchangeToken(response: Response): Promise<any> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<any>(null as any);
+    }
+
+    /**
+     * Token Refresh - 刷新 Access Token
+     * @param request 刷新請求
+     * @return Token Response
+     */
+    refreshToken(request: RefreshTokenRequest): Promise<any> {
+        let url_ = this.baseUrl + "/connect/token/refresh";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processRefreshToken(_response);
+        });
+    }
+
+    protected processRefreshToken(response: Response): Promise<any> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<any>(null as any);
+    }
+
+    /**
+     * Client Credentials - 機器對機器認證
+     * @param request Client Credentials 請求
+     * @return Token Response
+     */
+    getClientCredentialsToken(request: ClientCredentialsRequest): Promise<any> {
+        let url_ = this.baseUrl + "/connect/token/client-credentials";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetClientCredentialsToken(_response);
+        });
+    }
+
+    protected processGetClientCredentialsToken(response: Response): Promise<any> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<any>(null as any);
+    }
+
+    /**
+     * Introspection Endpoint - Token 內省（遠端驗證）
+     * @param request 內省請求
+     * @return Token 資訊
+     */
+    introspectToken(request: IntrospectRequest): Promise<any> {
+        let url_ = this.baseUrl + "/connect/introspect";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processIntrospectToken(_response);
+        });
+    }
+
+    protected processIntrospectToken(response: Response): Promise<any> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<any>(null as any);
+    }
+
+    /**
+     * Revocation Endpoint - Token 撤銷
+     * @param request 撤銷請求
+     * @return 撤銷結果
+     */
+    revokeToken(request: RevokeRequest): Promise<RevokeResponse> {
+        let url_ = this.baseUrl + "/connect/revocation";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processRevokeToken(_response);
+        });
+    }
+
+    protected processRevokeToken(response: Response): Promise<RevokeResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = RevokeResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<RevokeResponse>(null as any);
+    }
+
+    /**
+     * UserInfo Endpoint - 取得使用者資訊
+     * @param accessToken (optional) Access Token
+     * @return 使用者資訊
+     */
+    getUserInfo(accessToken: string | null | undefined): Promise<any> {
+        let url_ = this.baseUrl + "/connect/userinfo?";
+        if (accessToken !== undefined && accessToken !== null)
+            url_ += "accessToken=" + encodeURIComponent("" + accessToken) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetUserInfo(_response);
+        });
+    }
+
+    protected processGetUserInfo(response: Response): Promise<any> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<any>(null as any);
+    }
+
+    /**
+     * End Session Endpoint - 取得登出 URL
+     * @param request 登出請求
+     * @return 登出 URL
+     */
+    getLogoutUrl(request: LogoutUrlRequest): Promise<LogoutUrlResponse> {
+        let url_ = this.baseUrl + "/connect/endsession-url";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetLogoutUrl(_response);
+        });
+    }
+
+    protected processGetLogoutUrl(response: Response): Promise<LogoutUrlResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = LogoutUrlResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<LogoutUrlResponse>(null as any);
+    }
+}
+
 export interface IOrganizationClient {
 
+    /**
+     * 取得所有組織群組（扁平列表）
+     */
     getAll(): Promise<OrganizationGroupApiDto[]>;
 
+    /**
+     * 新增組織群組
+     */
     create(dto: CreateOrganizationGroupApiDto): Promise<OrganizationGroupApiDto>;
 
+    /**
+     * 取得組織樹狀結構
+     */
     getTree(): Promise<OrganizationTreeApiDto[]>;
 
+    /**
+     * 根據 ID 取得組織群組
+     */
     getById(id: string): Promise<OrganizationGroupApiDto>;
 
+    /**
+     * 更新組織群組
+     */
     update(id: string, dto: UpdateOrganizationGroupApiDto): Promise<OrganizationGroupApiDto>;
 
+    /**
+     * 刪除組織群組（含所有子群組）
+     */
     delete(id: string): Promise<DeleteResultApiDto>;
 
+    /**
+     * 取得組織統計資料
+     */
     getStats(): Promise<OrganizationStatsApiDto>;
 
+    /**
+     * 檢查群組名稱是否可用
+     * @param name (optional) 
+     * @param parentId (optional) 
+     * @param excludeId (optional) 
+     */
     canInsert(name: string | null | undefined, parentId: string | null | undefined, excludeId: string | null | undefined): Promise<boolean>;
 
+    /**
+     * 取得刪除確認資訊（包含將被刪除的子群組列表）
+     */
     getDeleteConfirmation(id: string): Promise<DeleteConfirmationApiDto>;
 
+    /**
+     * 取得群組成員列表
+     */
     getMembers(id: string): Promise<GroupMemberApiDto[]>;
 }
 
@@ -6241,6 +6983,9 @@ export class OrganizationClient extends WebApiClientBase implements IOrganizatio
         this.baseUrl = baseUrl ?? "";
     }
 
+    /**
+     * 取得所有組織群組（扁平列表）
+     */
     getAll(): Promise<OrganizationGroupApiDto[]> {
         let url_ = this.baseUrl + "/api/Organization";
         url_ = url_.replace(/[?&]$/, "");
@@ -6292,6 +7037,9 @@ export class OrganizationClient extends WebApiClientBase implements IOrganizatio
         return Promise.resolve<OrganizationGroupApiDto[]>(null as any);
     }
 
+    /**
+     * 新增組織群組
+     */
     create(dto: CreateOrganizationGroupApiDto): Promise<OrganizationGroupApiDto> {
         let url_ = this.baseUrl + "/api/Organization";
         url_ = url_.replace(/[?&]$/, "");
@@ -6347,6 +7095,9 @@ export class OrganizationClient extends WebApiClientBase implements IOrganizatio
         return Promise.resolve<OrganizationGroupApiDto>(null as any);
     }
 
+    /**
+     * 取得組織樹狀結構
+     */
     getTree(): Promise<OrganizationTreeApiDto[]> {
         let url_ = this.baseUrl + "/api/Organization/tree";
         url_ = url_.replace(/[?&]$/, "");
@@ -6398,6 +7149,9 @@ export class OrganizationClient extends WebApiClientBase implements IOrganizatio
         return Promise.resolve<OrganizationTreeApiDto[]>(null as any);
     }
 
+    /**
+     * 根據 ID 取得組織群組
+     */
     getById(id: string): Promise<OrganizationGroupApiDto> {
         let url_ = this.baseUrl + "/api/Organization/{id}";
         if (id === undefined || id === null)
@@ -6452,6 +7206,9 @@ export class OrganizationClient extends WebApiClientBase implements IOrganizatio
         return Promise.resolve<OrganizationGroupApiDto>(null as any);
     }
 
+    /**
+     * 更新組織群組
+     */
     update(id: string, dto: UpdateOrganizationGroupApiDto): Promise<OrganizationGroupApiDto> {
         let url_ = this.baseUrl + "/api/Organization/{id}";
         if (id === undefined || id === null)
@@ -6517,6 +7274,9 @@ export class OrganizationClient extends WebApiClientBase implements IOrganizatio
         return Promise.resolve<OrganizationGroupApiDto>(null as any);
     }
 
+    /**
+     * 刪除組織群組（含所有子群組）
+     */
     delete(id: string): Promise<DeleteResultApiDto> {
         let url_ = this.baseUrl + "/api/Organization/{id}";
         if (id === undefined || id === null)
@@ -6571,6 +7331,9 @@ export class OrganizationClient extends WebApiClientBase implements IOrganizatio
         return Promise.resolve<DeleteResultApiDto>(null as any);
     }
 
+    /**
+     * 取得組織統計資料
+     */
     getStats(): Promise<OrganizationStatsApiDto> {
         let url_ = this.baseUrl + "/api/Organization/stats";
         url_ = url_.replace(/[?&]$/, "");
@@ -6615,6 +7378,12 @@ export class OrganizationClient extends WebApiClientBase implements IOrganizatio
         return Promise.resolve<OrganizationStatsApiDto>(null as any);
     }
 
+    /**
+     * 檢查群組名稱是否可用
+     * @param name (optional) 
+     * @param parentId (optional) 
+     * @param excludeId (optional) 
+     */
     canInsert(name: string | null | undefined, parentId: string | null | undefined, excludeId: string | null | undefined): Promise<boolean> {
         let url_ = this.baseUrl + "/api/Organization/check-name?";
         if (name !== undefined && name !== null)
@@ -6666,6 +7435,9 @@ export class OrganizationClient extends WebApiClientBase implements IOrganizatio
         return Promise.resolve<boolean>(null as any);
     }
 
+    /**
+     * 取得刪除確認資訊（包含將被刪除的子群組列表）
+     */
     getDeleteConfirmation(id: string): Promise<DeleteConfirmationApiDto> {
         let url_ = this.baseUrl + "/api/Organization/{id}/delete-confirmation";
         if (id === undefined || id === null)
@@ -6720,6 +7492,9 @@ export class OrganizationClient extends WebApiClientBase implements IOrganizatio
         return Promise.resolve<DeleteConfirmationApiDto>(null as any);
     }
 
+    /**
+     * 取得群組成員列表
+     */
     getMembers(id: string): Promise<GroupMemberApiDto[]> {
         let url_ = this.baseUrl + "/api/Organization/{id}/members";
         if (id === undefined || id === null)
@@ -6784,60 +7559,172 @@ export class OrganizationClient extends WebApiClientBase implements IOrganizatio
 
 export interface IPermissionClient {
 
+    /**
+     * 取得權限統計資料
+     */
     getStats(): Promise<PermissionStatsDto>;
 
+    /**
+     * 取得所有客戶端 ID 列表
+     */
     getClients(): Promise<string[]>;
 
+    /**
+     * 搜尋使用者（用於下拉選單）
+     * @param search (optional) 
+     */
     searchUsers(search: string | null | undefined): Promise<UserBriefDto[]>;
 
+    /**
+     * 取得所有群組（用於下拉選單）
+     */
     getGroups(): Promise<GroupBriefDto[]>;
 
+    /**
+     * 取得所有權限範圍
+     * @param clientId (optional) 
+     */
     getAllScopes(clientId: string | null | undefined): Promise<ScopeDto[]>;
 
+    /**
+     * 新增權限範圍
+     */
     createScope(dto: CreateScopeDto): Promise<ScopeDto>;
 
+    /**
+     * 根據 ID 取得權限範圍
+     * @param clientId (optional) 
+     */
     getScopeById(id: string, clientId: string | null | undefined): Promise<ScopeDto>;
 
+    /**
+     * 更新權限範圍
+     */
     updateScope(id: string, dto: UpdateScopeDto): Promise<ScopeDto>;
 
+    /**
+     * 刪除權限範圍（軟刪除）
+     * @param clientId (optional) 
+     */
     deleteScope(id: string, clientId: string | null | undefined): Promise<void>;
 
+    /**
+     * 檢查權限範圍名稱是否可用
+     * @param name (optional) 
+     * @param clientId (optional) 
+     * @param excludeId (optional) 
+     */
     canInsertScope(name: string | null | undefined, clientId: string | null | undefined, excludeId: string | null | undefined): Promise<boolean>;
 
+    /**
+     * 取得所有資源
+     * @param clientId (optional) 
+     * @param type (optional) 
+     */
     getAllResources(clientId: string | null | undefined, type: string | null | undefined): Promise<ResourceDto[]>;
 
+    /**
+     * 新增資源
+     */
     createResource(dto: CreateResourceDto): Promise<ResourceDto>;
 
+    /**
+     * 根據 ID 取得資源
+     * @param clientId (optional) 
+     */
     getResourceById(id: string, clientId: string | null | undefined): Promise<ResourceDto>;
 
+    /**
+     * 更新資源
+     */
     updateResource(id: string, dto: UpdateResourceDto): Promise<ResourceDto>;
 
+    /**
+     * 刪除資源（軟刪除）
+     * @param clientId (optional) 
+     */
     deleteResource(id: string, clientId: string | null | undefined): Promise<void>;
 
+    /**
+     * 檢查資源名稱是否可用
+     * @param name (optional) 
+     * @param clientId (optional) 
+     * @param excludeId (optional) 
+     */
     canInsertResource(name: string | null | undefined, clientId: string | null | undefined, excludeId: string | null | undefined): Promise<boolean>;
 
+    /**
+     * 取得資源的所有範圍
+     * @param clientId (optional) 
+     */
     getResourceScopes(resourceId: string, clientId: string | null | undefined): Promise<ResourceScopeDto2[]>;
 
+    /**
+     * 設定資源的範圍
+     * @param clientId (optional) 
+     */
     setResourceScopes(resourceId: string, clientId: string | null | undefined, scopeIds: string[]): Promise<number>;
 
+    /**
+     * 取得使用者的所有權限
+     * @param clientId (optional) 
+     */
     getUserPermissions(userId: string, clientId: string | null | undefined): Promise<UserPermissionDto[]>;
 
+    /**
+     * 設定使用者權限
+     */
     setUserPermission(userId: string, dto: SetUserPermissionDto): Promise<UserPermissionDto>;
 
+    /**
+     * 移除使用者權限
+     * @param clientId (optional) 
+     * @param resourceId (optional) 
+     */
     removeUserPermission(userId: string, clientId: string | null | undefined, resourceId: string | null | undefined): Promise<void>;
 
+    /**
+     * 取得資源的所有使用者權限
+     * @param clientId (optional) 
+     */
     getResourceUserPermissions(resourceId: string, clientId: string | null | undefined): Promise<UserPermissionDto[]>;
 
+    /**
+     * 取得使用者的有效權限（包含群組繼承）
+     * @param clientId (optional) 
+     */
     getUserEffectivePermissions(userId: string, clientId: string | null | undefined): Promise<EffectivePermissionDto2[]>;
 
+    /**
+     * 檢查使用者是否有指定權限
+     * @param clientId (optional) 
+     * @param resourceId (optional) 
+     * @param scope (optional) 
+     */
     hasPermission(userId: string, clientId: string | null | undefined, resourceId: string | null | undefined, scope: string | null | undefined): Promise<boolean>;
 
+    /**
+     * 取得群組的所有權限
+     * @param clientId (optional) 
+     */
     getGroupPermissions(groupId: string, clientId: string | null | undefined): Promise<GroupPermissionDto[]>;
 
+    /**
+     * 設定群組權限
+     */
     setGroupPermission(groupId: string, dto: SetGroupPermissionDto): Promise<GroupPermissionDto>;
 
+    /**
+     * 移除群組權限
+     * @param clientId (optional) 
+     * @param resourceId (optional) 
+     */
     removeGroupPermission(groupId: string, clientId: string | null | undefined, resourceId: string | null | undefined): Promise<void>;
 
+    /**
+     * 取得資源的所有群組權限
+     * @param clientId (optional) 
+     */
     getResourceGroupPermissions(resourceId: string, clientId: string | null | undefined): Promise<GroupPermissionDto[]>;
 }
 
@@ -6852,6 +7739,9 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         this.baseUrl = baseUrl ?? "";
     }
 
+    /**
+     * 取得權限統計資料
+     */
     getStats(): Promise<PermissionStatsDto> {
         let url_ = this.baseUrl + "/api/Permission/stats";
         url_ = url_.replace(/[?&]$/, "");
@@ -6896,6 +7786,9 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<PermissionStatsDto>(null as any);
     }
 
+    /**
+     * 取得所有客戶端 ID 列表
+     */
     getClients(): Promise<string[]> {
         let url_ = this.baseUrl + "/api/Permission/clients";
         url_ = url_.replace(/[?&]$/, "");
@@ -6947,6 +7840,10 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<string[]>(null as any);
     }
 
+    /**
+     * 搜尋使用者（用於下拉選單）
+     * @param search (optional) 
+     */
     searchUsers(search: string | null | undefined): Promise<UserBriefDto[]> {
         let url_ = this.baseUrl + "/api/Permission/users/search?";
         if (search !== undefined && search !== null)
@@ -7000,6 +7897,9 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<UserBriefDto[]>(null as any);
     }
 
+    /**
+     * 取得所有群組（用於下拉選單）
+     */
     getGroups(): Promise<GroupBriefDto[]> {
         let url_ = this.baseUrl + "/api/Permission/groups";
         url_ = url_.replace(/[?&]$/, "");
@@ -7051,6 +7951,10 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<GroupBriefDto[]>(null as any);
     }
 
+    /**
+     * 取得所有權限範圍
+     * @param clientId (optional) 
+     */
     getAllScopes(clientId: string | null | undefined): Promise<ScopeDto[]> {
         let url_ = this.baseUrl + "/api/Permission/scopes?";
         if (clientId !== undefined && clientId !== null)
@@ -7104,6 +8008,9 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<ScopeDto[]>(null as any);
     }
 
+    /**
+     * 新增權限範圍
+     */
     createScope(dto: CreateScopeDto): Promise<ScopeDto> {
         let url_ = this.baseUrl + "/api/Permission/scopes";
         url_ = url_.replace(/[?&]$/, "");
@@ -7159,6 +8066,10 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<ScopeDto>(null as any);
     }
 
+    /**
+     * 根據 ID 取得權限範圍
+     * @param clientId (optional) 
+     */
     getScopeById(id: string, clientId: string | null | undefined): Promise<ScopeDto> {
         let url_ = this.baseUrl + "/api/Permission/scopes/{id}?";
         if (id === undefined || id === null)
@@ -7215,6 +8126,9 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<ScopeDto>(null as any);
     }
 
+    /**
+     * 更新權限範圍
+     */
     updateScope(id: string, dto: UpdateScopeDto): Promise<ScopeDto> {
         let url_ = this.baseUrl + "/api/Permission/scopes/{id}";
         if (id === undefined || id === null)
@@ -7280,6 +8194,10 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<ScopeDto>(null as any);
     }
 
+    /**
+     * 刪除權限範圍（軟刪除）
+     * @param clientId (optional) 
+     */
     deleteScope(id: string, clientId: string | null | undefined): Promise<void> {
         let url_ = this.baseUrl + "/api/Permission/scopes/{id}?";
         if (id === undefined || id === null)
@@ -7332,6 +8250,12 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<void>(null as any);
     }
 
+    /**
+     * 檢查權限範圍名稱是否可用
+     * @param name (optional) 
+     * @param clientId (optional) 
+     * @param excludeId (optional) 
+     */
     canInsertScope(name: string | null | undefined, clientId: string | null | undefined, excludeId: string | null | undefined): Promise<boolean> {
         let url_ = this.baseUrl + "/api/Permission/scopes/check-name?";
         if (name !== undefined && name !== null)
@@ -7383,6 +8307,11 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<boolean>(null as any);
     }
 
+    /**
+     * 取得所有資源
+     * @param clientId (optional) 
+     * @param type (optional) 
+     */
     getAllResources(clientId: string | null | undefined, type: string | null | undefined): Promise<ResourceDto[]> {
         let url_ = this.baseUrl + "/api/Permission/resources?";
         if (clientId !== undefined && clientId !== null)
@@ -7438,6 +8367,9 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<ResourceDto[]>(null as any);
     }
 
+    /**
+     * 新增資源
+     */
     createResource(dto: CreateResourceDto): Promise<ResourceDto> {
         let url_ = this.baseUrl + "/api/Permission/resources";
         url_ = url_.replace(/[?&]$/, "");
@@ -7493,6 +8425,10 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<ResourceDto>(null as any);
     }
 
+    /**
+     * 根據 ID 取得資源
+     * @param clientId (optional) 
+     */
     getResourceById(id: string, clientId: string | null | undefined): Promise<ResourceDto> {
         let url_ = this.baseUrl + "/api/Permission/resources/{id}?";
         if (id === undefined || id === null)
@@ -7549,6 +8485,9 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<ResourceDto>(null as any);
     }
 
+    /**
+     * 更新資源
+     */
     updateResource(id: string, dto: UpdateResourceDto): Promise<ResourceDto> {
         let url_ = this.baseUrl + "/api/Permission/resources/{id}";
         if (id === undefined || id === null)
@@ -7614,6 +8553,10 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<ResourceDto>(null as any);
     }
 
+    /**
+     * 刪除資源（軟刪除）
+     * @param clientId (optional) 
+     */
     deleteResource(id: string, clientId: string | null | undefined): Promise<void> {
         let url_ = this.baseUrl + "/api/Permission/resources/{id}?";
         if (id === undefined || id === null)
@@ -7666,6 +8609,12 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<void>(null as any);
     }
 
+    /**
+     * 檢查資源名稱是否可用
+     * @param name (optional) 
+     * @param clientId (optional) 
+     * @param excludeId (optional) 
+     */
     canInsertResource(name: string | null | undefined, clientId: string | null | undefined, excludeId: string | null | undefined): Promise<boolean> {
         let url_ = this.baseUrl + "/api/Permission/resources/check-name?";
         if (name !== undefined && name !== null)
@@ -7717,6 +8666,10 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<boolean>(null as any);
     }
 
+    /**
+     * 取得資源的所有範圍
+     * @param clientId (optional) 
+     */
     getResourceScopes(resourceId: string, clientId: string | null | undefined): Promise<ResourceScopeDto2[]> {
         let url_ = this.baseUrl + "/api/Permission/resources/{resourceId}/scopes?";
         if (resourceId === undefined || resourceId === null)
@@ -7773,6 +8726,10 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<ResourceScopeDto2[]>(null as any);
     }
 
+    /**
+     * 設定資源的範圍
+     * @param clientId (optional) 
+     */
     setResourceScopes(resourceId: string, clientId: string | null | undefined, scopeIds: string[]): Promise<number> {
         let url_ = this.baseUrl + "/api/Permission/resources/{resourceId}/scopes?";
         if (resourceId === undefined || resourceId === null)
@@ -7827,6 +8784,10 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<number>(null as any);
     }
 
+    /**
+     * 取得使用者的所有權限
+     * @param clientId (optional) 
+     */
     getUserPermissions(userId: string, clientId: string | null | undefined): Promise<UserPermissionDto[]> {
         let url_ = this.baseUrl + "/api/Permission/users/{userId}/permissions?";
         if (userId === undefined || userId === null)
@@ -7883,6 +8844,9 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<UserPermissionDto[]>(null as any);
     }
 
+    /**
+     * 設定使用者權限
+     */
     setUserPermission(userId: string, dto: SetUserPermissionDto): Promise<UserPermissionDto> {
         let url_ = this.baseUrl + "/api/Permission/users/{userId}/permissions";
         if (userId === undefined || userId === null)
@@ -7941,6 +8905,11 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<UserPermissionDto>(null as any);
     }
 
+    /**
+     * 移除使用者權限
+     * @param clientId (optional) 
+     * @param resourceId (optional) 
+     */
     removeUserPermission(userId: string, clientId: string | null | undefined, resourceId: string | null | undefined): Promise<void> {
         let url_ = this.baseUrl + "/api/Permission/users/{userId}/permissions?";
         if (userId === undefined || userId === null)
@@ -7995,6 +8964,10 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<void>(null as any);
     }
 
+    /**
+     * 取得資源的所有使用者權限
+     * @param clientId (optional) 
+     */
     getResourceUserPermissions(resourceId: string, clientId: string | null | undefined): Promise<UserPermissionDto[]> {
         let url_ = this.baseUrl + "/api/Permission/resources/{resourceId}/user-permissions?";
         if (resourceId === undefined || resourceId === null)
@@ -8051,6 +9024,10 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<UserPermissionDto[]>(null as any);
     }
 
+    /**
+     * 取得使用者的有效權限（包含群組繼承）
+     * @param clientId (optional) 
+     */
     getUserEffectivePermissions(userId: string, clientId: string | null | undefined): Promise<EffectivePermissionDto2[]> {
         let url_ = this.baseUrl + "/api/Permission/users/{userId}/effective-permissions?";
         if (userId === undefined || userId === null)
@@ -8107,6 +9084,12 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<EffectivePermissionDto2[]>(null as any);
     }
 
+    /**
+     * 檢查使用者是否有指定權限
+     * @param clientId (optional) 
+     * @param resourceId (optional) 
+     * @param scope (optional) 
+     */
     hasPermission(userId: string, clientId: string | null | undefined, resourceId: string | null | undefined, scope: string | null | undefined): Promise<boolean> {
         let url_ = this.baseUrl + "/api/Permission/users/{userId}/has-permission?";
         if (userId === undefined || userId === null)
@@ -8161,6 +9144,10 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<boolean>(null as any);
     }
 
+    /**
+     * 取得群組的所有權限
+     * @param clientId (optional) 
+     */
     getGroupPermissions(groupId: string, clientId: string | null | undefined): Promise<GroupPermissionDto[]> {
         let url_ = this.baseUrl + "/api/Permission/groups/{groupId}/permissions?";
         if (groupId === undefined || groupId === null)
@@ -8217,6 +9204,9 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<GroupPermissionDto[]>(null as any);
     }
 
+    /**
+     * 設定群組權限
+     */
     setGroupPermission(groupId: string, dto: SetGroupPermissionDto): Promise<GroupPermissionDto> {
         let url_ = this.baseUrl + "/api/Permission/groups/{groupId}/permissions";
         if (groupId === undefined || groupId === null)
@@ -8275,6 +9265,11 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<GroupPermissionDto>(null as any);
     }
 
+    /**
+     * 移除群組權限
+     * @param clientId (optional) 
+     * @param resourceId (optional) 
+     */
     removeGroupPermission(groupId: string, clientId: string | null | undefined, resourceId: string | null | undefined): Promise<void> {
         let url_ = this.baseUrl + "/api/Permission/groups/{groupId}/permissions?";
         if (groupId === undefined || groupId === null)
@@ -8329,6 +9324,10 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
         return Promise.resolve<void>(null as any);
     }
 
+    /**
+     * 取得資源的所有群組權限
+     * @param clientId (optional) 
+     */
     getResourceGroupPermissions(resourceId: string, clientId: string | null | undefined): Promise<GroupPermissionDto[]> {
         let url_ = this.baseUrl + "/api/Permission/resources/{resourceId}/group-permissions?";
         if (resourceId === undefined || resourceId === null)
@@ -8383,6 +9382,273 @@ export class PermissionClient extends WebApiClientBase implements IPermissionCli
             });
         }
         return Promise.resolve<GroupPermissionDto[]>(null as any);
+    }
+}
+
+export interface IPermissionQueryClient {
+
+    /**
+     * 查詢使用者權限
+     * @param request 權限查詢請求
+     * @return 查詢成功，回傳權限清單
+     */
+    queryPermissions(request: PermissionQueryRequest): Promise<PermissionQueryResponse>;
+
+    /**
+     * 檢查使用者是否具有特定權限
+     * @param request 權限檢查請求
+     * @return 檢查成功，回傳各 scope 的權限狀態
+     */
+    checkPermission(request: PermissionCheckRequest): Promise<{ [key: string]: ScopeCheckResultDto; }>;
+
+    /**
+     * 健康檢查端點
+     * @return API 狀態
+     */
+    health(): Promise<any>;
+}
+
+export class PermissionQueryClient extends WebApiClientBase implements IPermissionQueryClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super();
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * 查詢使用者權限
+     * @param request 權限查詢請求
+     * @return 查詢成功，回傳權限清單
+     */
+    queryPermissions(request: PermissionQueryRequest): Promise<PermissionQueryResponse> {
+        let url_ = this.baseUrl + "/api/prs/permissions/query";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processQueryPermissions(_response);
+        });
+    }
+
+    protected processQueryPermissions(response: Response): Promise<PermissionQueryResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PermissionQueryResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = PermissionQueryErrorResponse.fromJS(resultData400);
+            return throwException("\u8acb\u6c42\u53c3\u6578\u932f\u8aa4", status, _responseText, _headers, result400);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            let result401: any = null;
+            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result401 = PermissionQueryErrorResponse.fromJS(resultData401);
+            return throwException("Client \u6191\u8b49\u6216 Token \u9a57\u8b49\u5931\u6557", status, _responseText, _headers, result401);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = PermissionQueryErrorResponse.fromJS(resultData404);
+            return throwException("\u4f7f\u7528\u8005\u672a\u8a3b\u518a\u65bc\u6b0a\u9650\u7cfb\u7d71", status, _responseText, _headers, result404);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = PermissionQueryErrorResponse.fromJS(resultData500);
+            return throwException("\u4f3a\u670d\u5668\u5167\u90e8\u932f\u8aa4", status, _responseText, _headers, result500);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PermissionQueryResponse>(null as any);
+    }
+
+    /**
+     * 檢查使用者是否具有特定權限
+     * @param request 權限檢查請求
+     * @return 檢查成功，回傳各 scope 的權限狀態
+     */
+    checkPermission(request: PermissionCheckRequest): Promise<{ [key: string]: ScopeCheckResultDto; }> {
+        let url_ = this.baseUrl + "/api/prs/permissions/check";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processCheckPermission(_response);
+        });
+    }
+
+    protected processCheckPermission(response: Response): Promise<{ [key: string]: ScopeCheckResultDto; }> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (resultData200) {
+                result200 = {} as any;
+                for (let key in resultData200) {
+                    if (resultData200.hasOwnProperty(key))
+                        (<any>result200)![key] = resultData200[key] ? ScopeCheckResultDto.fromJS(resultData200[key]) : new ScopeCheckResultDto();
+                }
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (resultData400) {
+                result400 = {} as any;
+                for (let key in resultData400) {
+                    if (resultData400.hasOwnProperty(key))
+                        (<any>result400)![key] = resultData400[key] ? ScopeCheckResultDto.fromJS(resultData400[key]) : new ScopeCheckResultDto();
+                }
+            }
+            else {
+                result400 = <any>null;
+            }
+            return throwException("\u8acb\u6c42\u53c3\u6578\u932f\u8aa4", status, _responseText, _headers, result400);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            let result401: any = null;
+            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (resultData401) {
+                result401 = {} as any;
+                for (let key in resultData401) {
+                    if (resultData401.hasOwnProperty(key))
+                        (<any>result401)![key] = resultData401[key] ? ScopeCheckResultDto.fromJS(resultData401[key]) : new ScopeCheckResultDto();
+                }
+            }
+            else {
+                result401 = <any>null;
+            }
+            return throwException("Client \u6191\u8b49\u6216 Token \u9a57\u8b49\u5931\u6557", status, _responseText, _headers, result401);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (resultData404) {
+                result404 = {} as any;
+                for (let key in resultData404) {
+                    if (resultData404.hasOwnProperty(key))
+                        (<any>result404)![key] = resultData404[key] ? ScopeCheckResultDto.fromJS(resultData404[key]) : new ScopeCheckResultDto();
+                }
+            }
+            else {
+                result404 = <any>null;
+            }
+            return throwException("\u4f7f\u7528\u8005\u672a\u8a3b\u518a\u65bc\u6b0a\u9650\u7cfb\u7d71", status, _responseText, _headers, result404);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (resultData500) {
+                result500 = {} as any;
+                for (let key in resultData500) {
+                    if (resultData500.hasOwnProperty(key))
+                        (<any>result500)![key] = resultData500[key] ? ScopeCheckResultDto.fromJS(resultData500[key]) : new ScopeCheckResultDto();
+                }
+            }
+            else {
+                result500 = <any>null;
+            }
+            return throwException("\u4f3a\u670d\u5668\u5167\u90e8\u932f\u8aa4", status, _responseText, _headers, result500);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<{ [key: string]: ScopeCheckResultDto; }>(null as any);
+    }
+
+    /**
+     * 健康檢查端點
+     * @return API 狀態
+     */
+    health(): Promise<any> {
+        let url_ = this.baseUrl + "/api/prs/permissions/health";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processHealth(_response);
+        });
+    }
+
+    protected processHealth(response: Response): Promise<any> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<any>(null as any);
     }
 }
 
@@ -8671,22 +9937,51 @@ export class PersistedGrantsClient extends WebApiClientBase implements IPersiste
 
 export interface IRoleManagementClient {
 
+    /**
+     * 取得所有角色（含使用者數量）
+     */
     getRoles(): Promise<RoleWithCountDto[]>;
 
+    /**
+     * 建立角色
+     */
     createRole(dto: CreateRoleDto): Promise<RoleWithCountDto>;
 
+    /**
+     * 取得單一角色
+     */
     getRole(id: string): Promise<RoleWithCountDto>;
 
+    /**
+     * 更新角色
+     */
     updateRole(id: string, dto: UpdateRoleDto): Promise<FileResponse>;
 
+    /**
+     * 刪除角色
+     */
     deleteRole(id: string): Promise<FileResponse>;
 
+    /**
+     * 取得角色的使用者
+     */
     getRoleUsers(id: string): Promise<RoleUserDto[]>;
 
+    /**
+     * 取得角色的宣告
+     */
     getRoleClaims(id: string): Promise<RoleClaimDto[]>;
 
+    /**
+     * 新增角色宣告
+     */
     addRoleClaim(id: string, dto: AddRoleClaimDto): Promise<FileResponse>;
 
+    /**
+     * 移除角色宣告
+     * @param claimType (optional) 
+     * @param claimValue (optional) 
+     */
     removeRoleClaim(id: string, claimType: string | null | undefined, claimValue: string | null | undefined): Promise<FileResponse>;
 }
 
@@ -8701,6 +9996,9 @@ export class RoleManagementClient extends WebApiClientBase implements IRoleManag
         this.baseUrl = baseUrl ?? "";
     }
 
+    /**
+     * 取得所有角色（含使用者數量）
+     */
     getRoles(): Promise<RoleWithCountDto[]> {
         let url_ = this.baseUrl + "/api/role-management";
         url_ = url_.replace(/[?&]$/, "");
@@ -8752,6 +10050,9 @@ export class RoleManagementClient extends WebApiClientBase implements IRoleManag
         return Promise.resolve<RoleWithCountDto[]>(null as any);
     }
 
+    /**
+     * 建立角色
+     */
     createRole(dto: CreateRoleDto): Promise<RoleWithCountDto> {
         let url_ = this.baseUrl + "/api/role-management";
         url_ = url_.replace(/[?&]$/, "");
@@ -8800,6 +10101,9 @@ export class RoleManagementClient extends WebApiClientBase implements IRoleManag
         return Promise.resolve<RoleWithCountDto>(null as any);
     }
 
+    /**
+     * 取得單一角色
+     */
     getRole(id: string): Promise<RoleWithCountDto> {
         let url_ = this.baseUrl + "/api/role-management/{id}";
         if (id === undefined || id === null)
@@ -8847,6 +10151,9 @@ export class RoleManagementClient extends WebApiClientBase implements IRoleManag
         return Promise.resolve<RoleWithCountDto>(null as any);
     }
 
+    /**
+     * 更新角色
+     */
     updateRole(id: string, dto: UpdateRoleDto): Promise<FileResponse> {
         let url_ = this.baseUrl + "/api/role-management/{id}";
         if (id === undefined || id === null)
@@ -8902,6 +10209,9 @@ export class RoleManagementClient extends WebApiClientBase implements IRoleManag
         return Promise.resolve<FileResponse>(null as any);
     }
 
+    /**
+     * 刪除角色
+     */
     deleteRole(id: string): Promise<FileResponse> {
         let url_ = this.baseUrl + "/api/role-management/{id}";
         if (id === undefined || id === null)
@@ -8953,6 +10263,9 @@ export class RoleManagementClient extends WebApiClientBase implements IRoleManag
         return Promise.resolve<FileResponse>(null as any);
     }
 
+    /**
+     * 取得角色的使用者
+     */
     getRoleUsers(id: string): Promise<RoleUserDto[]> {
         let url_ = this.baseUrl + "/api/role-management/{id}/users";
         if (id === undefined || id === null)
@@ -9007,6 +10320,9 @@ export class RoleManagementClient extends WebApiClientBase implements IRoleManag
         return Promise.resolve<RoleUserDto[]>(null as any);
     }
 
+    /**
+     * 取得角色的宣告
+     */
     getRoleClaims(id: string): Promise<RoleClaimDto[]> {
         let url_ = this.baseUrl + "/api/role-management/{id}/claims";
         if (id === undefined || id === null)
@@ -9061,6 +10377,9 @@ export class RoleManagementClient extends WebApiClientBase implements IRoleManag
         return Promise.resolve<RoleClaimDto[]>(null as any);
     }
 
+    /**
+     * 新增角色宣告
+     */
     addRoleClaim(id: string, dto: AddRoleClaimDto): Promise<FileResponse> {
         let url_ = this.baseUrl + "/api/role-management/{id}/claims";
         if (id === undefined || id === null)
@@ -9116,6 +10435,11 @@ export class RoleManagementClient extends WebApiClientBase implements IRoleManag
         return Promise.resolve<FileResponse>(null as any);
     }
 
+    /**
+     * 移除角色宣告
+     * @param claimType (optional) 
+     * @param claimValue (optional) 
+     */
     removeRoleClaim(id: string, claimType: string | null | undefined, claimValue: string | null | undefined): Promise<FileResponse> {
         let url_ = this.baseUrl + "/api/role-management/{id}/claims?";
         if (id === undefined || id === null)
@@ -9172,52 +10496,893 @@ export class RoleManagementClient extends WebApiClientBase implements IRoleManag
     }
 }
 
+export interface ITokenManagementClient {
+
+    /**
+     * 取得所有活躍 Token（分頁）
+     * @param page (optional) 頁碼（從 1 開始）
+     * @param pageSize (optional) 每頁筆數
+     * @param search (optional) 搜尋關鍵字
+     */
+    getActiveTokens(page: number | undefined, pageSize: number | undefined, search: string | null | undefined): Promise<TokenListResponseOfActiveTokenDto>;
+
+    /**
+     * 取得使用者的活躍 Token
+     * @param subjectId 使用者 ID
+     * @param page (optional) 頁碼
+     * @param pageSize (optional) 每頁筆數
+     */
+    getUserActiveTokens(subjectId: string, page: number | undefined, pageSize: number | undefined): Promise<TokenListResponseOfActiveTokenDto>;
+
+    /**
+     * 取得客戶端的活躍 Token
+     * @param clientId 客戶端 ID
+     * @param page (optional) 頁碼
+     * @param pageSize (optional) 每頁筆數
+     */
+    getClientActiveTokens(clientId: string, page: number | undefined, pageSize: number | undefined): Promise<TokenListResponseOfActiveTokenDto>;
+
+    /**
+     * 取得所有撤銷的 Token（分頁）
+     * @param page (optional) 頁碼
+     * @param pageSize (optional) 每頁筆數
+     */
+    getRevokedTokens(page: number | undefined, pageSize: number | undefined): Promise<TokenListResponseOfRevokedTokenDto>;
+
+    /**
+     * 取得 Token 統計資訊
+     */
+    getStatistics(): Promise<TokenStatistics>;
+
+    /**
+     * 檢查 Token 是否已撤銷
+     * @param jti JWT Token ID
+     */
+    checkTokenRevoked(jti: string): Promise<TokenCheckResponse>;
+
+    /**
+     * 撤銷 Token（依 JTI）
+     * @param request 撤銷請求
+     */
+    revokeToken(request: RevokeTokenRequest): Promise<RevokedTokenDto>;
+
+    /**
+     * 撤銷 Token（依 Grant Key）
+     * @param grantKey Grant Key
+     * @param reason (optional) 撤銷原因
+     */
+    revokeByGrantKey(grantKey: string, reason: string | null | undefined): Promise<void>;
+
+    /**
+     * 撤銷使用者的所有 Token
+     * @param subjectId 使用者 ID
+     * @param reason (optional) 撤銷原因
+     */
+    revokeUserTokens(subjectId: string, reason: string | null | undefined): Promise<RevokeAllResponse>;
+
+    /**
+     * 撤銷客戶端的所有 Token
+     * @param clientId 客戶端 ID
+     * @param reason (optional) 撤銷原因
+     */
+    revokeClientTokens(clientId: string, reason: string | null | undefined): Promise<RevokeAllResponse>;
+
+    /**
+     * 取消撤銷
+     * @param jti JWT Token ID
+     */
+    unrevokeToken(jti: string): Promise<void>;
+
+    /**
+     * 清理過期的撤銷記錄
+     */
+    cleanupExpired(): Promise<CleanupResponse>;
+}
+
+export class TokenManagementClient extends WebApiClientBase implements ITokenManagementClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super();
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * 取得所有活躍 Token（分頁）
+     * @param page (optional) 頁碼（從 1 開始）
+     * @param pageSize (optional) 每頁筆數
+     * @param search (optional) 搜尋關鍵字
+     */
+    getActiveTokens(page: number | undefined, pageSize: number | undefined, search: string | null | undefined): Promise<TokenListResponseOfActiveTokenDto> {
+        let url_ = this.baseUrl + "/api/TokenManagement/active?";
+        if (page === null)
+            throw new Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        if (search !== undefined && search !== null)
+            url_ += "search=" + encodeURIComponent("" + search) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetActiveTokens(_response);
+        });
+    }
+
+    protected processGetActiveTokens(response: Response): Promise<TokenListResponseOfActiveTokenDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = TokenListResponseOfActiveTokenDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<TokenListResponseOfActiveTokenDto>(null as any);
+    }
+
+    /**
+     * 取得使用者的活躍 Token
+     * @param subjectId 使用者 ID
+     * @param page (optional) 頁碼
+     * @param pageSize (optional) 每頁筆數
+     */
+    getUserActiveTokens(subjectId: string, page: number | undefined, pageSize: number | undefined): Promise<TokenListResponseOfActiveTokenDto> {
+        let url_ = this.baseUrl + "/api/TokenManagement/active/user/{subjectId}?";
+        if (subjectId === undefined || subjectId === null)
+            throw new Error("The parameter 'subjectId' must be defined.");
+        url_ = url_.replace("{subjectId}", encodeURIComponent("" + subjectId));
+        if (page === null)
+            throw new Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetUserActiveTokens(_response);
+        });
+    }
+
+    protected processGetUserActiveTokens(response: Response): Promise<TokenListResponseOfActiveTokenDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = TokenListResponseOfActiveTokenDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<TokenListResponseOfActiveTokenDto>(null as any);
+    }
+
+    /**
+     * 取得客戶端的活躍 Token
+     * @param clientId 客戶端 ID
+     * @param page (optional) 頁碼
+     * @param pageSize (optional) 每頁筆數
+     */
+    getClientActiveTokens(clientId: string, page: number | undefined, pageSize: number | undefined): Promise<TokenListResponseOfActiveTokenDto> {
+        let url_ = this.baseUrl + "/api/TokenManagement/active/client/{clientId}?";
+        if (clientId === undefined || clientId === null)
+            throw new Error("The parameter 'clientId' must be defined.");
+        url_ = url_.replace("{clientId}", encodeURIComponent("" + clientId));
+        if (page === null)
+            throw new Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetClientActiveTokens(_response);
+        });
+    }
+
+    protected processGetClientActiveTokens(response: Response): Promise<TokenListResponseOfActiveTokenDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = TokenListResponseOfActiveTokenDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<TokenListResponseOfActiveTokenDto>(null as any);
+    }
+
+    /**
+     * 取得所有撤銷的 Token（分頁）
+     * @param page (optional) 頁碼
+     * @param pageSize (optional) 每頁筆數
+     */
+    getRevokedTokens(page: number | undefined, pageSize: number | undefined): Promise<TokenListResponseOfRevokedTokenDto> {
+        let url_ = this.baseUrl + "/api/TokenManagement/revoked?";
+        if (page === null)
+            throw new Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetRevokedTokens(_response);
+        });
+    }
+
+    protected processGetRevokedTokens(response: Response): Promise<TokenListResponseOfRevokedTokenDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = TokenListResponseOfRevokedTokenDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<TokenListResponseOfRevokedTokenDto>(null as any);
+    }
+
+    /**
+     * 取得 Token 統計資訊
+     */
+    getStatistics(): Promise<TokenStatistics> {
+        let url_ = this.baseUrl + "/api/TokenManagement/statistics";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetStatistics(_response);
+        });
+    }
+
+    protected processGetStatistics(response: Response): Promise<TokenStatistics> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = TokenStatistics.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<TokenStatistics>(null as any);
+    }
+
+    /**
+     * 檢查 Token 是否已撤銷
+     * @param jti JWT Token ID
+     */
+    checkTokenRevoked(jti: string): Promise<TokenCheckResponse> {
+        let url_ = this.baseUrl + "/api/TokenManagement/check/{jti}";
+        if (jti === undefined || jti === null)
+            throw new Error("The parameter 'jti' must be defined.");
+        url_ = url_.replace("{jti}", encodeURIComponent("" + jti));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processCheckTokenRevoked(_response);
+        });
+    }
+
+    protected processCheckTokenRevoked(response: Response): Promise<TokenCheckResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = TokenCheckResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<TokenCheckResponse>(null as any);
+    }
+
+    /**
+     * 撤銷 Token（依 JTI）
+     * @param request 撤銷請求
+     */
+    revokeToken(request: RevokeTokenRequest): Promise<RevokedTokenDto> {
+        let url_ = this.baseUrl + "/api/TokenManagement/revoke";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processRevokeToken(_response);
+        });
+    }
+
+    protected processRevokeToken(response: Response): Promise<RevokedTokenDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = RevokedTokenDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<RevokedTokenDto>(null as any);
+    }
+
+    /**
+     * 撤銷 Token（依 Grant Key）
+     * @param grantKey Grant Key
+     * @param reason (optional) 撤銷原因
+     */
+    revokeByGrantKey(grantKey: string, reason: string | null | undefined): Promise<void> {
+        let url_ = this.baseUrl + "/api/TokenManagement/revoke/grant/{grantKey}?";
+        if (grantKey === undefined || grantKey === null)
+            throw new Error("The parameter 'grantKey' must be defined.");
+        url_ = url_.replace("{grantKey}", encodeURIComponent("" + grantKey));
+        if (reason !== undefined && reason !== null)
+            url_ += "reason=" + encodeURIComponent("" + reason) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "POST",
+            headers: {
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processRevokeByGrantKey(_response);
+        });
+    }
+
+    protected processRevokeByGrantKey(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * 撤銷使用者的所有 Token
+     * @param subjectId 使用者 ID
+     * @param reason (optional) 撤銷原因
+     */
+    revokeUserTokens(subjectId: string, reason: string | null | undefined): Promise<RevokeAllResponse> {
+        let url_ = this.baseUrl + "/api/TokenManagement/revoke/user/{subjectId}?";
+        if (subjectId === undefined || subjectId === null)
+            throw new Error("The parameter 'subjectId' must be defined.");
+        url_ = url_.replace("{subjectId}", encodeURIComponent("" + subjectId));
+        if (reason !== undefined && reason !== null)
+            url_ += "reason=" + encodeURIComponent("" + reason) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "POST",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processRevokeUserTokens(_response);
+        });
+    }
+
+    protected processRevokeUserTokens(response: Response): Promise<RevokeAllResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = RevokeAllResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<RevokeAllResponse>(null as any);
+    }
+
+    /**
+     * 撤銷客戶端的所有 Token
+     * @param clientId 客戶端 ID
+     * @param reason (optional) 撤銷原因
+     */
+    revokeClientTokens(clientId: string, reason: string | null | undefined): Promise<RevokeAllResponse> {
+        let url_ = this.baseUrl + "/api/TokenManagement/revoke/client/{clientId}?";
+        if (clientId === undefined || clientId === null)
+            throw new Error("The parameter 'clientId' must be defined.");
+        url_ = url_.replace("{clientId}", encodeURIComponent("" + clientId));
+        if (reason !== undefined && reason !== null)
+            url_ += "reason=" + encodeURIComponent("" + reason) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "POST",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processRevokeClientTokens(_response);
+        });
+    }
+
+    protected processRevokeClientTokens(response: Response): Promise<RevokeAllResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = RevokeAllResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<RevokeAllResponse>(null as any);
+    }
+
+    /**
+     * 取消撤銷
+     * @param jti JWT Token ID
+     */
+    unrevokeToken(jti: string): Promise<void> {
+        let url_ = this.baseUrl + "/api/TokenManagement/revoke/{jti}";
+        if (jti === undefined || jti === null)
+            throw new Error("The parameter 'jti' must be defined.");
+        url_ = url_.replace("{jti}", encodeURIComponent("" + jti));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processUnrevokeToken(_response);
+        });
+    }
+
+    protected processUnrevokeToken(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * 清理過期的撤銷記錄
+     */
+    cleanupExpired(): Promise<CleanupResponse> {
+        let url_ = this.baseUrl + "/api/TokenManagement/cleanup";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "POST",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processCleanupExpired(_response);
+        });
+    }
+
+    protected processCleanupExpired(response: Response): Promise<CleanupResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = CleanupResponse.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<CleanupResponse>(null as any);
+    }
+}
+
 export interface IUserManagementClient {
 
+    /**
+     * 取得使用者列表（分頁）
+     * @param search (optional) 
+     * @param isActive (optional) 
+     * @param emailConfirmed (optional) 
+     * @param roleId (optional) 
+     * @param organizationId (optional) 
+     * @param page (optional) 
+     * @param pageSize (optional) 
+     * @param sortBy (optional) 
+     * @param sortDirection (optional) 
+     */
     getUsers(search: string | null | undefined, isActive: boolean | null | undefined, emailConfirmed: boolean | null | undefined, roleId: string | null | undefined, organizationId: string | null | undefined, page: number | undefined, pageSize: number | undefined, sortBy: string | null | undefined, sortDirection: string | null | undefined): Promise<PagedUserResultDto>;
 
+    /**
+     * 建立使用者（含擴展欄位）
+     */
     createUser(dto: CreateUserDto): Promise<UserDetailDto>;
 
+    /**
+     * 取得單一使用者
+     */
     getUser(id: string): Promise<UserDetailDto>;
 
+    /**
+     * 更新使用者
+     */
     updateUser(id: string, dto: UpdateUserDetailDto): Promise<FileResponse>;
 
+    /**
+     * 刪除使用者
+     */
     deleteUser(id: string): Promise<FileResponse>;
 
+    /**
+     * 取得使用者的宣告
+     */
     getUserClaims(id: string): Promise<UserClaimDto[]>;
 
+    /**
+     * 新增使用者宣告
+     */
     addUserClaim(id: string, dto: AddUserClaimDto): Promise<UserClaimDto>;
 
+    /**
+     * 刪除使用者宣告
+     */
     deleteUserClaim(id: string, claimId: number): Promise<FileResponse>;
 
+    /**
+     * 新增角色給使用者
+     */
     addRoleToUser(id: string, roleId: string): Promise<FileResponse>;
 
+    /**
+     * 移除使用者的角色
+     */
     removeRoleFromUser(id: string, roleId: string): Promise<FileResponse>;
 
+    /**
+     * 取得使用者統計資料
+     */
     getStats(): Promise<UserStatsDto>;
 
+    /**
+     * 啟用使用者帳號
+     */
     activate(id: string): Promise<FileResponse>;
 
+    /**
+     * 停用使用者帳號
+     */
     deactivate(id: string): Promise<FileResponse>;
 
+    /**
+     * 解除使用者鎖定
+     */
     unlock(id: string): Promise<FileResponse>;
 
+    /**
+     * 管理員重設使用者密碼
+     */
     resetPassword(id: string, dto: ResetPasswordDto): Promise<FileResponse>;
 
+    /**
+     * 批量設定使用者角色
+     */
     setUserRoles(id: string, dto: SetUserRolesDto): Promise<FileResponse>;
 
+    /**
+     * 取得使用者角色（簡化版）
+     */
     getUserRoles(id: string): Promise<UserRoleDto[]>;
 
+    /**
+     * 輕量搜尋使用者（用於自動完成）
+     * @param search (optional) 
+     * @param limit (optional) 
+     */
     searchUsers(search: string | null | undefined, limit: number | undefined): Promise<UserBriefDto[]>;
 
+    /**
+     * 檢查使用者名稱是否可用
+     * @param username (optional) 
+     * @param excludeId (optional) 
+     */
     checkUsernameAvailable(username: string | null | undefined, excludeId: string | null | undefined): Promise<AvailabilityDto>;
 
+    /**
+     * 檢查 Email 是否可用
+     * @param email (optional) 
+     * @param excludeId (optional) 
+     */
     checkEmailAvailable(email: string | null | undefined, excludeId: string | null | undefined): Promise<AvailabilityDto>;
 
+    /**
+     * 批量操作使用者
+     */
     bulkOperation(dto: BulkUserOperationDto): Promise<BulkOperationResultDto>;
 
+    /**
+     * 取得使用者詳細資訊（含擴展欄位）
+     */
     getUserDetail(id: string): Promise<UserDetailDto>;
 
+    /**
+     * 更新使用者擴展資訊
+     */
     updateUserDetail(id: string, dto: UpdateUserDetailDto): Promise<FileResponse>;
 }
 
@@ -9232,6 +11397,18 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         this.baseUrl = baseUrl ?? "";
     }
 
+    /**
+     * 取得使用者列表（分頁）
+     * @param search (optional) 
+     * @param isActive (optional) 
+     * @param emailConfirmed (optional) 
+     * @param roleId (optional) 
+     * @param organizationId (optional) 
+     * @param page (optional) 
+     * @param pageSize (optional) 
+     * @param sortBy (optional) 
+     * @param sortDirection (optional) 
+     */
     getUsers(search: string | null | undefined, isActive: boolean | null | undefined, emailConfirmed: boolean | null | undefined, roleId: string | null | undefined, organizationId: string | null | undefined, page: number | undefined, pageSize: number | undefined, sortBy: string | null | undefined, sortDirection: string | null | undefined): Promise<PagedUserResultDto> {
         let url_ = this.baseUrl + "/api/user-management?";
         if (search !== undefined && search !== null)
@@ -9298,6 +11475,9 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<PagedUserResultDto>(null as any);
     }
 
+    /**
+     * 建立使用者（含擴展欄位）
+     */
     createUser(dto: CreateUserDto): Promise<UserDetailDto> {
         let url_ = this.baseUrl + "/api/user-management";
         url_ = url_.replace(/[?&]$/, "");
@@ -9346,6 +11526,9 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<UserDetailDto>(null as any);
     }
 
+    /**
+     * 取得單一使用者
+     */
     getUser(id: string): Promise<UserDetailDto> {
         let url_ = this.baseUrl + "/api/user-management/{id}";
         if (id === undefined || id === null)
@@ -9393,6 +11576,9 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<UserDetailDto>(null as any);
     }
 
+    /**
+     * 更新使用者
+     */
     updateUser(id: string, dto: UpdateUserDetailDto): Promise<FileResponse> {
         let url_ = this.baseUrl + "/api/user-management/{id}";
         if (id === undefined || id === null)
@@ -9448,6 +11634,9 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<FileResponse>(null as any);
     }
 
+    /**
+     * 刪除使用者
+     */
     deleteUser(id: string): Promise<FileResponse> {
         let url_ = this.baseUrl + "/api/user-management/{id}";
         if (id === undefined || id === null)
@@ -9499,6 +11688,9 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<FileResponse>(null as any);
     }
 
+    /**
+     * 取得使用者的宣告
+     */
     getUserClaims(id: string): Promise<UserClaimDto[]> {
         let url_ = this.baseUrl + "/api/user-management/{id}/claims";
         if (id === undefined || id === null)
@@ -9553,6 +11745,9 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<UserClaimDto[]>(null as any);
     }
 
+    /**
+     * 新增使用者宣告
+     */
     addUserClaim(id: string, dto: AddUserClaimDto): Promise<UserClaimDto> {
         let url_ = this.baseUrl + "/api/user-management/{id}/claims";
         if (id === undefined || id === null)
@@ -9604,6 +11799,9 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<UserClaimDto>(null as any);
     }
 
+    /**
+     * 刪除使用者宣告
+     */
     deleteUserClaim(id: string, claimId: number): Promise<FileResponse> {
         let url_ = this.baseUrl + "/api/user-management/{id}/claims/{claimId}";
         if (id === undefined || id === null)
@@ -9658,6 +11856,9 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<FileResponse>(null as any);
     }
 
+    /**
+     * 新增角色給使用者
+     */
     addRoleToUser(id: string, roleId: string): Promise<FileResponse> {
         let url_ = this.baseUrl + "/api/user-management/{id}/roles/{roleId}";
         if (id === undefined || id === null)
@@ -9712,6 +11913,9 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<FileResponse>(null as any);
     }
 
+    /**
+     * 移除使用者的角色
+     */
     removeRoleFromUser(id: string, roleId: string): Promise<FileResponse> {
         let url_ = this.baseUrl + "/api/user-management/{id}/roles/{roleId}";
         if (id === undefined || id === null)
@@ -9766,6 +11970,9 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<FileResponse>(null as any);
     }
 
+    /**
+     * 取得使用者統計資料
+     */
     getStats(): Promise<UserStatsDto> {
         let url_ = this.baseUrl + "/api/user-management/stats";
         url_ = url_.replace(/[?&]$/, "");
@@ -9810,6 +12017,9 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<UserStatsDto>(null as any);
     }
 
+    /**
+     * 啟用使用者帳號
+     */
     activate(id: string): Promise<FileResponse> {
         let url_ = this.baseUrl + "/api/user-management/{id}/activate";
         if (id === undefined || id === null)
@@ -9861,6 +12071,9 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<FileResponse>(null as any);
     }
 
+    /**
+     * 停用使用者帳號
+     */
     deactivate(id: string): Promise<FileResponse> {
         let url_ = this.baseUrl + "/api/user-management/{id}/deactivate";
         if (id === undefined || id === null)
@@ -9912,6 +12125,9 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<FileResponse>(null as any);
     }
 
+    /**
+     * 解除使用者鎖定
+     */
     unlock(id: string): Promise<FileResponse> {
         let url_ = this.baseUrl + "/api/user-management/{id}/unlock";
         if (id === undefined || id === null)
@@ -9963,6 +12179,9 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<FileResponse>(null as any);
     }
 
+    /**
+     * 管理員重設使用者密碼
+     */
     resetPassword(id: string, dto: ResetPasswordDto): Promise<FileResponse> {
         let url_ = this.baseUrl + "/api/user-management/{id}/reset-password";
         if (id === undefined || id === null)
@@ -10018,6 +12237,9 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<FileResponse>(null as any);
     }
 
+    /**
+     * 批量設定使用者角色
+     */
     setUserRoles(id: string, dto: SetUserRolesDto): Promise<FileResponse> {
         let url_ = this.baseUrl + "/api/user-management/{id}/roles";
         if (id === undefined || id === null)
@@ -10073,6 +12295,9 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<FileResponse>(null as any);
     }
 
+    /**
+     * 取得使用者角色（簡化版）
+     */
     getUserRoles(id: string): Promise<UserRoleDto[]> {
         let url_ = this.baseUrl + "/api/user-management/{id}/roles";
         if (id === undefined || id === null)
@@ -10127,6 +12352,11 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<UserRoleDto[]>(null as any);
     }
 
+    /**
+     * 輕量搜尋使用者（用於自動完成）
+     * @param search (optional) 
+     * @param limit (optional) 
+     */
     searchUsers(search: string | null | undefined, limit: number | undefined): Promise<UserBriefDto[]> {
         let url_ = this.baseUrl + "/api/user-management/search?";
         if (search !== undefined && search !== null)
@@ -10184,6 +12414,11 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<UserBriefDto[]>(null as any);
     }
 
+    /**
+     * 檢查使用者名稱是否可用
+     * @param username (optional) 
+     * @param excludeId (optional) 
+     */
     checkUsernameAvailable(username: string | null | undefined, excludeId: string | null | undefined): Promise<AvailabilityDto> {
         let url_ = this.baseUrl + "/api/user-management/check-username?";
         if (username !== undefined && username !== null)
@@ -10232,6 +12467,11 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<AvailabilityDto>(null as any);
     }
 
+    /**
+     * 檢查 Email 是否可用
+     * @param email (optional) 
+     * @param excludeId (optional) 
+     */
     checkEmailAvailable(email: string | null | undefined, excludeId: string | null | undefined): Promise<AvailabilityDto> {
         let url_ = this.baseUrl + "/api/user-management/check-email?";
         if (email !== undefined && email !== null)
@@ -10280,6 +12520,9 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<AvailabilityDto>(null as any);
     }
 
+    /**
+     * 批量操作使用者
+     */
     bulkOperation(dto: BulkUserOperationDto): Promise<BulkOperationResultDto> {
         let url_ = this.baseUrl + "/api/user-management/bulk";
         url_ = url_.replace(/[?&]$/, "");
@@ -10328,6 +12571,9 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<BulkOperationResultDto>(null as any);
     }
 
+    /**
+     * 取得使用者詳細資訊（含擴展欄位）
+     */
     getUserDetail(id: string): Promise<UserDetailDto> {
         let url_ = this.baseUrl + "/api/user-management/{id}/detail";
         if (id === undefined || id === null)
@@ -10375,6 +12621,9 @@ export class UserManagementClient extends WebApiClientBase implements IUserManag
         return Promise.resolve<UserDetailDto>(null as any);
     }
 
+    /**
+     * 更新使用者擴展資訊
+     */
     updateUserDetail(id: string, dto: UpdateUserDetailDto): Promise<FileResponse> {
         let url_ = this.baseUrl + "/api/user-management/{id}/detail";
         if (id === undefined || id === null)
@@ -15414,6 +17663,7 @@ export interface IEffectivePermissionDto {
     sourceName: string | undefined;
 }
 
+/** 權限檢查結果 DTO */
 export class PermissionCheckResultDto implements IPermissionCheckResultDto {
     userId!: string | undefined;
     resourceId!: string | undefined;
@@ -15461,6 +17711,7 @@ export class PermissionCheckResultDto implements IPermissionCheckResultDto {
     }
 }
 
+/** 權限檢查結果 DTO */
 export interface IPermissionCheckResultDto {
     userId: string | undefined;
     resourceId: string | undefined;
@@ -15646,6 +17897,7 @@ export interface IResourceScopeDto {
     scopes: string[] | undefined;
 }
 
+/** 更新權限 DTO */
 export class UpdatePermissionDto implements IUpdatePermissionDto {
     scopes!: string[] | undefined;
     inheritToChildren!: boolean;
@@ -15692,12 +17944,534 @@ export class UpdatePermissionDto implements IUpdatePermissionDto {
     }
 }
 
+/** 更新權限 DTO */
 export interface IUpdatePermissionDto {
     scopes: string[] | undefined;
     inheritToChildren: boolean;
     expiresAt: Date | undefined;
 }
 
+/** 授權 URL 回應 */
+export class AuthorizeUrlResponse implements IAuthorizeUrlResponse {
+    /** 產生的授權 URL */
+    url!: string | undefined;
+
+    constructor(data?: IAuthorizeUrlResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.url = _data["url"];
+        }
+    }
+
+    static fromJS(data: any): AuthorizeUrlResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new AuthorizeUrlResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["url"] = this.url;
+        return data;
+    }
+}
+
+/** 授權 URL 回應 */
+export interface IAuthorizeUrlResponse {
+    /** 產生的授權 URL */
+    url: string | undefined;
+}
+
+/** 授權 URL 請求 - 用於產生 OAuth 2.0 授權 URL */
+export class AuthorizeUrlRequest implements IAuthorizeUrlRequest {
+    /** 客戶端 ID（必填） */
+    clientId!: string | undefined;
+    /** 重導向 URI（必填） */
+    redirectUri!: string | undefined;
+    /** 請求的 Scope（空格分隔） */
+    scope!: string | undefined;
+    /** State 參數（強烈建議） */
+    state!: string | undefined;
+    /** PKCE Code Challenge（建議使用） */
+    codeChallenge!: string | undefined;
+    /** 指定身分提供者 */
+    idp!: string | undefined;
+    /** 強制顯示登入畫面 */
+    forceLogin!: boolean;
+
+    constructor(data?: IAuthorizeUrlRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.clientId = _data["clientId"];
+            this.redirectUri = _data["redirectUri"];
+            this.scope = _data["scope"];
+            this.state = _data["state"];
+            this.codeChallenge = _data["codeChallenge"];
+            this.idp = _data["idp"];
+            this.forceLogin = _data["forceLogin"];
+        }
+    }
+
+    static fromJS(data: any): AuthorizeUrlRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new AuthorizeUrlRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["clientId"] = this.clientId;
+        data["redirectUri"] = this.redirectUri;
+        data["scope"] = this.scope;
+        data["state"] = this.state;
+        data["codeChallenge"] = this.codeChallenge;
+        data["idp"] = this.idp;
+        data["forceLogin"] = this.forceLogin;
+        return data;
+    }
+}
+
+/** 授權 URL 請求 - 用於產生 OAuth 2.0 授權 URL */
+export interface IAuthorizeUrlRequest {
+    /** 客戶端 ID（必填） */
+    clientId: string | undefined;
+    /** 重導向 URI（必填） */
+    redirectUri: string | undefined;
+    /** 請求的 Scope（空格分隔） */
+    scope: string | undefined;
+    /** State 參數（強烈建議） */
+    state: string | undefined;
+    /** PKCE Code Challenge（建議使用） */
+    codeChallenge: string | undefined;
+    /** 指定身分提供者 */
+    idp: string | undefined;
+    /** 強制顯示登入畫面 */
+    forceLogin: boolean;
+}
+
+/** Token 請求 - 用於授權碼交換 Token */
+export class TokenRequest implements ITokenRequest {
+    /** 授權碼（必填） */
+    code!: string | undefined;
+    /** 重導向 URI（必填） */
+    redirectUri!: string | undefined;
+    /** 客戶端 ID（必填） */
+    clientId!: string | undefined;
+    /** 客戶端密鑰（機密客戶端必填） */
+    clientSecret!: string | undefined;
+    /** PKCE Code Verifier */
+    codeVerifier!: string | undefined;
+
+    constructor(data?: ITokenRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.code = _data["code"];
+            this.redirectUri = _data["redirectUri"];
+            this.clientId = _data["clientId"];
+            this.clientSecret = _data["clientSecret"];
+            this.codeVerifier = _data["codeVerifier"];
+        }
+    }
+
+    static fromJS(data: any): TokenRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new TokenRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["code"] = this.code;
+        data["redirectUri"] = this.redirectUri;
+        data["clientId"] = this.clientId;
+        data["clientSecret"] = this.clientSecret;
+        data["codeVerifier"] = this.codeVerifier;
+        return data;
+    }
+}
+
+/** Token 請求 - 用於授權碼交換 Token */
+export interface ITokenRequest {
+    /** 授權碼（必填） */
+    code: string | undefined;
+    /** 重導向 URI（必填） */
+    redirectUri: string | undefined;
+    /** 客戶端 ID（必填） */
+    clientId: string | undefined;
+    /** 客戶端密鑰（機密客戶端必填） */
+    clientSecret: string | undefined;
+    /** PKCE Code Verifier */
+    codeVerifier: string | undefined;
+}
+
+/** 刷新 Token 請求 - 用於取得新的 Access Token */
+export class RefreshTokenRequest implements IRefreshTokenRequest {
+    /** Refresh Token（必填） */
+    refreshToken!: string | undefined;
+    /** 客戶端 ID（必填） */
+    clientId!: string | undefined;
+    /** 客戶端密鑰（機密客戶端必填） */
+    clientSecret!: string | undefined;
+
+    constructor(data?: IRefreshTokenRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.refreshToken = _data["refreshToken"];
+            this.clientId = _data["clientId"];
+            this.clientSecret = _data["clientSecret"];
+        }
+    }
+
+    static fromJS(data: any): RefreshTokenRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new RefreshTokenRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["refreshToken"] = this.refreshToken;
+        data["clientId"] = this.clientId;
+        data["clientSecret"] = this.clientSecret;
+        return data;
+    }
+}
+
+/** 刷新 Token 請求 - 用於取得新的 Access Token */
+export interface IRefreshTokenRequest {
+    /** Refresh Token（必填） */
+    refreshToken: string | undefined;
+    /** 客戶端 ID（必填） */
+    clientId: string | undefined;
+    /** 客戶端密鑰（機密客戶端必填） */
+    clientSecret: string | undefined;
+}
+
+/** Client Credentials 請求 - 用於機器對機器認證 */
+export class ClientCredentialsRequest implements IClientCredentialsRequest {
+    /** 客戶端 ID（必填） */
+    clientId!: string | undefined;
+    /** 客戶端密鑰（必填） */
+    clientSecret!: string | undefined;
+    /** 請求的 Scope */
+    scope!: string | undefined;
+
+    constructor(data?: IClientCredentialsRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.clientId = _data["clientId"];
+            this.clientSecret = _data["clientSecret"];
+            this.scope = _data["scope"];
+        }
+    }
+
+    static fromJS(data: any): ClientCredentialsRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new ClientCredentialsRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["clientId"] = this.clientId;
+        data["clientSecret"] = this.clientSecret;
+        data["scope"] = this.scope;
+        return data;
+    }
+}
+
+/** Client Credentials 請求 - 用於機器對機器認證 */
+export interface IClientCredentialsRequest {
+    /** 客戶端 ID（必填） */
+    clientId: string | undefined;
+    /** 客戶端密鑰（必填） */
+    clientSecret: string | undefined;
+    /** 請求的 Scope */
+    scope: string | undefined;
+}
+
+/** Token 內省請求 - 用於驗證 Token 是否有效 */
+export class IntrospectRequest implements IIntrospectRequest {
+    /** 要檢查的 Token（必填） */
+    token!: string | undefined;
+    /** 客戶端 ID（必填） */
+    clientId!: string | undefined;
+    /** 客戶端密鑰（必填） */
+    clientSecret!: string | undefined;
+
+    constructor(data?: IIntrospectRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.token = _data["token"];
+            this.clientId = _data["clientId"];
+            this.clientSecret = _data["clientSecret"];
+        }
+    }
+
+    static fromJS(data: any): IntrospectRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new IntrospectRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["token"] = this.token;
+        data["clientId"] = this.clientId;
+        data["clientSecret"] = this.clientSecret;
+        return data;
+    }
+}
+
+/** Token 內省請求 - 用於驗證 Token 是否有效 */
+export interface IIntrospectRequest {
+    /** 要檢查的 Token（必填） */
+    token: string | undefined;
+    /** 客戶端 ID（必填） */
+    clientId: string | undefined;
+    /** 客戶端密鑰（必填） */
+    clientSecret: string | undefined;
+}
+
+/** 撤銷回應 */
+export class RevokeResponse implements IRevokeResponse {
+    /** 是否成功 */
+    success!: boolean;
+
+    constructor(data?: IRevokeResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.success = _data["success"];
+        }
+    }
+
+    static fromJS(data: any): RevokeResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new RevokeResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["success"] = this.success;
+        return data;
+    }
+}
+
+/** 撤銷回應 */
+export interface IRevokeResponse {
+    /** 是否成功 */
+    success: boolean;
+}
+
+/** 撤銷 Token 請求 - 用於使 Token 失效 */
+export class RevokeRequest implements IRevokeRequest {
+    /** 要撤銷的 Token（必填） */
+    token!: string | undefined;
+    /** Token 類型提示 */
+    tokenTypeHint!: string | undefined;
+    /** 客戶端 ID（必填） */
+    clientId!: string | undefined;
+    /** 客戶端密鑰（機密客戶端必填） */
+    clientSecret!: string | undefined;
+
+    constructor(data?: IRevokeRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.token = _data["token"];
+            this.tokenTypeHint = _data["tokenTypeHint"];
+            this.clientId = _data["clientId"];
+            this.clientSecret = _data["clientSecret"];
+        }
+    }
+
+    static fromJS(data: any): RevokeRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new RevokeRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["token"] = this.token;
+        data["tokenTypeHint"] = this.tokenTypeHint;
+        data["clientId"] = this.clientId;
+        data["clientSecret"] = this.clientSecret;
+        return data;
+    }
+}
+
+/** 撤銷 Token 請求 - 用於使 Token 失效 */
+export interface IRevokeRequest {
+    /** 要撤銷的 Token（必填） */
+    token: string | undefined;
+    /** Token 類型提示 */
+    tokenTypeHint: string | undefined;
+    /** 客戶端 ID（必填） */
+    clientId: string | undefined;
+    /** 客戶端密鑰（機密客戶端必填） */
+    clientSecret: string | undefined;
+}
+
+/** 登出 URL 回應 */
+export class LogoutUrlResponse implements ILogoutUrlResponse {
+    /** 登出 URL */
+    url!: string | undefined;
+
+    constructor(data?: ILogoutUrlResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.url = _data["url"];
+        }
+    }
+
+    static fromJS(data: any): LogoutUrlResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new LogoutUrlResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["url"] = this.url;
+        return data;
+    }
+}
+
+/** 登出 URL 回應 */
+export interface ILogoutUrlResponse {
+    /** 登出 URL */
+    url: string | undefined;
+}
+
+/** 登出 URL 請求 - 用於產生登出 URL */
+export class LogoutUrlRequest implements ILogoutUrlRequest {
+    /** ID Token（建議提供） */
+    idTokenHint!: string | undefined;
+    /** 登出後重導向 URI */
+    postLogoutRedirectUri!: string | undefined;
+
+    constructor(data?: ILogoutUrlRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.idTokenHint = _data["idTokenHint"];
+            this.postLogoutRedirectUri = _data["postLogoutRedirectUri"];
+        }
+    }
+
+    static fromJS(data: any): LogoutUrlRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new LogoutUrlRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["idTokenHint"] = this.idTokenHint;
+        data["postLogoutRedirectUri"] = this.postLogoutRedirectUri;
+        return data;
+    }
+}
+
+/** 登出 URL 請求 - 用於產生登出 URL */
+export interface ILogoutUrlRequest {
+    /** ID Token（建議提供） */
+    idTokenHint: string | undefined;
+    /** 登出後重導向 URI */
+    postLogoutRedirectUri: string | undefined;
+}
+
+/** 組織群組 API DTO */
 export class OrganizationGroupApiDto implements IOrganizationGroupApiDto {
     id!: string | undefined;
     name!: string | undefined;
@@ -15769,6 +18543,7 @@ export class OrganizationGroupApiDto implements IOrganizationGroupApiDto {
     }
 }
 
+/** 組織群組 API DTO */
 export interface IOrganizationGroupApiDto {
     id: string | undefined;
     name: string | undefined;
@@ -15786,6 +18561,7 @@ export interface IOrganizationGroupApiDto {
     updDate: Date | undefined;
 }
 
+/** 組織樹狀結構 API DTO */
 export class OrganizationTreeApiDto implements IOrganizationTreeApiDto {
     id!: string | undefined;
     name!: string | undefined;
@@ -15799,7 +18575,9 @@ export class OrganizationTreeApiDto implements IOrganizationTreeApiDto {
     isCeo!: boolean;
     isRoot!: boolean;
     childCount!: number;
+    /** 該組織本身的成員數量 */
     memberCount!: number;
+    /** 該組織及所有子孫組織的成員總數 */
     totalMemberCount!: number;
     children!: OrganizationTreeApiDto[] | undefined;
 
@@ -15868,6 +18646,7 @@ export class OrganizationTreeApiDto implements IOrganizationTreeApiDto {
     }
 }
 
+/** 組織樹狀結構 API DTO */
 export interface IOrganizationTreeApiDto {
     id: string | undefined;
     name: string | undefined;
@@ -15881,11 +18660,14 @@ export interface IOrganizationTreeApiDto {
     isCeo: boolean;
     isRoot: boolean;
     childCount: number;
+    /** 該組織本身的成員數量 */
     memberCount: number;
+    /** 該組織及所有子孫組織的成員總數 */
     totalMemberCount: number;
     children: OrganizationTreeApiDto[] | undefined;
 }
 
+/** 組織統計 API DTO */
 export class OrganizationStatsApiDto implements IOrganizationStatsApiDto {
     totalGroups!: number;
     totalRootGroups!: number;
@@ -15927,6 +18709,7 @@ export class OrganizationStatsApiDto implements IOrganizationStatsApiDto {
     }
 }
 
+/** 組織統計 API DTO */
 export interface IOrganizationStatsApiDto {
     totalGroups: number;
     totalRootGroups: number;
@@ -15934,10 +18717,15 @@ export interface IOrganizationStatsApiDto {
     groupsWithManagers: number;
 }
 
+/** 刪除確認 API DTO */
 export class DeleteConfirmationApiDto implements IDeleteConfirmationApiDto {
+    /** 待刪除的群組 */
     group!: OrganizationGroupApiDto | undefined;
+    /** 將被一同刪除的子群組列表 */
     descendants!: OrganizationGroupApiDto[] | undefined;
+    /** 總計將刪除的群組數量（包含自身） */
     totalCount!: number;
+    /** 是否有子群組 */
     hasDescendants!: boolean;
 
     constructor(data?: IDeleteConfirmationApiDto) {
@@ -15983,21 +18771,35 @@ export class DeleteConfirmationApiDto implements IDeleteConfirmationApiDto {
     }
 }
 
+/** 刪除確認 API DTO */
 export interface IDeleteConfirmationApiDto {
+    /** 待刪除的群組 */
     group: OrganizationGroupApiDto | undefined;
+    /** 將被一同刪除的子群組列表 */
     descendants: OrganizationGroupApiDto[] | undefined;
+    /** 總計將刪除的群組數量（包含自身） */
     totalCount: number;
+    /** 是否有子群組 */
     hasDescendants: boolean;
 }
 
+/** 群組成員 API DTO */
 export class GroupMemberApiDto implements IGroupMemberApiDto {
+    /** 群組 ID */
     groupId!: string | undefined;
+    /** 使用者 ID */
     userId!: string | undefined;
+    /** 使用者名稱 */
     userName!: string | undefined;
+    /** 顯示名稱 */
     displayName!: string | undefined;
+    /** Email */
     email!: string | undefined;
+    /** 群組名稱 */
     groupName!: string | undefined;
+    /** 群組路徑 */
     groupPath!: string | undefined;
+    /** 加入時間 */
     joinedAt!: Date | undefined;
 
     constructor(data?: IGroupMemberApiDto) {
@@ -16043,24 +18845,41 @@ export class GroupMemberApiDto implements IGroupMemberApiDto {
     }
 }
 
+/** 群組成員 API DTO */
 export interface IGroupMemberApiDto {
+    /** 群組 ID */
     groupId: string | undefined;
+    /** 使用者 ID */
     userId: string | undefined;
+    /** 使用者名稱 */
     userName: string | undefined;
+    /** 顯示名稱 */
     displayName: string | undefined;
+    /** Email */
     email: string | undefined;
+    /** 群組名稱 */
     groupName: string | undefined;
+    /** 群組路徑 */
     groupPath: string | undefined;
+    /** 加入時間 */
     joinedAt: Date | undefined;
 }
 
+/** 新增組織群組 API DTO */
 export class CreateOrganizationGroupApiDto implements ICreateOrganizationGroupApiDto {
+    /** 部門名稱（必填） */
     name!: string;
+    /** 父群組 ID（null 表示根層級） */
     parentId!: string | undefined;
+    /** 部門代碼 */
     deptCode!: string | undefined;
+    /** 中文名稱 */
     deptZhName!: string | undefined;
+    /** 英文名稱 */
     deptEName!: string | undefined;
+    /** 部門主管 */
     manager!: string | undefined;
+    /** 描述 */
     description!: string | undefined;
 
     constructor(data?: ICreateOrganizationGroupApiDto) {
@@ -16104,23 +18923,39 @@ export class CreateOrganizationGroupApiDto implements ICreateOrganizationGroupAp
     }
 }
 
+/** 新增組織群組 API DTO */
 export interface ICreateOrganizationGroupApiDto {
+    /** 部門名稱（必填） */
     name: string;
+    /** 父群組 ID（null 表示根層級） */
     parentId: string | undefined;
+    /** 部門代碼 */
     deptCode: string | undefined;
+    /** 中文名稱 */
     deptZhName: string | undefined;
+    /** 英文名稱 */
     deptEName: string | undefined;
+    /** 部門主管 */
     manager: string | undefined;
+    /** 描述 */
     description: string | undefined;
 }
 
+/** 更新組織群組 API DTO */
 export class UpdateOrganizationGroupApiDto implements IUpdateOrganizationGroupApiDto {
+    /** 部門名稱（必填） */
     name!: string;
+    /** 父群組 ID（null 表示根層級） */
     parentId!: string | undefined;
+    /** 部門代碼 */
     deptCode!: string | undefined;
+    /** 中文名稱 */
     deptZhName!: string | undefined;
+    /** 英文名稱 */
     deptEName!: string | undefined;
+    /** 部門主管 */
     manager!: string | undefined;
+    /** 描述 */
     description!: string | undefined;
 
     constructor(data?: IUpdateOrganizationGroupApiDto) {
@@ -16164,19 +18999,31 @@ export class UpdateOrganizationGroupApiDto implements IUpdateOrganizationGroupAp
     }
 }
 
+/** 更新組織群組 API DTO */
 export interface IUpdateOrganizationGroupApiDto {
+    /** 部門名稱（必填） */
     name: string;
+    /** 父群組 ID（null 表示根層級） */
     parentId: string | undefined;
+    /** 部門代碼 */
     deptCode: string | undefined;
+    /** 中文名稱 */
     deptZhName: string | undefined;
+    /** 英文名稱 */
     deptEName: string | undefined;
+    /** 部門主管 */
     manager: string | undefined;
+    /** 描述 */
     description: string | undefined;
 }
 
+/** 刪除結果 API DTO */
 export class DeleteResultApiDto implements IDeleteResultApiDto {
+    /** 是否成功 */
     success!: boolean;
+    /** 刪除的群組數量 */
     deletedCount!: number;
+    /** 訊息 */
     message!: string | undefined;
 
     constructor(data?: IDeleteResultApiDto) {
@@ -16212,9 +19059,13 @@ export class DeleteResultApiDto implements IDeleteResultApiDto {
     }
 }
 
+/** 刪除結果 API DTO */
 export interface IDeleteResultApiDto {
+    /** 是否成功 */
     success: boolean;
+    /** 刪除的群組數量 */
     deletedCount: number;
+    /** 訊息 */
     message: string | undefined;
 }
 
@@ -17278,6 +20129,398 @@ export interface ISetGroupPermissionDto {
     inheritToChildren: boolean;
 }
 
+export class PermissionQueryResponse implements IPermissionQueryResponse {
+    userId!: string | undefined;
+    userName!: string | undefined;
+    userEnglishName!: string | undefined;
+    permissions!: SystemPermissionDto[] | undefined;
+
+    constructor(data?: IPermissionQueryResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.userId = _data["userId"];
+            this.userName = _data["userName"];
+            this.userEnglishName = _data["userEnglishName"];
+            if (Array.isArray(_data["permissions"])) {
+                this.permissions = [] as any;
+                for (let item of _data["permissions"])
+                    this.permissions!.push(SystemPermissionDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): PermissionQueryResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new PermissionQueryResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["userId"] = this.userId;
+        data["userName"] = this.userName;
+        data["userEnglishName"] = this.userEnglishName;
+        if (Array.isArray(this.permissions)) {
+            data["permissions"] = [];
+            for (let item of this.permissions)
+                data["permissions"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IPermissionQueryResponse {
+    userId: string | undefined;
+    userName: string | undefined;
+    userEnglishName: string | undefined;
+    permissions: SystemPermissionDto[] | undefined;
+}
+
+export class SystemPermissionDto implements ISystemPermissionDto {
+    systemId!: string | undefined;
+    systemName!: string | undefined;
+    resources!: ResourcePermissionDto[] | undefined;
+
+    constructor(data?: ISystemPermissionDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.systemId = _data["systemId"];
+            this.systemName = _data["systemName"];
+            if (Array.isArray(_data["resources"])) {
+                this.resources = [] as any;
+                for (let item of _data["resources"])
+                    this.resources!.push(ResourcePermissionDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): SystemPermissionDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new SystemPermissionDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["systemId"] = this.systemId;
+        data["systemName"] = this.systemName;
+        if (Array.isArray(this.resources)) {
+            data["resources"] = [];
+            for (let item of this.resources)
+                data["resources"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface ISystemPermissionDto {
+    systemId: string | undefined;
+    systemName: string | undefined;
+    resources: ResourcePermissionDto[] | undefined;
+}
+
+export class ResourcePermissionDto implements IResourcePermissionDto {
+    resourceId!: number;
+    resourceCode!: string | undefined;
+    scopes!: ScopeDto2[] | undefined;
+
+    constructor(data?: IResourcePermissionDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.resourceId = _data["resourceId"];
+            this.resourceCode = _data["resourceCode"];
+            if (Array.isArray(_data["scopes"])) {
+                this.scopes = [] as any;
+                for (let item of _data["scopes"])
+                    this.scopes!.push(ScopeDto2.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): ResourcePermissionDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ResourcePermissionDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["resourceId"] = this.resourceId;
+        data["resourceCode"] = this.resourceCode;
+        if (Array.isArray(this.scopes)) {
+            data["scopes"] = [];
+            for (let item of this.scopes)
+                data["scopes"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IResourcePermissionDto {
+    resourceId: number;
+    resourceCode: string | undefined;
+    scopes: ScopeDto2[] | undefined;
+}
+
+export class ScopeDto2 implements IScopeDto2 {
+    code!: string | undefined;
+    name!: string | undefined;
+
+    constructor(data?: IScopeDto2) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.code = _data["code"];
+            this.name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): ScopeDto2 {
+        data = typeof data === 'object' ? data : {};
+        let result = new ScopeDto2();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["code"] = this.code;
+        data["name"] = this.name;
+        return data;
+    }
+}
+
+export interface IScopeDto2 {
+    code: string | undefined;
+    name: string | undefined;
+}
+
+export class PermissionQueryErrorResponse implements IPermissionQueryErrorResponse {
+    error!: string | undefined;
+    errorDescription!: string | undefined;
+
+    constructor(data?: IPermissionQueryErrorResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.error = _data["error"];
+            this.errorDescription = _data["errorDescription"];
+        }
+    }
+
+    static fromJS(data: any): PermissionQueryErrorResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new PermissionQueryErrorResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["error"] = this.error;
+        data["errorDescription"] = this.errorDescription;
+        return data;
+    }
+}
+
+export interface IPermissionQueryErrorResponse {
+    error: string | undefined;
+    errorDescription: string | undefined;
+}
+
+export class PermissionQueryRequest implements IPermissionQueryRequest {
+    clientId!: string | undefined;
+    clientSecret!: string | undefined;
+    idToken!: string | undefined;
+    accessToken!: string | undefined;
+    systemId!: string | undefined;
+
+    constructor(data?: IPermissionQueryRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.clientId = _data["clientId"];
+            this.clientSecret = _data["clientSecret"];
+            this.idToken = _data["idToken"];
+            this.accessToken = _data["accessToken"];
+            this.systemId = _data["systemId"];
+        }
+    }
+
+    static fromJS(data: any): PermissionQueryRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new PermissionQueryRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["clientId"] = this.clientId;
+        data["clientSecret"] = this.clientSecret;
+        data["idToken"] = this.idToken;
+        data["accessToken"] = this.accessToken;
+        data["systemId"] = this.systemId;
+        return data;
+    }
+}
+
+export interface IPermissionQueryRequest {
+    clientId: string | undefined;
+    clientSecret: string | undefined;
+    idToken: string | undefined;
+    accessToken: string | undefined;
+    systemId: string | undefined;
+}
+
+export class ScopeCheckResultDto implements IScopeCheckResultDto {
+    allowed!: boolean;
+    error!: string | undefined;
+    errorDescription!: string | undefined;
+
+    constructor(data?: IScopeCheckResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.allowed = _data["allowed"];
+            this.error = _data["error"];
+            this.errorDescription = _data["errorDescription"];
+        }
+    }
+
+    static fromJS(data: any): ScopeCheckResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ScopeCheckResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["allowed"] = this.allowed;
+        data["error"] = this.error;
+        data["errorDescription"] = this.errorDescription;
+        return data;
+    }
+}
+
+export interface IScopeCheckResultDto {
+    allowed: boolean;
+    error: string | undefined;
+    errorDescription: string | undefined;
+}
+
+export class PermissionCheckRequest implements IPermissionCheckRequest {
+    clientId!: string | undefined;
+    clientSecret!: string | undefined;
+    idToken!: string | undefined;
+    accessToken!: string | undefined;
+    resource!: string | undefined;
+    scopes!: string | undefined;
+
+    constructor(data?: IPermissionCheckRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.clientId = _data["clientId"];
+            this.clientSecret = _data["clientSecret"];
+            this.idToken = _data["idToken"];
+            this.accessToken = _data["accessToken"];
+            this.resource = _data["resource"];
+            this.scopes = _data["scopes"];
+        }
+    }
+
+    static fromJS(data: any): PermissionCheckRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new PermissionCheckRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["clientId"] = this.clientId;
+        data["clientSecret"] = this.clientSecret;
+        data["idToken"] = this.idToken;
+        data["accessToken"] = this.accessToken;
+        data["resource"] = this.resource;
+        data["scopes"] = this.scopes;
+        return data;
+    }
+}
+
+export interface IPermissionCheckRequest {
+    clientId: string | undefined;
+    clientSecret: string | undefined;
+    idToken: string | undefined;
+    accessToken: string | undefined;
+    resource: string | undefined;
+    scopes: string | undefined;
+}
+
 export class PersistedGrantSubjectsApiDto implements IPersistedGrantSubjectsApiDto {
     totalCount!: number;
     pageSize!: number;
@@ -17812,6 +21055,544 @@ export class AddRoleClaimDto implements IAddRoleClaimDto {
 export interface IAddRoleClaimDto {
     claimType: string;
     claimValue: string;
+}
+
+export class TokenListResponseOfActiveTokenDto implements ITokenListResponseOfActiveTokenDto {
+    items!: ActiveTokenDto[] | undefined;
+    totalCount!: number;
+    page!: number;
+    pageSize!: number;
+    totalPages!: number;
+
+    constructor(data?: ITokenListResponseOfActiveTokenDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items!.push(ActiveTokenDto.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+            this.page = _data["page"];
+            this.pageSize = _data["pageSize"];
+            this.totalPages = _data["totalPages"];
+        }
+    }
+
+    static fromJS(data: any): TokenListResponseOfActiveTokenDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new TokenListResponseOfActiveTokenDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["totalCount"] = this.totalCount;
+        data["page"] = this.page;
+        data["pageSize"] = this.pageSize;
+        data["totalPages"] = this.totalPages;
+        return data;
+    }
+}
+
+export interface ITokenListResponseOfActiveTokenDto {
+    items: ActiveTokenDto[] | undefined;
+    totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+}
+
+export class ActiveTokenDto implements IActiveTokenDto {
+    key!: string | undefined;
+    type!: string | undefined;
+    subjectId!: string | undefined;
+    userName!: string | undefined;
+    sessionId!: string | undefined;
+    clientId!: string | undefined;
+    clientName!: string | undefined;
+    creationTime!: Date;
+    expiration!: Date | undefined;
+    remainingSeconds!: number | undefined;
+    remainingTimeFormatted!: string | undefined;
+    isExpired!: boolean;
+    isRevoked!: boolean;
+    revokedAt!: Date | undefined;
+    scopes!: string | undefined;
+    identityProvider!: string | undefined;
+
+    constructor(data?: IActiveTokenDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.key = _data["key"];
+            this.type = _data["type"];
+            this.subjectId = _data["subjectId"];
+            this.userName = _data["userName"];
+            this.sessionId = _data["sessionId"];
+            this.clientId = _data["clientId"];
+            this.clientName = _data["clientName"];
+            this.creationTime = _data["creationTime"] ? new Date(_data["creationTime"].toString()) : <any>undefined;
+            this.expiration = _data["expiration"] ? new Date(_data["expiration"].toString()) : <any>undefined;
+            this.remainingSeconds = _data["remainingSeconds"];
+            this.remainingTimeFormatted = _data["remainingTimeFormatted"];
+            this.isExpired = _data["isExpired"];
+            this.isRevoked = _data["isRevoked"];
+            this.revokedAt = _data["revokedAt"] ? new Date(_data["revokedAt"].toString()) : <any>undefined;
+            this.scopes = _data["scopes"];
+            this.identityProvider = _data["identityProvider"];
+        }
+    }
+
+    static fromJS(data: any): ActiveTokenDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ActiveTokenDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["key"] = this.key;
+        data["type"] = this.type;
+        data["subjectId"] = this.subjectId;
+        data["userName"] = this.userName;
+        data["sessionId"] = this.sessionId;
+        data["clientId"] = this.clientId;
+        data["clientName"] = this.clientName;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["expiration"] = this.expiration ? this.expiration.toISOString() : <any>undefined;
+        data["remainingSeconds"] = this.remainingSeconds;
+        data["remainingTimeFormatted"] = this.remainingTimeFormatted;
+        data["isExpired"] = this.isExpired;
+        data["isRevoked"] = this.isRevoked;
+        data["revokedAt"] = this.revokedAt ? this.revokedAt.toISOString() : <any>undefined;
+        data["scopes"] = this.scopes;
+        data["identityProvider"] = this.identityProvider;
+        return data;
+    }
+}
+
+export interface IActiveTokenDto {
+    key: string | undefined;
+    type: string | undefined;
+    subjectId: string | undefined;
+    userName: string | undefined;
+    sessionId: string | undefined;
+    clientId: string | undefined;
+    clientName: string | undefined;
+    creationTime: Date;
+    expiration: Date | undefined;
+    remainingSeconds: number | undefined;
+    remainingTimeFormatted: string | undefined;
+    isExpired: boolean;
+    isRevoked: boolean;
+    revokedAt: Date | undefined;
+    scopes: string | undefined;
+    identityProvider: string | undefined;
+}
+
+export class TokenListResponseOfRevokedTokenDto implements ITokenListResponseOfRevokedTokenDto {
+    items!: RevokedTokenDto[] | undefined;
+    totalCount!: number;
+    page!: number;
+    pageSize!: number;
+    totalPages!: number;
+
+    constructor(data?: ITokenListResponseOfRevokedTokenDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items!.push(RevokedTokenDto.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+            this.page = _data["page"];
+            this.pageSize = _data["pageSize"];
+            this.totalPages = _data["totalPages"];
+        }
+    }
+
+    static fromJS(data: any): TokenListResponseOfRevokedTokenDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new TokenListResponseOfRevokedTokenDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["totalCount"] = this.totalCount;
+        data["page"] = this.page;
+        data["pageSize"] = this.pageSize;
+        data["totalPages"] = this.totalPages;
+        return data;
+    }
+}
+
+export interface ITokenListResponseOfRevokedTokenDto {
+    items: RevokedTokenDto[] | undefined;
+    totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+}
+
+export class RevokedTokenDto implements IRevokedTokenDto {
+    id!: number;
+    jti!: string | undefined;
+    subjectId!: string | undefined;
+    userName!: string | undefined;
+    clientId!: string | undefined;
+    clientName!: string | undefined;
+    tokenType!: string | undefined;
+    expirationTime!: Date | undefined;
+    revokedAt!: Date;
+    reason!: string | undefined;
+    revokedBy!: string | undefined;
+
+    constructor(data?: IRevokedTokenDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.jti = _data["jti"];
+            this.subjectId = _data["subjectId"];
+            this.userName = _data["userName"];
+            this.clientId = _data["clientId"];
+            this.clientName = _data["clientName"];
+            this.tokenType = _data["tokenType"];
+            this.expirationTime = _data["expirationTime"] ? new Date(_data["expirationTime"].toString()) : <any>undefined;
+            this.revokedAt = _data["revokedAt"] ? new Date(_data["revokedAt"].toString()) : <any>undefined;
+            this.reason = _data["reason"];
+            this.revokedBy = _data["revokedBy"];
+        }
+    }
+
+    static fromJS(data: any): RevokedTokenDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new RevokedTokenDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["jti"] = this.jti;
+        data["subjectId"] = this.subjectId;
+        data["userName"] = this.userName;
+        data["clientId"] = this.clientId;
+        data["clientName"] = this.clientName;
+        data["tokenType"] = this.tokenType;
+        data["expirationTime"] = this.expirationTime ? this.expirationTime.toISOString() : <any>undefined;
+        data["revokedAt"] = this.revokedAt ? this.revokedAt.toISOString() : <any>undefined;
+        data["reason"] = this.reason;
+        data["revokedBy"] = this.revokedBy;
+        return data;
+    }
+}
+
+export interface IRevokedTokenDto {
+    id: number;
+    jti: string | undefined;
+    subjectId: string | undefined;
+    userName: string | undefined;
+    clientId: string | undefined;
+    clientName: string | undefined;
+    tokenType: string | undefined;
+    expirationTime: Date | undefined;
+    revokedAt: Date;
+    reason: string | undefined;
+    revokedBy: string | undefined;
+}
+
+export class TokenStatistics implements ITokenStatistics {
+    activeTokens!: number;
+    revokedTokens!: number;
+    expiringSoon!: number;
+    expiredTokens!: number;
+    activeUsers!: number;
+    activeClients!: number;
+
+    constructor(data?: ITokenStatistics) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.activeTokens = _data["activeTokens"];
+            this.revokedTokens = _data["revokedTokens"];
+            this.expiringSoon = _data["expiringSoon"];
+            this.expiredTokens = _data["expiredTokens"];
+            this.activeUsers = _data["activeUsers"];
+            this.activeClients = _data["activeClients"];
+        }
+    }
+
+    static fromJS(data: any): TokenStatistics {
+        data = typeof data === 'object' ? data : {};
+        let result = new TokenStatistics();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["activeTokens"] = this.activeTokens;
+        data["revokedTokens"] = this.revokedTokens;
+        data["expiringSoon"] = this.expiringSoon;
+        data["expiredTokens"] = this.expiredTokens;
+        data["activeUsers"] = this.activeUsers;
+        data["activeClients"] = this.activeClients;
+        return data;
+    }
+}
+
+export interface ITokenStatistics {
+    activeTokens: number;
+    revokedTokens: number;
+    expiringSoon: number;
+    expiredTokens: number;
+    activeUsers: number;
+    activeClients: number;
+}
+
+/** Token 檢查響應 */
+export class TokenCheckResponse implements ITokenCheckResponse {
+    jti!: string | undefined;
+    isRevoked!: boolean;
+
+    constructor(data?: ITokenCheckResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.jti = _data["jti"];
+            this.isRevoked = _data["isRevoked"];
+        }
+    }
+
+    static fromJS(data: any): TokenCheckResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new TokenCheckResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["jti"] = this.jti;
+        data["isRevoked"] = this.isRevoked;
+        return data;
+    }
+}
+
+/** Token 檢查響應 */
+export interface ITokenCheckResponse {
+    jti: string | undefined;
+    isRevoked: boolean;
+}
+
+export class RevokeTokenRequest implements IRevokeTokenRequest {
+    jti!: string | undefined;
+    subjectId!: string | undefined;
+    clientId!: string | undefined;
+    tokenType!: string | undefined;
+    expirationTime!: Date | undefined;
+    reason!: string | undefined;
+
+    constructor(data?: IRevokeTokenRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.jti = _data["jti"];
+            this.subjectId = _data["subjectId"];
+            this.clientId = _data["clientId"];
+            this.tokenType = _data["tokenType"];
+            this.expirationTime = _data["expirationTime"] ? new Date(_data["expirationTime"].toString()) : <any>undefined;
+            this.reason = _data["reason"];
+        }
+    }
+
+    static fromJS(data: any): RevokeTokenRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new RevokeTokenRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["jti"] = this.jti;
+        data["subjectId"] = this.subjectId;
+        data["clientId"] = this.clientId;
+        data["tokenType"] = this.tokenType;
+        data["expirationTime"] = this.expirationTime ? this.expirationTime.toISOString() : <any>undefined;
+        data["reason"] = this.reason;
+        return data;
+    }
+}
+
+export interface IRevokeTokenRequest {
+    jti: string | undefined;
+    subjectId: string | undefined;
+    clientId: string | undefined;
+    tokenType: string | undefined;
+    expirationTime: Date | undefined;
+    reason: string | undefined;
+}
+
+/** 批量撤銷響應 */
+export class RevokeAllResponse implements IRevokeAllResponse {
+    success!: boolean;
+    message!: string | undefined;
+    revokedCount!: number;
+
+    constructor(data?: IRevokeAllResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.success = _data["success"];
+            this.message = _data["message"];
+            this.revokedCount = _data["revokedCount"];
+        }
+    }
+
+    static fromJS(data: any): RevokeAllResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new RevokeAllResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["success"] = this.success;
+        data["message"] = this.message;
+        data["revokedCount"] = this.revokedCount;
+        return data;
+    }
+}
+
+/** 批量撤銷響應 */
+export interface IRevokeAllResponse {
+    success: boolean;
+    message: string | undefined;
+    revokedCount: number;
+}
+
+/** 清理響應 */
+export class CleanupResponse implements ICleanupResponse {
+    success!: boolean;
+    message!: string | undefined;
+    cleanedCount!: number;
+
+    constructor(data?: ICleanupResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.success = _data["success"];
+            this.message = _data["message"];
+            this.cleanedCount = _data["cleanedCount"];
+        }
+    }
+
+    static fromJS(data: any): CleanupResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new CleanupResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["success"] = this.success;
+        data["message"] = this.message;
+        data["cleanedCount"] = this.cleanedCount;
+        return data;
+    }
+}
+
+/** 清理響應 */
+export interface ICleanupResponse {
+    success: boolean;
+    message: string | undefined;
+    cleanedCount: number;
 }
 
 export class PagedUserResultDto implements IPagedUserResultDto {

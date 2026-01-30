@@ -37,6 +37,8 @@ using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories.Interface
 using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services;
 using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services.Interfaces;
 using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Configuration.Configuration;
+using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Interfaces;
+using PermissionQueryDbContext = Skoruba.Duende.IdentityServer.Admin.EntityFramework.DbContexts.PermissionQueryDbContext;
 
 namespace Skoruba.Duende.IdentityServer.Admin.Api
 {
@@ -89,6 +91,9 @@ namespace Skoruba.Duende.IdentityServer.Admin.Api
 
             // UC Capital - Token 管理服務 (JWT 撤銷)
             RegisterTokenManagementServices(services);
+
+            // UC Capital - PRS 權限查詢服務
+            RegisterPermissionQueryServices(services);
 
             // UC Capital - HttpClient for OIDC API
             services.AddHttpClient();
@@ -185,6 +190,57 @@ namespace Skoruba.Duende.IdentityServer.Admin.Api
 
             // 註冊 Service
             services.AddScoped<ITokenManagementService, TokenManagementService>();
+        }
+
+        /// <summary>
+        /// 註冊 PRS 權限查詢服務
+        /// </summary>
+        public virtual void RegisterPermissionQueryServices(IServiceCollection services)
+        {
+            var databaseProvider = Configuration.GetSection(nameof(DatabaseProviderConfiguration)).Get<DatabaseProviderConfiguration>();
+            var connectionString = Configuration.GetConnectionString("IdentitySysDbConnection")
+                ?? Configuration.GetConnectionString("ConfigurationDbConnection");
+
+            // 註冊 PermissionQueryDbContext
+            switch (databaseProvider?.ProviderType)
+            {
+                case DatabaseProviderType.SqlServer:
+                default:
+                    services.AddDbContext<PermissionQueryDbContext>(options =>
+                        options.UseSqlServer(connectionString));
+                    break;
+                case DatabaseProviderType.PostgreSQL:
+                    services.AddDbContext<PermissionQueryDbContext>(options =>
+                        options.UseNpgsql(connectionString));
+                    break;
+                case DatabaseProviderType.MySql:
+                    services.AddDbContext<PermissionQueryDbContext>(options =>
+                        options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+                    break;
+            }
+
+            // 註冊 IAdminConfigurationDbContext (用於驗證 Client 憑證)
+            services.AddScoped<IAdminConfigurationDbContext>(provider =>
+                provider.GetRequiredService<IdentityServerConfigurationDbContext>());
+
+            // 註冊 JWT Token 驗證器
+            services.AddMemoryCache();
+            services.Configure<JwtTokenValidatorOptions>(options =>
+            {
+                // 從設定檔讀取 STS Authority URL
+                var adminApiConfig = Configuration.GetSection(nameof(AdminApiConfiguration)).Get<AdminApiConfiguration>();
+                options.Authority = adminApiConfig?.IdentityServerBaseUrl ?? "https://localhost:44310";
+                options.ValidateAudience = false; // 不強制驗證 audience
+                options.CheckRevocation = true;   // 檢查撤銷狀態
+                options.JwksCacheMinutes = 60;    // JWKS 快取 60 分鐘
+            });
+            services.AddScoped<IJwtTokenValidator, JwtTokenValidator>();
+
+            // 註冊 Repository
+            services.AddScoped<IPermissionQueryRepository, PermissionQueryRepository>();
+
+            // 註冊 Service
+            services.AddScoped<IPermissionQueryService, PermissionQueryService>();
         }
     }
 }

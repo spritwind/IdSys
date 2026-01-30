@@ -1,0 +1,136 @@
+# O6 - 統一身份認證系統 (UC Capital Identity Provider)
+## 基於 Duende IdentityServer 的企業級 IDP 系統建置與優化
+
+---
+
+## Objective 6: 建置企業級統一身份認證系統 (IDP)
+
+### KR6.1 - OAuth 2.0 / OpenID Connect 標準實作
+| 項目 | 說明 | 狀態 |
+|------|------|------|
+| Authorization Code Flow + PKCE | 實現標準授權碼流程，支援 PKCE 安全機制 | 已完成 |
+| Client Credentials Flow | 服務對服務 (M2M) 驗證流程 | 已完成 |
+| Refresh Token 機制 | 支援 Token 刷新，維持使用者會話 | 已完成 |
+| Device Authorization Flow | 支援 IoT 裝置授權流程 | 已完成 |
+| OIDC Discovery Endpoint | /.well-known/openid-configuration 探索文件 | 已完成 |
+| JWKS Endpoint | JSON Web Key Set 公鑰端點 | 已完成 |
+
+### KR6.2 - JWT Token 管理與安全機制
+| 項目 | 說明 | 狀態 |
+|------|------|------|
+| JWT Token 撤銷機制 | 透過 /connect/revocation 端點撤銷 JWT Token | 已完成 |
+| Token 撤銷清單 (RevokedTokens) | 資料庫記錄已撤銷的 Token JTI | 已完成 |
+| Introspection 端點撤銷檢查 | /connect/introspect 驗證時檢查撤銷清單 | 已完成 |
+| CustomTokenRevocationResponseGenerator | 攔截撤銷請求，記錄 JWT Token 資訊 | 已完成 |
+| CustomIntrospectionRequestValidator | 自訂內省驗證器，整合撤銷檢查 | 已完成 |
+| Token JTI 追蹤 | 啟用 IncludeJwtId 確保 Token 可追蹤 | 已完成 |
+
+### KR6.3 - 身份資源與 Claims 管理
+| 項目 | 說明 | 狀態 |
+|------|------|------|
+| 標準 Identity Resources | openid, profile, email, address, phone | 已完成 |
+| 自訂 roles Resource | 角色聲明資源 | 已完成 |
+| API Resources 管理 | uc_capital_admin_api 資源與作用域 | 已完成 |
+| Claims 映射設定 | 設定 Token 中包含的 Claims | 已完成 |
+
+### KR6.4 - 客戶端應用程式管理
+| 項目 | 說明 | 狀態 |
+|------|------|------|
+| 客戶端 CRUD 管理介面 | 建立、讀取、更新、刪除客戶端設定 | 已完成 |
+| 客戶端密鑰管理 | 安全的密鑰產生與儲存 | 已完成 |
+| Redirect URI 設定 | 授權回調 URI 設定 | 已完成 |
+| Grant Types 設定 | 各客戶端允許的授權類型 | 已完成 |
+| CORS 設定 | 跨來源資源共享設定 | 已完成 |
+| riskcontrolsystemweb 客戶端 | 風控系統 Web 客戶端設定 | 已完成 |
+| oauth_demo_client 客戶端 | OAuth 示範客戶端設定 | 已完成 |
+
+### KR6.5 - 使用者與角色管理
+| 項目 | 說明 | 狀態 |
+|------|------|------|
+| ASP.NET Core Identity 整合 | 使用者身份管理基礎 | 已完成 |
+| 使用者 CRUD 管理介面 | 建立、讀取、更新、刪除使用者 | 已完成 |
+| 角色 CRUD 管理介面 | 建立、讀取、更新、刪除角色 | 已完成 |
+| 使用者-角色多對多關係 | 使用者可擁有多個角色 | 已完成 |
+| 使用者 Claims 管理 | 自訂使用者聲明 | 已完成 |
+
+### KR6.6 - 組織架構與多租戶支援
+| 項目 | 說明 | 狀態 |
+|------|------|------|
+| 組織單位 (OU) 管理 | 組織架構層級結構 | 進行中 |
+| 部門與團隊管理 | 支援複雜的組織結構 | 進行中 |
+| 權限隔離機制 | 跨組織單位的權限隔離 | 規劃中 |
+
+### KR6.7 - API 文件與開發者支援
+| 項目 | 說明 | 狀態 |
+|------|------|------|
+| STS API 指南文件 | 完整的 API 端點文件 | 已完成 |
+| Postman Collection | OIDC 測試集合 | 已完成 |
+| Postman Environment | OAuth Demo 環境設定 | 已完成 |
+| Postman Environment | RiskControlSystem 環境設定 | 已完成 |
+| Swagger/OpenAPI 文件 | Admin API Swagger 文件 | 已完成 |
+
+### KR6.8 - 安全性與稽核
+| 項目 | 說明 | 狀態 |
+|------|------|------|
+| Audit Logs | 操作稽核日誌 | 已完成 |
+| Token 撤銷稽核 | 記錄 Token 撤銷事件 | 已完成 |
+| 登入事件追蹤 | 使用者登入/登出事件 | 已完成 |
+| 權限變更追蹤 | 角色與權限異動記錄 | 進行中 |
+
+---
+
+## 技術規格
+
+### 技術堆疊
+- **框架**: ASP.NET Core 9.0 + Duende IdentityServer
+- **資料庫**: SQL Server (支援 MySQL/PostgreSQL)
+- **ORM**: Entity Framework Core
+- **前端管理介面**: React + TypeScript + AG Grid
+- **認證標準**: OAuth 2.0 / OpenID Connect 1.0
+
+### 核心模組
+1. **STS.Identity** - 安全性權杖服務 (https://localhost:44310)
+2. **Admin.Api** - 管理 API (https://localhost:44302)
+3. **Admin** - 管理介面 (https://localhost:44303)
+4. **TwFrontEnd** - React 前端管理介面
+
+### 已實作的自訂服務
+1. `JwtRevocationValidator` - JWT 撤銷驗證器
+2. `CustomIntrospectionRequestValidator` - 自訂內省驗證器
+3. `CustomTokenRevocationResponseGenerator` - 自訂撤銷回應產生器
+4. `TokenManagementService` - Token 管理服務
+5. `RevokedTokenRepository` - 撤銷 Token 儲存庫
+
+### 資料表結構
+- `AspNetUsers` - 使用者資料
+- `AspNetRoles` - 角色定義
+- `AspNetUserRoles` - 使用者角色關聯
+- `Clients` - 客戶端設定
+- `ApiResources` - API 資源
+- `IdentityResources` - 身份資源
+- `RevokedTokens` - 撤銷 Token 清單
+- `AuditLogs` - 稽核日誌
+
+---
+
+## 下一階段規劃 (參考規劃書.txt)
+
+### Phase 1: 授權引擎升級
+- ABAC (Attribute-Based Access Control) 實作
+- OPA (Open Policy Agent) 策略引擎整合
+- 聲明豐富化引擎 (Claims Enrichment)
+
+### Phase 2: 組織治理層升級
+- 強化多租戶架構
+- 委託授權機制 (Delegation)
+- 訪問審查工作流 (Access Review)
+
+### Phase 3: 細粒度權限管理
+- 應用系統資源權限樹設計
+- 權限矩陣建立
+- 按鈕級別權限控制
+
+---
+
+*文件產生日期：2026-01-15*
+*UC Capital Identity Admin System*

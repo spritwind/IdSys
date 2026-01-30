@@ -1,0 +1,1053 @@
+{
+	"info": {
+		"_postman_id": "uc-capital-oidc-collection",
+		"name": "UC Capital IdentityServer OIDC",
+		"description": "## UC Capital Identity Server - OAuth 2.0 / OIDC 測試集合\n\n此集合包含所有標準 OIDC 端點的測試。\n\n### 測試流程\n\n1. **Discovery** - 取得 OIDC 設定\n2. **Authorize** - 在瀏覽器開啟授權 URL\n3. **Token** - 使用授權碼交換 Token\n4. **UserInfo** - 取得使用者資訊\n5. **Introspection** - 驗證 Token\n6. **Revocation** - 撤銷 Token\n\n### 環境變數\n\n請先設定以下環境變數：\n- `sts_base_url`: STS 伺服器基底 URL\n- `client_id`: Client ID\n- `client_secret`: Client Secret (如果有)\n- `redirect_uri`: 重導向 URI\n- `code_verifier`: PKCE Code Verifier\n- `authorization_code`: 授權碼 (從 authorize 回調取得)\n- `access_token`: Access Token\n- `refresh_token`: Refresh Token\n- `id_token`: ID Token",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "sts_base_url",
+			"value": "https://prs.uccapital.com.tw/sts",
+			"type": "string"
+		},
+		{
+			"key": "client_id",
+			"value": "oauth_demo_client",
+			"type": "string"
+		},
+		{
+			"key": "client_secret",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "redirect_uri",
+			"value": "http://localhost:3001/callback",
+			"type": "string"
+		},
+		{
+			"key": "scope",
+			"value": "openid profile email roles offline_access",
+			"type": "string"
+		},
+		{
+			"key": "code_verifier",
+			"value": "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
+			"type": "string"
+		},
+		{
+			"key": "code_challenge",
+			"value": "my-qKsa9_RLKa5SfNGAVv95jEtxXJYsZfBDXDCwm6Qo",
+			"type": "string"
+		},
+		{
+			"key": "authorization_code",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "id_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "api_client_id",
+			"value": "skoruba_identity_admin_api",
+			"type": "string"
+		},
+		{
+			"key": "api_client_secret",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "state",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "nonce",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Discovery",
+			"item": [
+				{
+					"name": "Get Discovery Document",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has issuer\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.issuer).to.exist;",
+									"    console.log(\"Issuer: \" + jsonData.issuer);",
+									"});",
+									"",
+									"pm.test(\"Response has token_endpoint\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.token_endpoint).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{sts_base_url}}/.well-known/openid-configuration",
+							"host": [
+								"{{sts_base_url}}"
+							],
+							"path": [
+								".well-known",
+								"openid-configuration"
+							]
+						},
+						"description": "## Discovery Document\n\n取得 IdentityServer 的 OIDC 設定文件，包含所有端點 URL 與支援的功能。\n\n### 重要欄位\n\n- `issuer`: 發行者識別\n- `authorization_endpoint`: 授權端點\n- `token_endpoint`: Token 端點\n- `userinfo_endpoint`: UserInfo 端點\n- `jwks_uri`: JWKS 端點\n- `scopes_supported`: 支援的 Scopes\n- `grant_types_supported`: 支援的 Grant Types"
+					},
+					"response": []
+				},
+				{
+					"name": "Get JWKS (Public Keys)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has keys array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.keys).to.be.an('array');",
+									"    console.log(\"Found \" + jsonData.keys.length + \" keys\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{sts_base_url}}/.well-known/openid-configuration/jwks",
+							"host": [
+								"{{sts_base_url}}"
+							],
+							"path": [
+								".well-known",
+								"openid-configuration",
+								"jwks"
+							]
+						},
+						"description": "## JSON Web Key Set (JWKS)\n\n取得用於驗證 JWT Token 簽章的公鑰。\n\n### 用途\n\n- 本地驗證 JWT Token\n- 不需要呼叫 IdentityServer\n- 速度快，但無法偵測 Token 撤銷"
+					},
+					"response": []
+				}
+			],
+			"description": "Discovery 端點用於取得 IdentityServer 的設定資訊。"
+		},
+		{
+			"name": "2. Authorization (在瀏覽器開啟)",
+			"item": [
+				{
+					"name": "Generate Authorize URL",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// 產生隨機 state (防 CSRF)",
+									"var state = Math.random().toString(36).substring(2, 15);",
+									"pm.collectionVariables.set(\"state\", state);",
+									"console.log(\"Generated state: \" + state);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// 這個請求會重導向到登入頁面",
+									"// 請在瀏覽器中開啟此 URL",
+									"",
+									"var authorizeUrl = pm.request.url.toString();",
+									"console.log(\"\\n========================================\");",
+									"console.log(\"請在瀏覽器中開啟以下 URL 進行登入：\");",
+									"console.log(\"========================================\");",
+									"console.log(authorizeUrl);",
+									"console.log(\"========================================\");",
+									"console.log(\"\\n登入完成後，從回調 URL 取得 code 參數，\");",
+									"console.log(\"並設定到 authorization_code 變數中。\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{sts_base_url}}/connect/authorize?client_id={{client_id}}&redirect_uri={{redirect_uri}}&response_type=code&scope={{scope}}&code_challenge={{code_challenge}}&code_challenge_method=S256&state={{state}}",
+							"host": [
+								"{{sts_base_url}}"
+							],
+							"path": [
+								"connect",
+								"authorize"
+							],
+							"query": [
+								{
+									"key": "client_id",
+									"value": "{{client_id}}",
+									"description": "[必填] OAuth 2.0 Client ID"
+								},
+								{
+									"key": "redirect_uri",
+									"value": "{{redirect_uri}}",
+									"description": "[必填] 授權完成後的重導向 URI"
+								},
+								{
+									"key": "response_type",
+									"value": "code",
+									"description": "[必填] 固定為 code (Authorization Code Flow)"
+								},
+								{
+									"key": "scope",
+									"value": "{{scope}}",
+									"description": "[必填] 請求的權限範圍，以空格分隔"
+								},
+								{
+									"key": "code_challenge",
+									"value": "{{code_challenge}}",
+									"description": "[必填] PKCE Code Challenge = BASE64URL(SHA256(code_verifier))"
+								},
+								{
+									"key": "code_challenge_method",
+									"value": "S256",
+									"description": "[必填] PKCE 方法，固定為 S256"
+								},
+								{
+									"key": "state",
+									"value": "{{state}}",
+									"description": "[建議] 防 CSRF 攻擊的隨機狀態值"
+								}
+							]
+						},
+						"description": "## Authorization Endpoint\n\n**請在瀏覽器中開啟此 URL 進行登入！**\n\n### 必要參數\n\n| 參數 | 說明 |\n|------|------|\n| client_id | OAuth 2.0 Client ID |\n| redirect_uri | 授權完成後的重導向 URI |\n| response_type | 固定為 `code` |\n| scope | 請求的權限範圍 |\n| code_challenge | PKCE 驗證碼 |\n| code_challenge_method | 固定為 `S256` |\n| state | 防 CSRF 隨機值 |\n\n### 測試流程\n\n1. 點擊 Send 或複製 URL\n2. 在瀏覽器中開啟\n3. 登入並同意授權\n4. 從回調 URL 取得 `code` 參數\n5. 將 `code` 設定到 `authorization_code` 變數\n\n### 回調 URL 範例\n\n```\nhttp://localhost:3001/callback?code=XXXXX&scope=openid%20profile&state=abc123\n```"
+					},
+					"response": []
+				}
+			],
+			"description": "授權端點 - 需要在瀏覽器中開啟，不能直接在 Postman 執行。"
+		},
+		{
+			"name": "3. Token",
+			"item": [
+				{
+					"name": "Exchange Code for Token (Authorization Code)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"if (jsonData.access_token) {",
+									"    pm.collectionVariables.set(\"access_token\", jsonData.access_token);",
+									"    console.log(\"✅ Access Token 已儲存\");",
+									"    ",
+									"    // 解析 JWT",
+									"    var parts = jsonData.access_token.split('.');",
+									"    if (parts.length === 3) {",
+									"        var payload = JSON.parse(atob(parts[1]));",
+									"        console.log(\"Token Payload:\", JSON.stringify(payload, null, 2));",
+									"    }",
+									"}",
+									"",
+									"if (jsonData.refresh_token) {",
+									"    pm.collectionVariables.set(\"refresh_token\", jsonData.refresh_token);",
+									"    console.log(\"✅ Refresh Token 已儲存\");",
+									"}",
+									"",
+									"if (jsonData.id_token) {",
+									"    pm.collectionVariables.set(\"id_token\", jsonData.id_token);",
+									"    console.log(\"✅ ID Token 已儲存\");",
+									"    ",
+									"    // 解析 ID Token",
+									"    var parts = jsonData.id_token.split('.');",
+									"    if (parts.length === 3) {",
+									"        var payload = JSON.parse(atob(parts[1]));",
+									"        console.log(\"ID Token Payload:\", JSON.stringify(payload, null, 2));",
+									"    }",
+									"}",
+									"",
+									"pm.test(\"Response has access_token\", function () {",
+									"    pm.expect(jsonData.access_token).to.exist;",
+									"});",
+									"",
+									"pm.test(\"Response has token_type Bearer\", function () {",
+									"    pm.expect(jsonData.token_type).to.eql(\"Bearer\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "authorization_code",
+									"description": "[必填] 固定為 authorization_code",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{client_id}}",
+									"description": "[必填] OAuth 2.0 Client ID",
+									"type": "text"
+								},
+								{
+									"key": "code",
+									"value": "{{authorization_code}}",
+									"description": "[必填] 授權碼 (從 authorize 回調取得)",
+									"type": "text"
+								},
+								{
+									"key": "redirect_uri",
+									"value": "{{redirect_uri}}",
+									"description": "[必填] 重導向 URI (需與 authorize 請求相同)",
+									"type": "text"
+								},
+								{
+									"key": "code_verifier",
+									"value": "{{code_verifier}}",
+									"description": "[選填] PKCE Code Verifier，若 authorize 時有用 PKCE 則必填",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "client_secret",
+									"value": "{{client_secret}}",
+									"description": "[選填] Client Secret，Confidential Client 才需要",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{sts_base_url}}/connect/token",
+							"host": [
+								"{{sts_base_url}}"
+							],
+							"path": [
+								"connect",
+								"token"
+							]
+						},
+						"description": "## Authorization Code Grant\n\n使用授權碼交換 Access Token、ID Token 和 Refresh Token。\n\n### 前置條件\n\n1. 已在瀏覽器完成授權流程\n2. 已將授權碼設定到 `authorization_code` 變數\n\n### 成功回應\n\n```json\n{\n  \"access_token\": \"eyJhbGciOiJSUzI1NiIs...\",\n  \"token_type\": \"Bearer\",\n  \"expires_in\": 3600,\n  \"refresh_token\": \"CfDJ8Nyxw...\",\n  \"id_token\": \"eyJhbGciOiJSUzI1NiIs...\",\n  \"scope\": \"openid profile email roles offline_access\"\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"if (jsonData.access_token) {",
+									"    pm.collectionVariables.set(\"access_token\", jsonData.access_token);",
+									"    console.log(\"✅ 新的 Access Token 已儲存\");",
+									"}",
+									"",
+									"if (jsonData.refresh_token) {",
+									"    pm.collectionVariables.set(\"refresh_token\", jsonData.refresh_token);",
+									"    console.log(\"✅ 新的 Refresh Token 已儲存\");",
+									"}",
+									"",
+									"pm.test(\"Response has new access_token\", function () {",
+									"    pm.expect(jsonData.access_token).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "refresh_token",
+									"description": "[必填] 固定為 refresh_token",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{client_id}}",
+									"description": "[必填] OAuth 2.0 Client ID",
+									"type": "text"
+								},
+								{
+									"key": "refresh_token",
+									"value": "{{refresh_token}}",
+									"description": "[必填] Refresh Token",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{client_secret}}",
+									"description": "[選填] Client Secret，Confidential Client 才需要",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{sts_base_url}}/connect/token",
+							"host": [
+								"{{sts_base_url}}"
+							],
+							"path": [
+								"connect",
+								"token"
+							]
+						},
+						"description": "## Refresh Token Grant\n\n使用 Refresh Token 取得新的 Access Token。\n\n### 前置條件\n\n- `refresh_token` 變數已設定\n\n### 說明\n\n- 每次 Refresh 可能會取得新的 Refresh Token (Rotation)\n- 舊的 Refresh Token 可能會失效"
+					},
+					"response": []
+				},
+				{
+					"name": "Client Credentials (M2M)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"if (jsonData.access_token) {",
+									"    pm.collectionVariables.set(\"access_token\", jsonData.access_token);",
+									"    console.log(\"✅ Access Token 已儲存\");",
+									"}",
+									"",
+									"pm.test(\"Response has access_token\", function () {",
+									"    pm.expect(jsonData.access_token).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"description": "[必填] 固定為 client_credentials",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{api_client_id}}",
+									"description": "[必填] OAuth 2.0 Client ID",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{api_client_secret}}",
+									"description": "[必填] Client Secret",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "skoruba_identity_admin_api",
+									"description": "[選填] 請求的權限範圍",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{sts_base_url}}/connect/token",
+							"host": [
+								"{{sts_base_url}}"
+							],
+							"path": [
+								"connect",
+								"token"
+							]
+						},
+						"description": "## Client Credentials Grant\n\n用於 Machine-to-Machine (M2M) 通訊，不涉及使用者。\n\n### 前置條件\n\n- 需要設定 `api_client_id` 和 `api_client_secret` 變數\n- Client 必須是 Confidential Client (有 Secret)\n\n### 適用場景\n\n- 後端服務對後端服務的通訊\n- 排程作業\n- 背景處理程序"
+					},
+					"response": []
+				}
+			],
+			"description": "Token 端點用於交換、更新或取得 Token。"
+		},
+		{
+			"name": "4. UserInfo",
+			"item": [
+				{
+					"name": "Get User Info",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has sub claim\", function () {",
+									"    pm.expect(jsonData.sub).to.exist;",
+									"});",
+									"",
+									"console.log(\"User Info:\", JSON.stringify(jsonData, null, 2));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{sts_base_url}}/connect/userinfo",
+							"host": [
+								"{{sts_base_url}}"
+							],
+							"path": [
+								"connect",
+								"userinfo"
+							]
+						},
+						"description": "## UserInfo Endpoint\n\n使用 Access Token 取得使用者資訊。\n\n### 前置條件\n\n- `access_token` 變數已設定\n- Token 需包含 `openid` scope\n\n### 回傳 Claims\n\n依據 Token 的 scope：\n- `openid`: sub\n- `profile`: name, given_name, family_name, ...\n- `email`: email, email_verified\n- `roles`: role"
+					},
+					"response": []
+				}
+			],
+			"description": "UserInfo 端點用於取得使用者的 Claims 資訊。"
+		},
+		{
+			"name": "5. Introspection",
+			"item": [
+				{
+					"name": "Introspect Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Response has active field\", function () {",
+									"    pm.expect(jsonData.active).to.exist;",
+									"});",
+									"",
+									"if (jsonData.active) {",
+									"    console.log(\"✅ Token 有效\");",
+									"    console.log(\"Token Info:\", JSON.stringify(jsonData, null, 2));",
+									"} else {",
+									"    console.log(\"❌ Token 無效或已撤銷\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"description": "[必填] 要檢驗的 Token",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{api_client_id}}",
+									"description": "[必填] API Resource Client ID",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{api_client_secret}}",
+									"description": "[必填] API Resource Secret",
+									"type": "text"
+								},
+								{
+									"key": "token_type_hint",
+									"value": "access_token",
+									"description": "[選填] Token 類型提示 (access_token/refresh_token)",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{sts_base_url}}/connect/introspect",
+							"host": [
+								"{{sts_base_url}}"
+							],
+							"path": [
+								"connect",
+								"introspect"
+							]
+						},
+						"description": "## Token Introspection\n\n驗證 Token 是否有效，並取得 Token 的詳細資訊。\n\n### 前置條件\n\n- 需要設定 `api_client_id` 和 `api_client_secret`\n- 這些 credentials 應該是 API Resource 的，而非一般 Client\n\n### 用途\n\n- 驗證 JWT Token 是否已被撤銷\n- 取得 Token 的詳細資訊 (sub, scope, exp 等)\n\n### 重要說明\n\nJWT Token 是無狀態的，本地驗證無法偵測撤銷。\n使用此端點可以確認 Token 是否已被撤銷。"
+					},
+					"response": []
+				}
+			],
+			"description": "Introspection 端點用於驗證 Token 並取得詳細資訊。"
+		},
+		{
+			"name": "6. Revocation",
+			"item": [
+				{
+					"name": "Revoke Access Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"console.log(\"✅ Token 撤銷請求已送出\");",
+									"console.log(\"💡 請使用 Introspection 確認 Token 是否已失效\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"description": "[必填] 要撤銷的 Token",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{client_id}}",
+									"description": "[必填] OAuth 2.0 Client ID",
+									"type": "text"
+								},
+								{
+									"key": "token_type_hint",
+									"value": "access_token",
+									"description": "[選填] Token 類型提示",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "client_secret",
+									"value": "{{client_secret}}",
+									"description": "[選填] Client Secret，Confidential Client 才需要",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{sts_base_url}}/connect/revocation",
+							"host": [
+								"{{sts_base_url}}"
+							],
+							"path": [
+								"connect",
+								"revocation"
+							]
+						},
+						"description": "## Revoke Access Token\n\n撤銷 Access Token，使其失效。\n\n### 必要參數\n\n| 參數 | 說明 |\n|------|------|\n| token | 要撤銷的 Token |\n| client_id | OAuth 2.0 Client ID |\n\n### 重要說明\n\n⚠️ **JWT Token 是無狀態的**\n\n撤銷後：\n- 使用本地驗證 (JWKS) 的服務**無法偵測**撤銷\n- 必須使用 Introspection 端點才能確認是否已撤銷"
+					},
+					"response": []
+				},
+				{
+					"name": "Revoke Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"console.log(\"✅ Refresh Token 撤銷成功\");",
+									"console.log(\"💡 之後無法再使用此 Refresh Token 更新 Access Token\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "token",
+									"value": "{{refresh_token}}",
+									"description": "[必填] 要撤銷的 Refresh Token",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{client_id}}",
+									"description": "[必填] OAuth 2.0 Client ID",
+									"type": "text"
+								},
+								{
+									"key": "token_type_hint",
+									"value": "refresh_token",
+									"description": "[選填] Token 類型提示",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "client_secret",
+									"value": "{{client_secret}}",
+									"description": "[選填] Client Secret，Confidential Client 才需要",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{sts_base_url}}/connect/revocation",
+							"host": [
+								"{{sts_base_url}}"
+							],
+							"path": [
+								"connect",
+								"revocation"
+							]
+						},
+						"description": "## Revoke Refresh Token\n\n撤銷 Refresh Token，使其無法再用於更新 Access Token。\n\n### 必要參數\n\n| 參數 | 說明 |\n|------|------|\n| token | 要撤銷的 Refresh Token |\n| client_id | OAuth 2.0 Client ID |\n\n### 說明\n\n- Refresh Token 撤銷後立即失效\n- 已發出的 Access Token 仍有效直到過期"
+					},
+					"response": []
+				}
+			],
+			"description": "Revocation 端點用於撤銷 Token。"
+		},
+		{
+			"name": "7. End Session (在瀏覽器開啟)",
+			"item": [
+				{
+					"name": "Generate Logout URL",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var logoutUrl = pm.request.url.toString();",
+									"console.log(\"\\n========================================\");",
+									"console.log(\"請在瀏覽器中開啟以下 URL 進行登出：\");",
+									"console.log(\"========================================\");",
+									"console.log(logoutUrl);",
+									"console.log(\"========================================\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{sts_base_url}}/connect/endsession",
+							"host": [
+								"{{sts_base_url}}"
+							],
+							"path": [
+								"connect",
+								"endsession"
+							],
+							"query": [
+								{
+									"key": "id_token_hint",
+									"value": "{{id_token}}",
+									"description": "[選填] ID Token，用於識別要登出的 Session",
+									"disabled": true
+								},
+								{
+									"key": "post_logout_redirect_uri",
+									"value": "{{redirect_uri}}",
+									"description": "[選填] 登出後重導向 URI (需已註冊)",
+									"disabled": true
+								}
+							]
+						},
+						"description": "## End Session Endpoint\n\n**請在瀏覽器中開啟此 URL 進行登出！**\n\n### 參數說明\n\n| 參數 | 必填 | 說明 |\n|------|------|------|\n| id_token_hint | 選填 | 用於識別要登出的 Session |\n| post_logout_redirect_uri | 選填 | 登出後重導向 URI |\n\n### 流程\n\n1. 複製此請求的 URL\n2. 在瀏覽器中開啟\n3. IdentityServer 會清除 Session 並登出"
+					},
+					"response": []
+				}
+			],
+			"description": "End Session 端點用於登出。需在瀏覽器中開啟。"
+		},
+		{
+			"name": "Utils",
+			"item": [
+				{
+					"name": "Generate PKCE",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// 產生 code_verifier (43-128 字元)",
+									"function generateCodeVerifier() {",
+									"    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';",
+									"    let result = '';",
+									"    for (let i = 0; i < 64; i++) {",
+									"        result += chars.charAt(Math.floor(Math.random() * chars.length));",
+									"    }",
+									"    return result;",
+									"}",
+									"",
+									"// Base64URL 編碼",
+									"function base64UrlEncode(str) {",
+									"    return btoa(str)",
+									"        .replace(/\\+/g, '-')",
+									"        .replace(/\\//g, '_')",
+									"        .replace(/=/g, '');",
+									"}",
+									"",
+									"var codeVerifier = generateCodeVerifier();",
+									"pm.collectionVariables.set(\"code_verifier\", codeVerifier);",
+									"",
+									"console.log(\"========================================\");",
+									"console.log(\"PKCE Code Verifier (已儲存到變數):\");",
+									"console.log(codeVerifier);",
+									"console.log(\"========================================\");",
+									"console.log(\"\");",
+									"console.log(\"⚠️ 請使用以下 JavaScript 計算 code_challenge:\");",
+									"console.log(\"\");",
+									"console.log(`async function generateCodeChallenge() {`);",
+									"console.log(`    const encoder = new TextEncoder();`);",
+									"console.log(`    const data = encoder.encode('${codeVerifier}');`);",
+									"console.log(`    const hash = await crypto.subtle.digest('SHA-256', data);`);",
+									"console.log(`    return btoa(String.fromCharCode(...new Uint8Array(hash)))`);",
+									"console.log(`        .replace(/\\\\+/g, '-').replace(/\\\\//g, '_').replace(/=/g, '');`);",
+									"console.log(`}`);",
+									"console.log(\"\");",
+									"console.log(\"或使用線上工具: https://tonyxu-io.github.io/pkce-generator/\");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// 這只是一個工具請求，不會實際發送",
+									"console.log(\"Code Verifier 已產生並儲存到 code_verifier 變數\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://httpbin.org/get",
+							"protocol": "https",
+							"host": [
+								"httpbin",
+								"org"
+							],
+							"path": [
+								"get"
+							]
+						},
+						"description": "## 產生 PKCE Code Verifier\n\n執行此請求會產生隨機的 `code_verifier` 並儲存到變數。\n\n### 計算 Code Challenge\n\nPostman 的 Pre-request Script 無法使用 `crypto.subtle`，\n請使用瀏覽器 Console 或線上工具計算 `code_challenge`。\n\n### 線上工具\n\n- https://tonyxu-io.github.io/pkce-generator/\n- https://www.oauth.com/playground/authorization-code-with-pkce.html"
+					},
+					"response": []
+				},
+				{
+					"name": "Decode JWT Token",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var token = pm.collectionVariables.get(\"access_token\");",
+									"",
+									"if (token) {",
+									"    var parts = token.split('.');",
+									"    if (parts.length === 3) {",
+									"        console.log(\"========================================\");",
+									"        console.log(\"JWT Token 解析結果\");",
+									"        console.log(\"========================================\");",
+									"        ",
+									"        // Header",
+									"        var header = JSON.parse(atob(parts[0]));",
+									"        console.log(\"\\nHeader:\");",
+									"        console.log(JSON.stringify(header, null, 2));",
+									"        ",
+									"        // Payload",
+									"        var payload = JSON.parse(atob(parts[1]));",
+									"        console.log(\"\\nPayload:\");",
+									"        console.log(JSON.stringify(payload, null, 2));",
+									"        ",
+									"        // 檢查過期時間",
+									"        if (payload.exp) {",
+									"            var expDate = new Date(payload.exp * 1000);",
+									"            var now = new Date();",
+									"            console.log(\"\\n過期時間: \" + expDate.toISOString());",
+									"            if (expDate < now) {",
+									"                console.log(\"❌ Token 已過期\");",
+									"            } else {",
+									"                var remaining = Math.floor((expDate - now) / 1000 / 60);",
+									"                console.log(\"✅ Token 有效，剩餘 \" + remaining + \" 分鐘\");",
+									"            }",
+									"        }",
+									"        ",
+									"        console.log(\"========================================\");",
+									"    } else {",
+									"        console.log(\"❌ 無效的 JWT 格式\");",
+									"    }",
+									"} else {",
+									"    console.log(\"❌ access_token 變數未設定\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://httpbin.org/get",
+							"protocol": "https",
+							"host": [
+								"httpbin",
+								"org"
+							],
+							"path": [
+								"get"
+							]
+						},
+						"description": "## 解析 JWT Token\n\n執行此請求會解析 `access_token` 變數中的 JWT Token，\n並顯示 Header、Payload 和過期時間。\n\n### 輸出資訊\n\n- Header (alg, typ, kid)\n- Payload (sub, scope, exp, iss, aud 等)\n- 過期狀態"
+					},
+					"response": []
+				}
+			],
+			"description": "工具請求，用於產生 PKCE 和解析 JWT。"
+		}
+	]
+}

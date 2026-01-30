@@ -90,8 +90,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
             logAuth('Login initiated', { returnUrl: window.location.pathname });
             setStatus('loading');
-            // 儲存當前 URL 以便登入後返回
-            sessionStorage.setItem('returnUrl', window.location.pathname);
+            // returnUrl 已由 ProtectedRoute 使用 React Router 的相對路徑設定
+            // 此處不再重複設定，避免在 base path 非 '/' 時產生雙重前綴問題
             await userManager.signinRedirect();
         } catch (err) {
             logError('Auth', 'Login failed', err);

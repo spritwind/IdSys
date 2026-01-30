@@ -103,9 +103,9 @@ api.interceptors.response.use(
             message: error.message,
         });
 
-        // 處理 401 未授權
-        if (error.response?.status === 401) {
-            logApi('Received 401, triggering login');
+        // 處理 401 未授權 或 403 禁止存取
+        if (error.response?.status === 401 || error.response?.status === 403) {
+            logApi(`Received ${error.response.status}, triggering login`);
             try {
                 const userManager = getUserManager();
                 await userManager.signinRedirect();

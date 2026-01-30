@@ -5,7 +5,7 @@
  * 使用者管理頁面 - 含組織架構分群顯示
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Users,
@@ -39,6 +39,7 @@ import UserCreateModal from './components/UserCreateModal';
 import ResetPasswordModal from './components/ResetPasswordModal';
 import UserRolesModal from './components/UserRolesModal';
 import UserPermissionsModal from './components/UserPermissionsModal';
+import BatchPermissionsModal from './components/BatchPermissionsModal';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
 
 // 統計卡片組件
@@ -127,6 +128,9 @@ export default function UsersPage() {
     const [filterStatus, setFilterStatus] = useState<string>('');
     const [showFilters, setShowFilters] = useState(false);
 
+    // 批次選擇
+    const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
+
     // Modal 狀態
     const [selectedUser, setSelectedUser] = useState<UserListDto | null>(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
@@ -134,8 +138,10 @@ export default function UsersPage() {
     const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
     const [showRolesModal, setShowRolesModal] = useState(false);
     const [showPermissionsModal, setShowPermissionsModal] = useState(false);
+    const [showBatchPermissionsModal, setShowBatchPermissionsModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [actionMenuUser, setActionMenuUser] = useState<string | null>(null);
+    const actionMenuRef = useRef<HTMLDivElement>(null);
 
     // 載入組織架構（只載入一次）
     useEffect(() => {
@@ -237,6 +243,18 @@ export default function UsersPage() {
         setCurrentPage(1);
     };
 
+    // 點擊外部關閉操作選單
+    useEffect(() => {
+        if (!actionMenuUser) return;
+        const handleClickOutside = (e: MouseEvent) => {
+            if (actionMenuRef.current && !actionMenuRef.current.contains(e.target as Node)) {
+                setActionMenuUser(null);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [actionMenuUser]);
+
     // 搜尋防抖
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -316,6 +334,32 @@ export default function UsersPage() {
         }
     };
 
+    // 批次選擇處理
+    const handleToggleSelectUser = (userId: string) => {
+        setSelectedUserIds((prev) => {
+            const next = new Set(prev);
+            if (next.has(userId)) {
+                next.delete(userId);
+            } else {
+                next.add(userId);
+            }
+            return next;
+        });
+    };
+
+    const handleToggleSelectAll = () => {
+        if (selectedUserIds.size === users.length) {
+            setSelectedUserIds(new Set());
+        } else {
+            setSelectedUserIds(new Set(users.map((u) => u.id)));
+        }
+    };
+
+    const selectedUsersForBatch = useMemo(
+        () => users.filter((u) => selectedUserIds.has(u.id)),
+        [users, selectedUserIds]
+    );
+
     // 分頁
     const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -330,13 +374,24 @@ export default function UsersPage() {
                     </h1>
                     <p className="text-gray-400 mt-1">管理系統使用者、角色與權限</p>
                 </div>
-                <button
-                    onClick={() => setShowCreateModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-gray-900 font-medium rounded-lg transition-colors"
-                >
-                    <Plus className="w-4 h-4" />
-                    新增使用者
-                </button>
+                <div className="flex items-center gap-3">
+                    {selectedUserIds.size > 0 && (
+                        <button
+                            onClick={() => setShowBatchPermissionsModal(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors"
+                        >
+                            <Lock className="w-4 h-4" />
+                            批次設定權限 ({selectedUserIds.size})
+                        </button>
+                    )}
+                    <button
+                        onClick={() => setShowCreateModal(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-gray-900 font-medium rounded-lg transition-colors"
+                    >
+                        <Plus className="w-4 h-4" />
+                        新增使用者
+                    </button>
+                </div>
             </div>
 
             {/* 統計卡片 */}
@@ -506,11 +561,19 @@ export default function UsersPage() {
             </div>
 
             {/* 使用者列表 */}
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden">
-                <div className="overflow-x-auto">
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl">
+                <div>
                     <table className="w-full">
                         <thead>
                             <tr className="border-b border-white/10">
+                                <th className="w-10 px-4 py-3">
+                                    <input
+                                        type="checkbox"
+                                        checked={users.length > 0 && selectedUserIds.size === users.length}
+                                        onChange={handleToggleSelectAll}
+                                        className="w-4 h-4 rounded border-gray-500 bg-white/5 text-amber-500 focus:ring-amber-500/50 cursor-pointer"
+                                    />
+                                </th>
                                 <th className="text-left px-4 py-3 text-sm font-medium text-gray-400">使用者</th>
                                 <th className="text-left px-4 py-3 text-sm font-medium text-gray-400">Email</th>
                                 <th className="text-left px-4 py-3 text-sm font-medium text-gray-400">角色</th>
@@ -522,14 +585,14 @@ export default function UsersPage() {
                         <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan={6} className="px-4 py-12 text-center text-gray-400">
+                                    <td colSpan={7} className="px-4 py-12 text-center text-gray-400">
                                         <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
                                         載入中...
                                     </td>
                                 </tr>
                             ) : users.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="px-4 py-12 text-center text-gray-400">
+                                    <td colSpan={7} className="px-4 py-12 text-center text-gray-400">
                                         <Users className="w-12 h-12 mx-auto mb-2 opacity-50" />
                                         沒有找到使用者
                                     </td>
@@ -538,8 +601,18 @@ export default function UsersPage() {
                                 users.map((user) => (
                                     <tr
                                         key={user.id}
-                                        className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                                        className={`border-b border-white/5 hover:bg-white/5 transition-colors ${
+                                            selectedUserIds.has(user.id) ? 'bg-amber-500/5' : ''
+                                        }`}
                                     >
+                                        <td className="w-10 px-4 py-3">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedUserIds.has(user.id)}
+                                                onChange={() => handleToggleSelectUser(user.id)}
+                                                className="w-4 h-4 rounded border-gray-500 bg-white/5 text-amber-500 focus:ring-amber-500/50 cursor-pointer"
+                                            />
+                                        </td>
                                         <td className="px-4 py-3">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-medium">
@@ -565,14 +638,14 @@ export default function UsersPage() {
                                         </td>
                                         <td className="px-4 py-3">
                                             <div className="flex flex-wrap gap-1">
-                                                {user.roles.length > 0 ? (
+                                                {(user.roles?.length ?? 0) > 0 ? (
                                                     user.roles.slice(0, 2).map((role) => (
                                                         <RoleBadge key={role} role={role} />
                                                     ))
                                                 ) : (
                                                     <span className="text-gray-500 text-sm">無角色</span>
                                                 )}
-                                                {user.roles.length > 2 && (
+                                                {(user.roles?.length ?? 0) > 2 && (
                                                     <span className="text-xs text-gray-400">
                                                         +{user.roles.length - 2}
                                                     </span>
@@ -589,7 +662,7 @@ export default function UsersPage() {
                                             {new Date(user.createdAt).toLocaleDateString('zh-TW')}
                                         </td>
                                         <td className="px-4 py-3 text-right">
-                                            <div className="relative">
+                                            <div className="relative" ref={actionMenuUser === user.id ? actionMenuRef : undefined}>
                                                 <button
                                                     onClick={() => setActionMenuUser(actionMenuUser === user.id ? null : user.id)}
                                                     className="p-2 hover:bg-white/10 rounded-lg transition-colors"
@@ -727,11 +800,6 @@ export default function UsersPage() {
                 )}
             </div>
 
-            {/* 點擊外部關閉選單 */}
-            {actionMenuUser && (
-                <div className="fixed inset-0 z-0" onClick={() => setActionMenuUser(null)} />
-            )}
-
             {/* Modals */}
             {showDetailModal && selectedUser && (
                 <UserDetailModal
@@ -806,6 +874,18 @@ export default function UsersPage() {
                     onCancel={() => {
                         setShowDeleteModal(false);
                         setSelectedUser(null);
+                    }}
+                />
+            )}
+
+            {showBatchPermissionsModal && selectedUsersForBatch.length > 0 && (
+                <BatchPermissionsModal
+                    users={selectedUsersForBatch}
+                    onClose={() => setShowBatchPermissionsModal(false)}
+                    onSave={() => {
+                        setShowBatchPermissionsModal(false);
+                        setSelectedUserIds(new Set());
+                        loadData();
                     }}
                 />
             )}

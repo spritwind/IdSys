@@ -197,16 +197,16 @@ namespace Skoruba.Duende.IdentityServer.Admin
                 // 更新授權策略以支持 Cookie 和 Bearer 雙重認證
                 options.Security.AuthorizationConfigureAction = authzOptions =>
                 {
-                    // 重新定義 AdministrationPolicy 以支持多重認證方案
-                    // 注意：這會覆蓋原有的策略
+                    // 使用 SmartAuth 策略方案：
+                    // - 有 Bearer token 的 API 請求 → JWT Bearer（失敗返回 401/403 JSON）
+                    // - 無 Bearer token 的瀏覽器請求 → Cookie（失敗重導向登入頁）
+                    // 這避免了 API 請求在認證失敗時被重導向到 HTML 登入頁
                     authzOptions.AddPolicy(
                         Skoruba.Duende.IdentityServer.Admin.UI.Configuration.Constants.AuthorizationConsts.AdministrationPolicy,
                         policy =>
                         {
                             policy.RequireRole(options.Admin.AdministrationRole);
-                            policy.AddAuthenticationSchemes(
-                                Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme,
-                                JwtBearerDefaults.AuthenticationScheme);
+                            policy.AddAuthenticationSchemes("SmartAuth");
                         });
                 };
             }

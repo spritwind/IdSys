@@ -1,0 +1,60 @@
+﻿O6 驗證系統建置&權限系統開發,,0.00%,,,,,
+工作項目,權重,預計執行日,開發完成日,驗收完成日,狀態說明,備註 (負責人填寫),追蹤&回覆 (PM/主管)
+PRS驗證伺服器落地 (Duende IdentityServer),3,,1月14日,,已完成,STS.Identity 部署於 prs.uccapital.com.tw/sts,
+,,,,,,,
+【Token API 開發】,,,,,,,
+OAuth 2.0 Authorization Code + PKCE 流程實作,3,,1月10日,,已完成,/connect/authorize 端點,
+Token Endpoint 實作 (交換/刷新 Token),3,,1月10日,,已完成,/connect/token 支援 authorization_code、refresh_token、client_credentials,
+Token Introspection 端點實作,3,,1月12日,,已完成,/connect/introspect 驗證 Token 有效性,
+Token Revocation 端點實作,3,,1月14日,,已完成,/connect/revocation 撤銷 Access/Refresh Token,
+JWT Token 撤銷機制 (RevokedTokens),3,,1月15日,,已完成,CustomTokenRevocationResponseGenerator + JwtRevocationValidator,
+,,,,,,,
+【後台管理介面開發】,,,,,,,
+Client 管理介面 (CRUD),2,,1月10日,,已完成,支援 OAuth 2.0 Client 設定管理,
+User 管理介面 (CRUD),2,,1月10日,,已完成,ASP.NET Core Identity 使用者管理,
+Role 管理介面 (CRUD),2,,1月10日,,已完成,角色與權限設定,
+API Resource 管理介面,2,,1月10日,,已完成,API 資源與 Scope 管理,
+Identity Resource 管理介面,2,,1月10日,,已完成,身份資源 (openid/profile/email/roles),
+,,,,,,,
+【權限系統串接工作】,,,,,,,
+Postman Collection 撰寫 (OIDC 測試集合),2,,1月14日,,已完成,UC_Capital_IdentityServer_OIDC.postman_collection.json,
+Postman Environment 設定,2,,1月14日,,已完成,RiskControlSystem + OAuthDemo 環境,
+STS API 文件撰寫,2,,1月14日,,已完成,STS-API-GUIDE.md 完整 API 端點說明,
+,,,,,,,
+【權限設定與派發系統介面】,,,,,,,
+Token 管理頁面 (Token Management),2,,1月15日,,已完成,React 前端 TokenManagementPage,
+組織架構管理介面,2,,,,進行中,多租戶架構支援,
+角色權限矩陣設定,2,,,,規劃中,細粒度權限控制,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+O3 導入MS SQL AA 機制,,0.00%,,,,,
+工作項目,權重,預計執行日,開發完成日,驗收完成日,狀態說明,備註 (負責人填寫),追蹤&回覆 (PM/主管)
+SQL SERVER新架構搭建,,,,,排程中,,
+"底層叢集架構
+加入網域： 所有節點必須加入同一個 Active Directory 網域。
+安裝功能： 在所有伺服器上安裝「容錯移轉叢集」功能。
+建立叢集： 執行叢集驗證工具並建立 WSF",3,1月2日,1月12日,,排程中,"1/09，andre要求驗證處置預測準確度
+優先度3分",
+"SQL Server 配置
+啟用 Always On： 在 SQL Server 中，啟用 Always On 可用性群組。
+服務帳戶： 確保所有節點的 SQL Service 使用同一個網域帳戶啟動。
+資料庫準備： 確保目標資料庫為 完整復原模式且至少執行過一次完整備份。",3,1月9日,,,排程中,,
+"建立可用性群組
+使用精靈建立 AG，選擇同步或非同步模式。
+設定接聽程式 (Listener)： 這是應用程式連線的單一入口，發生轉移時自動導向新主機。",3,1月16日,,,排程中,,
+"維運與測試演練
+狀態檢查： 透過 sys.dm_hadr_availability_group_states 確認所有節點為 HEALTHY。
+壓力測試： 在有負載的情況下執行手動切換，觀察 Listener 的重新連線時間。
+監控配置： 設定 SQL Agent 監控，避免同步延遲過大。",3,1月23日,,,排程中,,
+TEJ資料遷移,2,,,,排程中,,
+"TEJDB遷移
+TEJ資料更新機制建立",2,1月30日,,,排程中,,
+測試TEJ資料更新、資料調教,3,2月4日,,,排程中,,
+週邊系統改接新服務,3,,,,排程中,,

@@ -1,33 +1,34 @@
 /**
- * Role Permissions Modal
- * 角色權限管理 Modal
+ * Batch Permissions Modal
+ * 批次權限設定 Modal
+ *
+ * 為多個使用者同時設定相同的權限
  */
 
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
     X,
-    Shield,
+    Lock,
     Save,
     ChevronDown,
     ChevronRight,
-    Check,
     Search,
     Loader2,
     AlertCircle,
+    Users,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import * as permissionV2Api from '../../../services/permissionV2Api';
-import type { RoleDto } from '../../../types/user';
+import type { UserListDto } from '../../../types/user';
 import type {
     PermissionResourceDto,
-    PermissionDto,
     PermissionScopeDto,
 } from '../../../types/permissionV2';
 import { SUBJECT_TYPES } from '../../../types/permissionV2';
 
 interface Props {
-    role: RoleDto;
+    users: UserListDto[];
     onClose: () => void;
     onSave: () => void;
 }
@@ -53,12 +54,9 @@ function ResourceItem({
     return (
         <div className="border-b border-white/5 last:border-0">
             <div
-                className={`flex items-center gap-2 py-2 hover:bg-white/5 transition-colors ${
-                    depth > 0 ? 'pl-' + (depth * 4 + 2) : 'pl-2'
-                }`}
+                className="flex items-center gap-2 py-2 hover:bg-white/5 transition-colors"
                 style={{ paddingLeft: `${depth * 16 + 8}px` }}
             >
-                {/* 展開/收合按鈕 */}
                 {hasChildren ? (
                     <button
                         onClick={() => setExpanded(!expanded)}
@@ -74,13 +72,11 @@ function ResourceItem({
                     <div className="w-5" />
                 )}
 
-                {/* 資源名稱 */}
                 <div className="flex-1 min-w-0">
                     <div className="text-sm text-white truncate">{resource.name}</div>
                     <div className="text-xs text-gray-500 truncate">{resource.code}</div>
                 </div>
 
-                {/* 權限範圍選擇 */}
                 <div className="flex items-center gap-1">
                     {allScopes.map((scope) => {
                         const isSelected = resourceScopes.includes(scope.code);
@@ -91,7 +87,7 @@ function ResourceItem({
                                 title={scope.name}
                                 className={`w-7 h-7 flex items-center justify-center rounded text-xs font-medium transition-colors ${
                                     isSelected
-                                        ? 'bg-blue-500 text-white'
+                                        ? 'bg-amber-500 text-white'
                                         : 'bg-white/5 text-gray-400 hover:bg-white/10'
                                 }`}
                             >
@@ -102,7 +98,6 @@ function ResourceItem({
                 </div>
             </div>
 
-            {/* 子資源 */}
             {hasChildren && expanded && (
                 <div>
                     {resource.children!.map((child) => (
@@ -121,67 +116,51 @@ function ResourceItem({
     );
 }
 
-export default function RolePermissionsModal({ role, onClose, onSave }: Props) {
+export default function BatchPermissionsModal({ users, onClose, onSave }: Props) {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [resources, setResources] = useState<PermissionResourceDto[]>([]);
-    const [scopes, setScopes] = useState<PermissionScopeDto[]>([]);
-    const [currentPermissions, setCurrentPermissions] = useState<PermissionDto[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [clientFilter, setClientFilter] = useState('');
 
-    // 選中的權限 (resourceId -> scopes[])
+    const [resources, setResources] = useState<PermissionResourceDto[]>([]);
+    const [scopes, setScopes] = useState<PermissionScopeDto[]>([]);
     const [selectedScopes, setSelectedScopes] = useState<Record<string, string[]>>({});
-    const [originalScopes, setOriginalScopes] = useState<Record<string, string[]>>({});
 
-    // 載入資料
+    // 載入資源和範圍
     useEffect(() => {
         async function loadData() {
             setLoading(true);
             try {
-                // 並行載入資源、範圍、當前權限
-                const [resourcesData, scopesData, permissionsData] = await Promise.all([
+                const [resourcesData, scopesData] = await Promise.all([
                     permissionV2Api.getResources(),
                     permissionV2Api.getScopes(),
-                    permissionV2Api.getUserPermissions(role.id), // Role permissions are stored with SubjectType=Role
                 ]);
-
                 setResources(resourcesData);
                 setScopes(scopesData);
-                setCurrentPermissions(permissionsData);
-
-                // 解析當前權限為選中狀態
-                const scopeMap: Record<string, string[]> = {};
-                permissionsData.forEach((p) => {
-                    // 解析 scopes 字串 (格式: @r@c@u@d 或 JSON array)
-                    let scopeList: string[] = [];
-                    if (p.scopes.startsWith('@')) {
-                        // @r@c@u@d 格式
-                        scopeList = p.scopes.split('@').filter(Boolean);
-                    } else if (p.scopes.startsWith('[')) {
-                        // JSON array 格式
-                        try {
-                            scopeList = JSON.parse(p.scopes);
-                        } catch {
-                            scopeList = [];
-                        }
-                    } else {
-                        scopeList = p.scopeList || [];
-                    }
-                    scopeMap[p.resourceId] = scopeList;
-                });
-
-                setSelectedScopes(scopeMap);
-                setOriginalScopes(JSON.parse(JSON.stringify(scopeMap)));
             } catch (error) {
-                console.error('Failed to load permission data:', error);
-                toast.error('載入權限資料失敗');
+                console.error('Failed to load resource data:', error);
+                toast.error('載入資源資料失敗');
             } finally {
                 setLoading(false);
             }
         }
         loadData();
-    }, [role.id]);
+    }, []);
+
+    // 提取 Client 選項
+    const clientOptions = useMemo(() => {
+        const clients = new Map<string, string>();
+        const extract = (items: PermissionResourceDto[]) => {
+            for (const item of items) {
+                if (item.clientId && !clients.has(item.clientId)) {
+                    clients.set(item.clientId, item.clientName || item.clientId);
+                }
+                if (item.children) extract(item.children);
+            }
+        };
+        extract(resources);
+        return Array.from(clients.entries()).map(([id, name]) => ({ id, name }));
+    }, [resources]);
 
     // 切換權限範圍
     const handleToggleScope = (resourceId: string, scope: string) => {
@@ -199,21 +178,6 @@ export default function RolePermissionsModal({ role, onClose, onSave }: Props) {
             return { ...prev, [resourceId]: newScopes };
         });
     };
-
-    // 提取 Client 選項
-    const clientOptions = useMemo(() => {
-        const clients = new Map<string, string>();
-        const extract = (items: PermissionResourceDto[]) => {
-            for (const item of items) {
-                if (item.clientId && !clients.has(item.clientId)) {
-                    clients.set(item.clientId, item.clientName || item.clientId);
-                }
-                if (item.children) extract(item.children);
-            }
-        };
-        extract(resources);
-        return Array.from(clients.entries()).map(([id, name]) => ({ id, name }));
-    }, [resources]);
 
     // 篩選資源
     const filteredResources = useMemo(() => {
@@ -256,88 +220,52 @@ export default function RolePermissionsModal({ role, onClose, onSave }: Props) {
         return result;
     }, [resources, searchTerm, clientFilter]);
 
-    // 檢查是否有變更
-    const hasChanges = useMemo(() => {
-        const currentKeys = Object.keys(selectedScopes);
-        const originalKeys = Object.keys(originalScopes);
+    // 是否有選擇任何權限
+    const hasSelections = Object.keys(selectedScopes).length > 0;
 
-        if (currentKeys.length !== originalKeys.length) return true;
-
-        for (const key of currentKeys) {
-            if (!originalScopes[key]) return true;
-            const current = [...(selectedScopes[key] || [])].sort();
-            const original = [...(originalScopes[key] || [])].sort();
-            if (current.join(',') !== original.join(',')) return true;
-        }
-
-        return false;
-    }, [selectedScopes, originalScopes]);
-
-    // 儲存
+    // 儲存 - 為每個使用者批次授予權限
     const handleSave = async () => {
-        if (!hasChanges) {
+        if (!hasSelections) {
             onClose();
             return;
         }
 
         setSaving(true);
         try {
-            // 找出需要新增和刪除的權限
-            const toRevoke: string[] = [];
-            const toGrant: { resourceId: string; scopes: string[] }[] = [];
+            const resourceScopesList = Object.entries(selectedScopes).map(
+                ([resourceId, scopeList]) => ({ resourceId, scopes: scopeList })
+            );
 
-            // 比較差異
-            const allResourceIds = new Set([
-                ...Object.keys(selectedScopes),
-                ...Object.keys(originalScopes),
-            ]);
+            // 為每個使用者批次授予
+            const results = await Promise.allSettled(
+                users.map((user) =>
+                    permissionV2Api.batchGrantPermissions({
+                        subjectType: SUBJECT_TYPES.USER,
+                        subjectId: user.id,
+                        subjectName: user.displayName || user.userName,
+                        resourceScopes: resourceScopesList,
+                        inheritToChildren: false,
+                    })
+                )
+            );
 
-            for (const resourceId of allResourceIds) {
-                const current = selectedScopes[resourceId] || [];
-                const original = originalScopes[resourceId] || [];
+            const succeeded = results.filter((r) => r.status === 'fulfilled').length;
+            const failed = results.filter((r) => r.status === 'rejected').length;
 
-                if (current.length === 0 && original.length > 0) {
-                    // 需要撤銷
-                    const permission = currentPermissions.find((p) => p.resourceId === resourceId);
-                    if (permission) {
-                        toRevoke.push(permission.id);
-                    }
-                } else if (current.length > 0) {
-                    // 需要新增或更新
-                    const currentSorted = [...current].sort().join(',');
-                    const originalSorted = [...original].sort().join(',');
-                    if (currentSorted !== originalSorted) {
-                        toGrant.push({ resourceId, scopes: current });
-                    }
-                }
+            if (failed === 0) {
+                toast.success(`已為 ${succeeded} 位使用者設定權限`);
+            } else {
+                toast.warning(`${succeeded} 位成功，${failed} 位失敗`);
             }
 
-            // 執行撤銷
-            if (toRevoke.length > 0) {
-                await permissionV2Api.batchRevokePermissions(toRevoke);
-            }
-
-            // 執行授予
-            if (toGrant.length > 0) {
-                await permissionV2Api.batchGrantPermissions({
-                    subjectType: SUBJECT_TYPES.ROLE,
-                    subjectId: role.id,
-                    subjectName: role.name,
-                    resourceScopes: toGrant,
-                    inheritToChildren: false,
-                });
-            }
-
-            toast.success('權限已更新');
             onSave();
         } catch (error: any) {
-            console.error('Failed to save permissions:', error);
-            toast.error(error.response?.data?.message || '儲存失敗');
+            console.error('Failed to batch set permissions:', error);
+            toast.error(error.response?.data?.message || '批次設定失敗');
         } finally {
             setSaving(false);
         }
     };
-
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -350,12 +278,15 @@ export default function RolePermissionsModal({ role, onClose, onSave }: Props) {
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-purple-500/20 rounded-lg">
-                            <Shield className="w-5 h-5 text-purple-400" />
+                        <div className="p-2 bg-amber-500/20 rounded-lg">
+                            <Lock className="w-5 h-5 text-amber-400" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-semibold text-white">管理角色權限</h2>
-                            <p className="text-sm text-gray-400">{role.name}</p>
+                            <h2 className="text-lg font-semibold text-white">批次設定權限</h2>
+                            <p className="text-sm text-gray-400 flex items-center gap-2">
+                                <Users className="w-3 h-3" />
+                                已選擇 {users.length} 位使用者
+                            </p>
                         </div>
                     </div>
                     <button
@@ -366,6 +297,25 @@ export default function RolePermissionsModal({ role, onClose, onSave }: Props) {
                     </button>
                 </div>
 
+                {/* Selected Users Preview */}
+                <div className="px-6 py-2 border-b border-white/10 bg-white/5">
+                    <div className="flex flex-wrap gap-2">
+                        {users.slice(0, 10).map((user) => (
+                            <span
+                                key={user.id}
+                                className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                            >
+                                {user.displayName || user.userName}
+                            </span>
+                        ))}
+                        {users.length > 10 && (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs text-gray-400">
+                                +{users.length - 10} 位
+                            </span>
+                        )}
+                    </div>
+                </div>
+
                 {/* Search & Client Filter */}
                 <div className="px-6 py-3 border-b border-white/10">
                     <div className="flex gap-3">
@@ -373,7 +323,7 @@ export default function RolePermissionsModal({ role, onClose, onSave }: Props) {
                             <select
                                 value={clientFilter}
                                 onChange={(e) => setClientFilter(e.target.value)}
-                                className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-purple-500/50 min-w-[160px]"
+                                className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-amber-500/50 min-w-[160px]"
                             >
                                 <option value="" className="bg-gray-800">全部 Client</option>
                                 {clientOptions.map((c) => (
@@ -390,12 +340,11 @@ export default function RolePermissionsModal({ role, onClose, onSave }: Props) {
                                 placeholder="搜尋資源..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500/50"
+                                className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-amber-500/50"
                             />
                         </div>
                     </div>
 
-                    {/* 權限範圍說明 */}
                     <div className="flex items-center gap-4 mt-3 text-xs text-gray-400">
                         <span>權限範圍:</span>
                         {scopes.map((scope) => (
@@ -413,7 +362,7 @@ export default function RolePermissionsModal({ role, onClose, onSave }: Props) {
                 <div className="flex-1 overflow-y-auto">
                     {loading ? (
                         <div className="flex items-center justify-center py-12">
-                            <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
+                            <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
                         </div>
                     ) : filteredResources.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-12 text-gray-400">
@@ -435,12 +384,11 @@ export default function RolePermissionsModal({ role, onClose, onSave }: Props) {
                     )}
                 </div>
 
-                {/* 變更摘要 */}
-                {hasChanges && (
-                    <div className="px-6 py-3 bg-purple-500/10 border-t border-purple-500/30">
-                        <p className="text-sm text-purple-300">
-                            <Check className="w-4 h-4 inline mr-1" />
-                            有未儲存的變更
+                {/* Change Summary */}
+                {hasSelections && (
+                    <div className="px-6 py-3 bg-amber-500/10 border-t border-amber-500/30">
+                        <p className="text-sm text-amber-300">
+                            將為 {users.length} 位使用者設定 {Object.keys(selectedScopes).length} 項資源權限
                         </p>
                     </div>
                 )}
@@ -455,15 +403,15 @@ export default function RolePermissionsModal({ role, onClose, onSave }: Props) {
                     </button>
                     <button
                         onClick={handleSave}
-                        disabled={saving || !hasChanges}
-                        className="flex items-center gap-2 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
+                        disabled={saving || !hasSelections}
+                        className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-gray-900 font-medium rounded-lg transition-colors disabled:opacity-50"
                     >
                         {saving ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
                         ) : (
                             <Save className="w-4 h-4" />
                         )}
-                        {saving ? '儲存中...' : '儲存變更'}
+                        {saving ? '設定中...' : '批次設定權限'}
                     </button>
                 </div>
             </motion.div>

@@ -51,7 +51,21 @@ export async function getUsers(params: UserSearchParams = {}): Promise<PagedResu
     if (params.sortDirection) queryParams.append('sortDirection', params.sortDirection);
 
     const response = await api.get<PagedResult<UserListDto>>(`${BASE_URL}?${queryParams.toString()}`);
-    return response.data;
+    const data = response.data;
+
+    // 防禦性驗證：確保回應是預期的分頁格式（非 HTML 重導向等）
+    if (!data || typeof data !== 'object' || !Array.isArray(data.items)) {
+        console.error('Unexpected API response format for getUsers:', typeof data);
+        return { items: [], totalCount: 0, pageNumber: 1, pageSize: params.pageSize || 10, totalPages: 0 };
+    }
+
+    // 確保每個 user 的 roles 是陣列
+    data.items = data.items.map(user => ({
+        ...user,
+        roles: Array.isArray(user.roles) ? user.roles : [],
+    }));
+
+    return data;
 }
 
 /**
