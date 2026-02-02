@@ -101,7 +101,7 @@ namespace Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories
             var userPermissions = await GetUserPermissionsAsync(userId, cancellationToken);
             permissions.AddRange(userPermissions);
 
-            // 2. 使用者所屬組織的權限
+            // 2. 使用者所屬組織的權限（包含 Organization 和 Group SubjectType）
             var userOrganizations = await DbContext.OrganizationMembers
                 .Include(m => m.Organization)
                 .Where(m => m.UserId == userId)
@@ -109,18 +109,26 @@ namespace Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories
 
             foreach (var membership in userOrganizations)
             {
-                // 只有當成員設定為繼承群組權限時才包含
-                if (membership.Organization?.InheritParentPermissions == true)
-                {
-                    var orgPermissions = await GetOrganizationPermissionsWithInheritanceAsync(
-                        membership.OrganizationId, cancellationToken);
-                    permissions.AddRange(orgPermissions);
-                }
+                // 組織繼承權限
+                var orgPermissions = await GetOrganizationPermissionsWithInheritanceAsync(
+                    membership.OrganizationId, cancellationToken);
+                permissions.AddRange(orgPermissions);
+
+                // Group SubjectType 的權限（SubjectId = OrganizationId）
+                var groupPermissions = await DbContext.Permissions
+                    .Include(p => p.Resource)
+                    .Where(p => p.IsEnabled &&
+                               p.SubjectType == PermissionSubjectType.Group &&
+                               p.SubjectId == membership.OrganizationId.ToString() &&
+                               (p.ExpiresAt == null || p.ExpiresAt > DateTime.UtcNow))
+                    .ToListAsync(cancellationToken);
+                permissions.AddRange(groupPermissions);
             }
 
-            // 去除重複（以 ResourceId + Scopes 為準）
+            // 不做去重 — 同一 ResourceId 可能有多個來源（Direct / Organization / Group），
+            // 由 Service 層決定如何呈現。只去除完全相同的紀錄（相同 Id）。
             return permissions
-                .GroupBy(p => new { p.ResourceId, p.Scopes })
+                .GroupBy(p => p.Id)
                 .Select(g => g.First())
                 .ToList();
         }

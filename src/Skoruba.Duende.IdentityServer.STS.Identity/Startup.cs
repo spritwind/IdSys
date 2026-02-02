@@ -4,10 +4,12 @@ using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Skoruba.AuditLogging.EntityFramework.DbContexts;
 using Skoruba.AuditLogging.EntityFramework.Entities;
 using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Configuration.Configuration;
@@ -252,6 +254,11 @@ JWT Token 是**無狀態 (Stateless)** 的：
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            var logger = app.ApplicationServices.GetRequiredService<ILoggerFactory>().CreateLogger("STS.PathBase");
+            var basePath = Configuration.GetValue<string>("BasePath");
+
+            logger.LogWarning("[STS-BOOT] BasePath config = '{BasePath}', Environment = {Env}", basePath, env.EnvironmentName);
+
             app.UseCookiePolicy();
 
             if (env.IsDevelopment())
@@ -263,7 +270,56 @@ JWT Token 是**無狀態 (Stateless)** 的：
                 app.UseHsts();
             }
 
-            app.UsePathBase(Configuration.GetValue<string>("BasePath"));
+            // ============================================================
+            // PathBase 診斷 + 強制設定 (pipeline 第一個 middleware)
+            // ============================================================
+            if (!string.IsNullOrEmpty(basePath))
+            {
+                app.Use(async (context, next) =>
+                {
+                    var originalPathBase = context.Request.PathBase.Value;
+                    var originalPath = context.Request.Path.Value;
+
+                    // 強制設定 PathBase
+                    var pathBase = new PathString(basePath);
+                    context.Request.PathBase = pathBase;
+
+                    // Kestrel 直接存取時，path 仍帶有 basePath 前綴，需剝掉
+                    if (context.Request.Path.StartsWithSegments(pathBase, out var remaining))
+                    {
+                        context.Request.Path = remaining;
+                    }
+
+                    // 記錄每個 302 redirect 的 Location header（抓出誰產生了錯誤的 redirect）
+                    context.Response.OnStarting(() =>
+                    {
+                        if (context.Response.StatusCode == 302 || context.Response.StatusCode == 301)
+                        {
+                            var location = context.Response.Headers["Location"].ToString();
+                            logger.LogWarning(
+                                "[STS-REDIRECT] {StatusCode} Location={Location} | OrigPathBase='{OrigPathBase}' OrigPath='{OrigPath}' → PathBase='{PathBase}' Path='{Path}'",
+                                context.Response.StatusCode, location,
+                                originalPathBase, originalPath,
+                                context.Request.PathBase.Value, context.Request.Path.Value);
+                        }
+                        return System.Threading.Tasks.Task.CompletedTask;
+                    });
+
+                    // 對 /Account/Login 和 /connect/authorize 請求記錄詳細資訊
+                    if (context.Request.Path.Value != null &&
+                        (context.Request.Path.Value.Contains("/Account/Login") ||
+                         context.Request.Path.Value.Contains("/connect/authorize")))
+                    {
+                        logger.LogWarning(
+                            "[STS-REQUEST] {Method} {Scheme}://{Host}{PathBase}{Path}{Query} | OrigPathBase='{OrigPathBase}' OrigPath='{OrigPath}'",
+                            context.Request.Method, context.Request.Scheme, context.Request.Host,
+                            context.Request.PathBase.Value, context.Request.Path.Value, context.Request.QueryString,
+                            originalPathBase, originalPath);
+                    }
+
+                    await next();
+                });
+            }
 
             // 啟用 CORS - 必須在 UseRouting 之前
             app.UseCors("IdentityServerCors");
@@ -294,6 +350,22 @@ JWT Token 是**無狀態 (Stateless)** 的：
                 endpoint.MapHealthChecks("/health", new HealthCheckOptions
                 {
                     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+                });
+
+                // 診斷端點：確認 PathBase 是否正確
+                endpoint.MapGet("/debug/pathbase", context =>
+                {
+                    var info = new
+                    {
+                        PathBase = context.Request.PathBase.Value,
+                        Path = context.Request.Path.Value,
+                        Host = context.Request.Host.Value,
+                        Scheme = context.Request.Scheme,
+                        ConfiguredBasePath = basePath,
+                        FullUrl = $"{context.Request.Scheme}://{context.Request.Host}{context.Request.PathBase}{context.Request.Path}"
+                    };
+                    context.Response.ContentType = "application/json";
+                    return context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(info));
                 });
             });
         }

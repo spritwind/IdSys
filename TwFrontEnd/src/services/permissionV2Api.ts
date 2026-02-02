@@ -172,9 +172,7 @@ export async function revokePermission(permissionId: string): Promise<OperationR
  * 批次撤銷權限
  */
 export async function batchRevokePermissions(permissionIds: string[]): Promise<OperationResultDto> {
-    const response = await api.delete<OperationResultDto>(`${BASE_URL}/batch`, {
-        data: permissionIds,
-    });
+    const response = await api.post<OperationResultDto>(`${BASE_URL}/revoke/batch`, permissionIds);
     return response.data;
 }
 

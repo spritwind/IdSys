@@ -246,7 +246,7 @@ namespace Skoruba.Duende.IdentityServer.Admin.UI.Api.Controllers
         /// <summary>
         /// 批次撤銷權限
         /// </summary>
-        [HttpDelete("batch")]
+        [HttpPost("revoke/batch")]
         [ProducesResponseType(typeof(OperationResultDto), 200)]
         public async Task<IActionResult> BatchRevokePermissions([FromBody] List<Guid> permissionIds)
         {

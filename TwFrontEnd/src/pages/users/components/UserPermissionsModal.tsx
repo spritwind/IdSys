@@ -152,12 +152,12 @@ function ResourceItem({
                         const isSelected = resourceScopes.includes(scope.code);
                         const isInherited = inherited.includes(scope.code);
 
-                        if (isInherited) {
-                            // 繼承的權限：顯示但不可編輯
+                        if (isInherited && !isSelected) {
+                            // 純繼承（無直接授權）：顯示但不可編輯
                             return (
                                 <span
                                     key={scope.code}
-                                    title={`${scope.name} (角色繼承)`}
+                                    title={`${scope.name} (繼承，不可編輯)`}
                                     className="w-7 h-7 flex items-center justify-center rounded text-xs font-medium bg-purple-500/30 text-purple-300 cursor-not-allowed"
                                 >
                                     {scope.code.toUpperCase()}
@@ -169,11 +169,15 @@ function ResourceItem({
                             <button
                                 key={scope.code}
                                 onClick={() => onToggleScope(resource.id, scope.code)}
-                                title={scope.name}
+                                title={isSelected && isInherited
+                                    ? `${scope.name} (直接授權 + 繼承)`
+                                    : scope.name}
                                 className={`w-7 h-7 flex items-center justify-center rounded text-xs font-medium transition-colors ${
-                                    isSelected
-                                        ? 'bg-blue-500 text-white'
-                                        : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                                    isSelected && isInherited
+                                        ? 'bg-blue-500 text-white ring-2 ring-purple-400/50'
+                                        : isSelected
+                                            ? 'bg-blue-500 text-white'
+                                            : 'bg-white/5 text-gray-400 hover:bg-white/10'
                                 }`}
                             >
                                 {scope.code.toUpperCase()}
@@ -220,21 +224,47 @@ export default function UserPermissionsModal({ user, onClose, onSave }: Props) {
     const [selectedScopes, setSelectedScopes] = useState<Record<string, string[]>>({});
     const [originalScopes, setOriginalScopes] = useState<Record<string, string[]>>({});
 
-    // 從角色繼承的權限（不可編輯）
+    // 從其他來源繼承的權限（僅在該 scope 沒有直接授權時才標記為不可編輯）
     const inheritedScopes = useMemo(() => {
-        const result: Record<string, string[]> = {};
+        // 先收集所有非 Direct 來源的 scopes
+        const inherited: Record<string, string[]> = {};
         effectivePermissions
             .filter((p) => p.source !== 'Direct')
             .forEach((p) => {
-                if (!result[p.resourceId]) {
-                    result[p.resourceId] = [];
+                if (!inherited[p.resourceId]) {
+                    inherited[p.resourceId] = [];
                 }
                 p.scopes.forEach((s) => {
-                    if (!result[p.resourceId].includes(s)) {
-                        result[p.resourceId].push(s);
+                    if (!inherited[p.resourceId].includes(s)) {
+                        inherited[p.resourceId].push(s);
                     }
                 });
             });
+
+        // 收集所有 Direct 來源的 scopes
+        const direct: Record<string, string[]> = {};
+        effectivePermissions
+            .filter((p) => p.source === 'Direct')
+            .forEach((p) => {
+                if (!direct[p.resourceId]) {
+                    direct[p.resourceId] = [];
+                }
+                p.scopes.forEach((s) => {
+                    if (!direct[p.resourceId].includes(s)) {
+                        direct[p.resourceId].push(s);
+                    }
+                });
+            });
+
+        // 只標記「僅繼承、無直接授權」的 scopes 為不可編輯
+        const result: Record<string, string[]> = {};
+        for (const [resourceId, scopes] of Object.entries(inherited)) {
+            const directScopes = direct[resourceId] || [];
+            const pureInherited = scopes.filter((s) => !directScopes.includes(s));
+            if (pureInherited.length > 0) {
+                result[resourceId] = pureInherited;
+            }
+        }
         return result;
     }, [effectivePermissions]);
 
@@ -552,7 +582,13 @@ export default function UserPermissionsModal({ user, onClose, onSave }: Props) {
                                 <span className="w-5 h-5 flex items-center justify-center bg-purple-500/30 rounded text-purple-300 font-medium">
                                     X
                                 </span>
-                                <span>= 角色繼承（不可編輯）</span>
+                                <span>= 僅繼承（不可編輯）</span>
+                            </span>
+                            <span className="ml-2 flex items-center gap-1">
+                                <span className="w-5 h-5 flex items-center justify-center bg-blue-500 rounded text-white font-medium ring-2 ring-purple-400/50">
+                                    X
+                                </span>
+                                <span>= 直接 + 繼承（可編輯）</span>
                             </span>
                         </div>
                     )}

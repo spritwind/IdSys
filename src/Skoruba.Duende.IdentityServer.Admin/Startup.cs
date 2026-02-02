@@ -181,16 +181,25 @@ namespace Skoruba.Duende.IdentityServer.Admin
                     {
                         policyOptions.ForwardDefaultSelector = context =>
                         {
-                            // 如果有 Bearer token，使用 JWT Bearer 認證
+                            // API 請求（有 Bearer token）：所有操作都走 JWT Bearer
                             string authorization = context.Request.Headers["Authorization"];
                             if (!string.IsNullOrEmpty(authorization) && authorization.StartsWith("Bearer ", System.StringComparison.OrdinalIgnoreCase))
                             {
                                 return JwtBearerDefaults.AuthenticationScheme;
                             }
 
-                            // 否則使用 Cookie 認證
-                            return Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme;
+                            // 瀏覽器請求：回傳 null，讓各操作使用各自的 Forward 設定
+                            return null;
                         };
+
+                        // 瀏覽器請求的各操作 Forward 設定：
+                        // 驗證已登入 session → Cookie scheme
+                        policyOptions.ForwardAuthenticate = Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme;
+                        // 未登入時的重導向 → OIDC scheme（導向 STS 登入頁）
+                        // 不能用 Cookie scheme，因為它會 redirect 到 /Account/Login（不存在）
+                        policyOptions.ForwardChallenge = Skoruba.Duende.IdentityServer.Admin.UI.Configuration.Constants.AuthenticationConsts.OidcAuthenticationScheme;
+                        // 權限不足 → OIDC scheme
+                        policyOptions.ForwardForbid = Skoruba.Duende.IdentityServer.Admin.UI.Configuration.Constants.AuthenticationConsts.OidcAuthenticationScheme;
                     });
                 };
 

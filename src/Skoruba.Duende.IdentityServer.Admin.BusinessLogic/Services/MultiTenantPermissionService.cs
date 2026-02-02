@@ -97,17 +97,40 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
         {
             var permissions = await _repository.GetUserEffectivePermissionsAsync(userId, cancellationToken);
 
-            var effectivePermissions = permissions.Select(p => new EffectivePermissionDto
+            // 將每筆 Permission 轉為 EffectivePermissionDto，保留原始來源
+            var rawEffective = permissions.Select(p => new EffectivePermissionDto
             {
                 ResourceId = p.ResourceId,
                 ResourceCode = p.Resource?.Code,
                 ResourceName = p.Resource?.Name,
                 ClientId = p.Resource?.ClientId,
                 Scopes = ParseScopes(p.Scopes),
-                Source = p.SubjectType == "User" && p.SubjectId == userId ? "Direct" : p.SubjectType,
+                Source = p.SubjectType == PermissionSubjectType.User && p.SubjectId == userId
+                    ? "Direct"
+                    : p.SubjectType,
                 SourceId = p.SubjectId,
                 SourceName = p.SubjectName
             }).ToList();
+
+            // 按 ResourceId + Source 合併 scopes（同一資源同一來源的 scopes 聯集）
+            var effectivePermissions = rawEffective
+                .GroupBy(p => new { p.ResourceId, p.Source, p.SourceId })
+                .Select(g =>
+                {
+                    var first = g.First();
+                    return new EffectivePermissionDto
+                    {
+                        ResourceId = first.ResourceId,
+                        ResourceCode = first.ResourceCode,
+                        ResourceName = first.ResourceName,
+                        ClientId = first.ClientId,
+                        Scopes = g.SelectMany(p => p.Scopes).Distinct().ToList(),
+                        Source = first.Source,
+                        SourceId = first.SourceId,
+                        SourceName = first.SourceName
+                    };
+                })
+                .ToList();
 
             return new UserEffectivePermissionsDto
             {

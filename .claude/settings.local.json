@@ -63,7 +63,10 @@
       "Bash(git -C \"c:\\\\Users\\\\User\\\\SideProject\\\\Duende.IdentityServer.Admin\" push uc main)",
       "Bash(git -C \"c:\\\\Users\\\\User\\\\SideProject\\\\Duende.IdentityServer.Admin\" add TwFrontEnd/src/pages/identity-server/)",
       "Bash(git -C \"c:\\\\Users\\\\User\\\\SideProject\\\\Duende.IdentityServer.Admin\" commit -m \"$\\(cat <<''EOF''\nfix: 修正新增頁面無限轉圈問題\n\n修正 IdentityServer 設定頁面的編輯元件：\n- ClientEditPage, ApiResourceEditPage, ApiScopeEditPage, IdentityResourceEditPage\n- 當路由為 /new（無 id 參數）時，id 為 undefined 而非 ''new''\n- 修改 isNew 判斷邏輯為 !id || id === ''new''\n- 修改 loading 初始值為 false\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(del \"c:\\\\Users\\\\User\\\\SideProject\\\\Duende.IdentityServer.Admin\\\\src\\\\Skoruba.Duende.IdentityServer.Admin.EntityFramework\\\\Entities\\\\RevokedToken.cs\")"
+      "Bash(del \"c:\\\\Users\\\\User\\\\SideProject\\\\Duende.IdentityServer.Admin\\\\src\\\\Skoruba.Duende.IdentityServer.Admin.EntityFramework\\\\Entities\\\\RevokedToken.cs\")",
+      "Bash(dotnet add:*)",
+      "Bash(Select-String -Pattern \"error|Error|成功|Build succeeded|Build FAILED\")",
+      "Bash(ls:*)"
     ]
   }
 }
