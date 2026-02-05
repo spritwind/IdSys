@@ -12,7 +12,7 @@ const BASE_URL = '/api/ApiResources';
 
 export const apiResourceService = {
     // ============ API Resources CRUD ============
-    async getApiResources(search: string = '', page: number = 1, pageSize: number = 10): Promise<ApiResourcesApiDto> {
+    async getApiResources(search: string = '', page: number = 1, pageSize: number = 100): Promise<ApiResourcesApiDto> {
         const response = await api.get<ApiResourcesApiDto>(BASE_URL, {
             params: { searchText: search, page, pageSize }
         });
@@ -45,7 +45,7 @@ export const apiResourceService = {
     },
 
     // ============ API Resource Secrets ============
-    async getSecrets(apiResourceId: number, page: number = 1, pageSize: number = 10): Promise<ApiSecretsApiDto> {
+    async getSecrets(apiResourceId: number, page: number = 1, pageSize: number = 100): Promise<ApiSecretsApiDto> {
         const response = await api.get<ApiSecretsApiDto>(`${BASE_URL}/${apiResourceId}/Secrets`, {
             params: { page, pageSize }
         });
@@ -71,7 +71,7 @@ export const apiResourceService = {
     },
 
     // ============ API Resource Properties ============
-    async getProperties(apiResourceId: number, page: number = 1, pageSize: number = 10): Promise<ApiResourcePropertiesApiDto> {
+    async getProperties(apiResourceId: number, page: number = 1, pageSize: number = 100): Promise<ApiResourcePropertiesApiDto> {
         const response = await api.get<ApiResourcePropertiesApiDto>(`${BASE_URL}/${apiResourceId}/Properties`, {
             params: { page, pageSize }
         });

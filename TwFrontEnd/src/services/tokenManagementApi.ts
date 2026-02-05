@@ -15,6 +15,7 @@ export interface ActiveTokenDto {
     type: string;
     subjectId?: string;
     userName?: string;
+    email?: string;
     sessionId?: string;
     clientId: string;
     clientName?: string;
@@ -35,6 +36,7 @@ export interface RevokedTokenDto {
     jti: string;
     subjectId?: string;
     userName?: string;
+    email?: string;
     clientId: string;
     clientName?: string;
     tokenType: string;
@@ -95,7 +97,7 @@ const BASE_URL = '/api/TokenManagement';
  */
 export async function getActiveTokens(
     page: number = 1,
-    pageSize: number = 20,
+    pageSize: number = 100,
     search?: string
 ): Promise<TokenListResponse<ActiveTokenDto>> {
     const params = new URLSearchParams();
@@ -115,7 +117,7 @@ export async function getActiveTokens(
 export async function getUserActiveTokens(
     subjectId: string,
     page: number = 1,
-    pageSize: number = 20
+    pageSize: number = 100
 ): Promise<TokenListResponse<ActiveTokenDto>> {
     const params = new URLSearchParams();
     params.append('page', page.toString());
@@ -133,7 +135,7 @@ export async function getUserActiveTokens(
 export async function getClientActiveTokens(
     clientId: string,
     page: number = 1,
-    pageSize: number = 20
+    pageSize: number = 100
 ): Promise<TokenListResponse<ActiveTokenDto>> {
     const params = new URLSearchParams();
     params.append('page', page.toString());
@@ -150,7 +152,7 @@ export async function getClientActiveTokens(
  */
 export async function getRevokedTokens(
     page: number = 1,
-    pageSize: number = 20
+    pageSize: number = 100
 ): Promise<TokenListResponse<RevokedTokenDto>> {
     const params = new URLSearchParams();
     params.append('page', page.toString());

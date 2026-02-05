@@ -13,7 +13,7 @@ import { GlassTable } from '@/components/common/GlassTable';
 import { apiResourceService } from '@/services/apiResourceService';
 import type { ApiResourceApiDto } from '@/types/identityServer';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 100;
 
 export function ApiResourcesTab() {
     const navigate = useNavigate();

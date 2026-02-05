@@ -13,7 +13,7 @@ import { GlassTable } from '@/components/common/GlassTable';
 import { clientService } from '@/services/clientService';
 import type { ClientApiDto } from '@/types/client';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 100;
 
 export function ClientsTab() {
     const navigate = useNavigate();

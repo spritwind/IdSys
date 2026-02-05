@@ -2,7 +2,7 @@ import { api } from './api';
 import type { ClientApiDto, ClientsApiDto } from '@/types/client';
 
 export const clientService = {
-    async getClients(search: string = '', page: number = 1, pageSize: number = 10): Promise<ClientsApiDto> {
+    async getClients(search: string = '', page: number = 1, pageSize: number = 100): Promise<ClientsApiDto> {
         const response = await api.get<ClientsApiDto>('/api/Clients', {
             params: { searchText: search, page, pageSize }
         });

@@ -13,7 +13,7 @@ import { GlassTable } from '@/components/common/GlassTable';
 import { apiScopeService } from '@/services/apiScopeService';
 import type { ApiScopeApiDto } from '@/types/identityServer';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 100;
 
 export function ApiScopesTab() {
     const navigate = useNavigate();

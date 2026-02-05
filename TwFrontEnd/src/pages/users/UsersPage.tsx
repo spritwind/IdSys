@@ -116,7 +116,7 @@ export default function UsersPage() {
     const [loading, setLoading] = useState(true);
     const [totalCount, setTotalCount] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize] = useState(20);
+    const [pageSize] = useState(100);
 
     // 組織架構
     const [organizations, setOrganizations] = useState<OrganizationTreeNode[]>([]);

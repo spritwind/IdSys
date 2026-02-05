@@ -126,7 +126,10 @@ function RevokeConfirmModal({
                         <div className="grid grid-cols-2 gap-2 text-sm">
                             <div>
                                 <span className="text-gray-400">使用者：</span>
-                                <span className="text-white ml-1">{token.subjectId || '-'}</span>
+                                <span className="text-white ml-1">{token.userName || token.subjectId || '-'}</span>
+                                {token.email && (
+                                    <p className="text-xs text-gray-500">{token.email}</p>
+                                )}
                             </div>
                             <div>
                                 <span className="text-gray-400">客戶端：</span>
@@ -192,7 +195,7 @@ export default function TokenManagementPage() {
     // 分頁
     const [currentPage, setCurrentPage] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
-    const [pageSize] = useState(20);
+    const [pageSize] = useState(100);
 
     // Modal 狀態
     const [tokenToRevoke, setTokenToRevoke] = useState<ActiveTokenDto | null>(null);
@@ -437,7 +440,15 @@ export default function TokenManagementPage() {
                                             className="border-b border-white/5 hover:bg-white/5 transition-colors"
                                         >
                                             <td className="px-4 py-3">
-                                                <span className="text-white">{token.subjectId || '-'}</span>
+                                                <div>
+                                                    <p className="text-white">{token.userName || token.subjectId || '-'}</p>
+                                                    {token.email && (
+                                                        <p className="text-xs text-gray-500">{token.email}</p>
+                                                    )}
+                                                    {token.userName && token.subjectId && (
+                                                        <p className="text-[10px] font-mono text-gray-600 truncate max-w-[180px]" title={token.subjectId}>{token.subjectId}</p>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="px-4 py-3">
                                                 <div>
@@ -506,10 +517,23 @@ export default function TokenManagementPage() {
                                                 </span>
                                             </td>
                                             <td className="px-4 py-3">
-                                                <span className="text-white">{token.subjectId || '-'}</span>
+                                                <div>
+                                                    <p className="text-white">{token.userName || token.subjectId || '-'}</p>
+                                                    {token.email && (
+                                                        <p className="text-xs text-gray-500">{token.email}</p>
+                                                    )}
+                                                    {token.userName && token.subjectId && (
+                                                        <p className="text-[10px] font-mono text-gray-600 truncate max-w-[180px]" title={token.subjectId}>{token.subjectId}</p>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="px-4 py-3">
-                                                <span className="text-white">{token.clientId}</span>
+                                                <div>
+                                                    <p className="text-white">{token.clientName || token.clientId}</p>
+                                                    {token.clientName && (
+                                                        <p className="text-xs text-gray-500">{token.clientId}</p>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="px-4 py-3 text-gray-400 text-sm">
                                                 {new Date(token.revokedAt).toLocaleString('zh-TW')}

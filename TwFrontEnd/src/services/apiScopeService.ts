@@ -10,7 +10,7 @@ const BASE_URL = '/api/ApiScopes';
 
 export const apiScopeService = {
     // ============ API Scopes CRUD ============
-    async getApiScopes(search: string = '', page: number = 1, pageSize: number = 10): Promise<ApiScopesApiDto> {
+    async getApiScopes(search: string = '', page: number = 1, pageSize: number = 100): Promise<ApiScopesApiDto> {
         const response = await api.get<ApiScopesApiDto>(BASE_URL, {
             params: { search, page, pageSize }
         });
@@ -43,7 +43,7 @@ export const apiScopeService = {
     },
 
     // ============ API Scope Properties ============
-    async getProperties(apiScopeId: number, page: number = 1, pageSize: number = 10): Promise<ApiScopePropertiesApiDto> {
+    async getProperties(apiScopeId: number, page: number = 1, pageSize: number = 100): Promise<ApiScopePropertiesApiDto> {
         const response = await api.get<ApiScopePropertiesApiDto>(`${BASE_URL}/${apiScopeId}/Properties`, {
             params: { page, pageSize }
         });

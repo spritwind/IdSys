@@ -5,6 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -12,18 +13,25 @@ using Microsoft.Extensions.Logging;
 using Skoruba.AuditLogging.EntityFramework.Entities;
 using Skoruba.Duende.IdentityServer.Admin.Configuration;
 using Skoruba.Duende.IdentityServer.Admin.Configuration.Database;
+using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Extensions;
+using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Dtos.GoogleSync;
+using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services;
+using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services.Interfaces;
+using Skoruba.Duende.IdentityServer.Admin.EntityFramework.DbContexts;
+using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Interfaces;
+using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories;
+using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories.Interfaces;
 using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Shared.DbContexts;
 using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Shared.Entities.Identity;
 using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Shared.Extensions;
 using Skoruba.Duende.IdentityServer.Admin.Helpers;
+using Skoruba.Duende.IdentityServer.Admin.UI.Api.ExceptionHandling;
+using Skoruba.Duende.IdentityServer.Admin.UI.Api.Resources;
 using Skoruba.Duende.IdentityServer.Admin.UI.Helpers.ApplicationBuilder;
 using Skoruba.Duende.IdentityServer.Admin.UI.Helpers.DependencyInjection;
 using Skoruba.Duende.IdentityServer.Shared.Configuration.Helpers;
 using Skoruba.Duende.IdentityServer.Shared.Dtos;
 using Skoruba.Duende.IdentityServer.Shared.Dtos.Identity;
-using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Extensions;
-using Skoruba.Duende.IdentityServer.Admin.UI.Api.ExceptionHandling;
-using Skoruba.Duende.IdentityServer.Admin.UI.Api.Resources;
 using ApiStartupHelpers = Skoruba.Duende.IdentityServer.Admin.UI.Api.Helpers.StartupHelpers;
 
 namespace Skoruba.Duende.IdentityServer.Admin
@@ -88,9 +96,28 @@ namespace Skoruba.Duende.IdentityServer.Admin
             // UC Capital: 註冊多租戶服務 (新架構)
             services.AddMultiTenantServices(connectionString);
 
+            // UC Capital: 註冊 Token 管理服務 (JWT 撤銷查詢)
+            var configConnectionString = Configuration.GetConnectionString("ConfigurationDbConnection");
+            services.AddDbContext<TokenManagementDbContext>(options =>
+                options.UseSqlServer(configConnectionString));
+            services.AddScoped<IRevokedTokenRepository, RevokedTokenRepository>();
+            services.AddScoped<ITokenManagementService, TokenManagementService>();
+
+            // UC Capital: 註冊 DbContext 介面映射 (TokenManagementService 依賴)
+            // AddIdentityServerAdminUI 透過 Duende 註冊具體型別，但不會註冊 Skoruba 自訂介面
+            services.AddScoped<IAdminPersistedGrantDbContext>(sp =>
+                sp.GetRequiredService<IdentityServerPersistedGrantDbContext>());
+            services.AddScoped<IAdminConfigurationDbContext>(sp =>
+                sp.GetRequiredService<IdentityServerConfigurationDbContext>());
+
             // UC Capital: 註冊 Admin.UI.Api 控制器所需的服務
             services.AddScoped<ControllerExceptionFilterAttribute>();
             services.AddScoped<IApiErrorResources, ApiErrorResources>();
+
+            // UC Capital: 註冊 Google Workspace 同步服務
+            services.Configure<GoogleWorkspaceSettings>(Configuration.GetSection("GoogleWorkspaceSettings"));
+            services.AddScoped<IGoogleSyncRepository, GoogleSyncRepository>();
+            services.AddScoped<IGoogleWorkspaceSyncService, GoogleWorkspaceSyncService>();
 
             // UC Capital: 註冊 Admin.UI.Api 控制器 (REST API)
             // 讓 MVC 能夠發現 Admin.UI.Api 程序集中的控制器

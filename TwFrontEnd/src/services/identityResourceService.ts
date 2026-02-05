@@ -10,7 +10,7 @@ const BASE_URL = '/api/IdentityResources';
 
 export const identityResourceService = {
     // ============ Identity Resources CRUD ============
-    async getIdentityResources(search: string = '', page: number = 1, pageSize: number = 10): Promise<IdentityResourcesApiDto> {
+    async getIdentityResources(search: string = '', page: number = 1, pageSize: number = 100): Promise<IdentityResourcesApiDto> {
         const response = await api.get<IdentityResourcesApiDto>(BASE_URL, {
             params: { searchText: search, page, pageSize }
         });
@@ -43,7 +43,7 @@ export const identityResourceService = {
     },
 
     // ============ Identity Resource Properties ============
-    async getProperties(identityResourceId: number, page: number = 1, pageSize: number = 10): Promise<IdentityResourcePropertiesApiDto> {
+    async getProperties(identityResourceId: number, page: number = 1, pageSize: number = 100): Promise<IdentityResourcePropertiesApiDto> {
         const response = await api.get<IdentityResourcePropertiesApiDto>(`${BASE_URL}/${identityResourceId}/Properties`, {
             params: { page, pageSize }
         });

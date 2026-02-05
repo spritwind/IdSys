@@ -56,7 +56,7 @@ export async function getUsers(params: UserSearchParams = {}): Promise<PagedResu
     // 防禦性驗證：確保回應是預期的分頁格式（非 HTML 重導向等）
     if (!data || typeof data !== 'object' || !Array.isArray(data.items)) {
         console.error('Unexpected API response format for getUsers:', typeof data);
-        return { items: [], totalCount: 0, pageNumber: 1, pageSize: params.pageSize || 10, totalPages: 0 };
+        return { items: [], totalCount: 0, pageNumber: 1, pageSize: params.pageSize || 100, totalPages: 0 };
     }
 
     // 確保每個 user 的 roles 是陣列

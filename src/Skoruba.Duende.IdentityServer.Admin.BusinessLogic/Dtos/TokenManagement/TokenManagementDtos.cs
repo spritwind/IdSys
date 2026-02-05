@@ -32,6 +32,11 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Dtos.TokenManagement
         public string? UserName { get; set; }
 
         /// <summary>
+        /// 使用者 Email（顯示用）
+        /// </summary>
+        public string? Email { get; set; }
+
+        /// <summary>
         /// 客戶端 ID
         /// </summary>
         public string ClientId { get; set; } = string.Empty;
@@ -91,6 +96,11 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Dtos.TokenManagement
         /// 使用者名稱
         /// </summary>
         public string? UserName { get; set; }
+
+        /// <summary>
+        /// 使用者 Email
+        /// </summary>
+        public string? Email { get; set; }
 
         /// <summary>
         /// Session ID

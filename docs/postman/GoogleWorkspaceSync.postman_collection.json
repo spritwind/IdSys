@@ -1,0 +1,194 @@
+{
+	"info": {
+		"_postman_id": "google-workspace-sync-api",
+		"name": "Google Workspace Sync API",
+		"description": "UC Capital - Google Workspace 組織架構同步 API\n\n## 使用前準備\n1. 確保已取得有效的 Access Token（透過 OIDC 登入流程）\n2. 更新 Collection Variables 中的 `baseUrl` 和 `accessToken`\n3. 確保 Google Service Account 已設定 Domain-Wide Delegation\n\n## API 端點\n- **Health Check**: 測試 Google API 連線\n- **Preview**: 預覽同步內容（不寫入 DB）\n- **Sync Organizations**: 僅同步組織架構\n- **Sync Members**: 僅同步人員對應\n- **Full Sync**: 完整同步（組織+人員）",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Health Check",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/v2/google-sync/health",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "v2", "google-sync", "health"]
+				},
+				"description": "測試 Google API 連線狀態\n\n**回應範例:**\n```json\n{\n    \"status\": \"healthy\",\n    \"message\": \"Google API 連線正常，取得 15 個組織、120 個人員\",\n    \"timestamp\": \"2024-01-01T00:00:00Z\"\n}\n```"
+			},
+			"response": []
+		},
+		{
+			"name": "2. Preview Sync",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/v2/google-sync/preview?tenantId={{tenantId}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "v2", "google-sync", "preview"],
+					"query": [
+						{
+							"key": "tenantId",
+							"value": "{{tenantId}}",
+							"description": "租戶 ID（可選，預設使用設定檔值）"
+						}
+					]
+				},
+				"description": "預覽同步內容，不會寫入資料庫\n\n**回應範例:**\n```json\n{\n    \"organizationsFromGoogle\": 15,\n    \"membersFromGoogle\": 120,\n    \"membersWithMissingOrg\": 2,\n    \"existingOrganizations\": 10,\n    \"existingMembers\": 100,\n    \"organizationPaths\": [\"/\", \"/Engineering\", \"/Engineering/Backend\"],\n    \"warnings\": [\"User xxx missing org\"],\n    \"previewedAt\": \"2024-01-01T00:00:00Z\"\n}\n```"
+			},
+			"response": []
+		},
+		{
+			"name": "3. Sync Organizations Only",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/v2/google-sync/organizations?tenantId={{tenantId}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "v2", "google-sync", "organizations"],
+					"query": [
+						{
+							"key": "tenantId",
+							"value": "{{tenantId}}",
+							"description": "租戶 ID（可選）"
+						}
+					]
+				},
+				"description": "同步組織架構（使用 MERGE，會自動建立/更新/停用）\n\n**回應範例:**\n```json\n{\n    \"success\": true,\n    \"message\": \"組織架構同步完成\",\n    \"organizationsCreated\": 5,\n    \"organizationsUpdated\": 10,\n    \"organizationsDisabled\": 0,\n    \"syncedAt\": \"2024-01-01T00:00:00Z\",\n    \"durationMs\": 1234\n}\n```"
+			},
+			"response": []
+		},
+		{
+			"name": "4. Sync Members Only",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/v2/google-sync/members?tenantId={{tenantId}}&targetEmails=",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "v2", "google-sync", "members"],
+					"query": [
+						{
+							"key": "tenantId",
+							"value": "{{tenantId}}",
+							"description": "租戶 ID（可選）"
+						},
+						{
+							"key": "targetEmails",
+							"value": "",
+							"description": "指定同步的 Email（以逗號分隔，留空=全量）"
+						}
+					]
+				},
+				"description": "同步人員對應\n\n**targetEmails 參數範例:**\n- 空值：全量同步所有人員\n- `user1@company.com,user2@company.com`：僅同步指定人員\n\n**回應範例:**\n```json\n{\n    \"success\": true,\n    \"message\": \"人員對應同步完成\",\n    \"membersSynced\": 120,\n    \"membersFailed\": 2,\n    \"failedEmails\": [\"unknown@company.com\"],\n    \"warnings\": [],\n    \"syncedAt\": \"2024-01-01T00:00:00Z\",\n    \"durationMs\": 2345\n}\n```"
+			},
+			"response": []
+		},
+		{
+			"name": "5. Full Sync",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"tenantId\": null,\n    \"targetEmails\": null,\n    \"syncOrganizations\": true,\n    \"syncMembers\": true,\n    \"dryRun\": false\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/v2/google-sync/full",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "v2", "google-sync", "full"]
+				},
+				"description": "完整同步（組織架構 + 人員對應）\n\n**Request Body:**\n```json\n{\n    \"tenantId\": null,           // 租戶 ID（可選）\n    \"targetEmails\": null,       // 指定 Email（可選）\n    \"syncOrganizations\": true,  // 是否同步組織\n    \"syncMembers\": true,        // 是否同步人員\n    \"dryRun\": false             // 試執行模式（true=不寫入DB）\n}\n```\n\n**回應範例:**\n```json\n{\n    \"success\": true,\n    \"message\": \"完整同步完成\",\n    \"organizationsCreated\": 5,\n    \"organizationsUpdated\": 10,\n    \"organizationsDisabled\": 0,\n    \"membersSynced\": 120,\n    \"membersFailed\": 2,\n    \"failedEmails\": [\"unknown@company.com\"],\n    \"warnings\": [],\n    \"syncedAt\": \"2024-01-01T00:00:00Z\",\n    \"durationMs\": 3456\n}\n```"
+			},
+			"response": []
+		},
+		{
+			"name": "5a. Full Sync (Dry Run)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{accessToken}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"tenantId\": null,\n    \"targetEmails\": null,\n    \"syncOrganizations\": true,\n    \"syncMembers\": true,\n    \"dryRun\": true\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/v2/google-sync/full",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "v2", "google-sync", "full"]
+				},
+				"description": "試執行模式（不會寫入資料庫）\n\n**dryRun: true** 時，API 只會讀取 Google 資料並回報預計同步的數量，不會實際寫入資料庫。"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://prs.uccapital.com.tw",
+			"type": "string",
+			"description": "正式環境 Admin MVC URL"
+		},
+		{
+			"key": "accessToken",
+			"value": "YOUR_ACCESS_TOKEN_HERE",
+			"type": "string",
+			"description": "JWT Access Token（從 STS 取得）"
+		},
+		{
+			"key": "tenantId",
+			"value": "00000000-0000-0000-0000-000000000001",
+			"type": "string",
+			"description": "預設租戶 ID"
+		}
+	]
+}

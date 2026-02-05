@@ -13,6 +13,7 @@ using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services.Interfaces;
 using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Entities;
 using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Interfaces;
 using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories.Interfaces;
+using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Shared.DbContexts;
 
 namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
 {
@@ -24,15 +25,18 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
         private readonly IAdminPersistedGrantDbContext _persistedGrantDbContext;
         private readonly IRevokedTokenRepository _revokedTokenRepository;
         private readonly IAdminConfigurationDbContext _configurationDbContext;
+        private readonly AdminIdentityDbContext _identityDbContext;
 
         public TokenManagementService(
             IAdminPersistedGrantDbContext persistedGrantDbContext,
             IRevokedTokenRepository revokedTokenRepository,
-            IAdminConfigurationDbContext configurationDbContext)
+            IAdminConfigurationDbContext configurationDbContext,
+            AdminIdentityDbContext identityDbContext)
         {
             _persistedGrantDbContext = persistedGrantDbContext;
             _revokedTokenRepository = revokedTokenRepository;
             _configurationDbContext = configurationDbContext;
+            _identityDbContext = identityDbContext;
         }
 
         /// <inheritdoc/>
@@ -42,10 +46,17 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
 
             if (!string.IsNullOrWhiteSpace(search))
             {
+                // 先查詢符合搜尋條件的使用者 ID（支援以名稱/Email 搜尋）
+                var matchingUserIds = await _identityDbContext.Users
+                    .Where(u => u.UserName!.Contains(search) || u.Email!.Contains(search))
+                    .Select(u => u.Id)
+                    .ToListAsync();
+
                 query = query.Where(x =>
                     x.SubjectId!.Contains(search) ||
                     x.ClientId.Contains(search) ||
-                    x.Type.Contains(search));
+                    x.Type.Contains(search) ||
+                    matchingUserIds.Contains(x.SubjectId!));
             }
 
             var totalCount = await query.CountAsync();
@@ -58,9 +69,18 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
             var items = new List<ActiveTokenDto>();
             var now = DateTime.UtcNow;
 
+            // 批次查詢使用者資訊
+            var subjectIds = grants.Select(g => g.SubjectId).Where(id => !string.IsNullOrEmpty(id)).Distinct().ToList();
+            var userLookup = await GetUserInfoByIdsAsync(subjectIds!);
+
             foreach (var grant in grants)
             {
                 var dto = await MapToActiveTokenDto(grant, now);
+                if (!string.IsNullOrEmpty(grant.SubjectId) && userLookup.TryGetValue(grant.SubjectId, out var userInfo))
+                {
+                    dto.UserName = userInfo.UserName;
+                    dto.Email = userInfo.Email;
+                }
                 items.Add(dto);
             }
 
@@ -89,9 +109,16 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
             var items = new List<ActiveTokenDto>();
             var now = DateTime.UtcNow;
 
+            var userLookup = await GetUserInfoByIdsAsync(new[] { subjectId });
+
             foreach (var grant in grants)
             {
                 var dto = await MapToActiveTokenDto(grant, now);
+                if (userLookup.TryGetValue(subjectId, out var userInfo))
+                {
+                    dto.UserName = userInfo.UserName;
+                    dto.Email = userInfo.Email;
+                }
                 items.Add(dto);
             }
 
@@ -120,9 +147,17 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
             var items = new List<ActiveTokenDto>();
             var now = DateTime.UtcNow;
 
+            var subjectIds = grants.Select(g => g.SubjectId).Where(id => !string.IsNullOrEmpty(id)).Distinct().ToList();
+            var userLookup = await GetUserInfoByIdsAsync(subjectIds!);
+
             foreach (var grant in grants)
             {
                 var dto = await MapToActiveTokenDto(grant, now);
+                if (!string.IsNullOrEmpty(grant.SubjectId) && userLookup.TryGetValue(grant.SubjectId, out var userInfo))
+                {
+                    dto.UserName = userInfo.UserName;
+                    dto.Email = userInfo.Email;
+                }
                 items.Add(dto);
             }
 
@@ -140,17 +175,42 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
         {
             var (items, totalCount) = await _revokedTokenRepository.GetAllAsync(page, pageSize);
 
-            var dtos = items.Select(x => new RevokedTokenDto
+            // 批次查詢使用者與客戶端資訊
+            var subjectIds = items.Select(x => x.SubjectId).Where(id => !string.IsNullOrEmpty(id)).Distinct().ToList();
+            var userLookup = await GetUserInfoByIdsAsync(subjectIds!);
+
+            var clientIds = items.Select(x => x.ClientId).Distinct().ToList();
+            var clientLookup = await _configurationDbContext.Clients
+                .Where(c => clientIds.Contains(c.ClientId))
+                .ToDictionaryAsync(c => c.ClientId, c => c.ClientName ?? c.ClientId);
+
+            var dtos = items.Select(x =>
             {
-                Id = x.Id,
-                Jti = x.Jti,
-                SubjectId = x.SubjectId,
-                ClientId = x.ClientId,
-                TokenType = x.TokenType,
-                ExpirationTime = x.ExpirationTime,
-                RevokedAt = x.RevokedAt,
-                Reason = x.Reason,
-                RevokedBy = x.RevokedBy
+                var dto = new RevokedTokenDto
+                {
+                    Id = x.Id,
+                    Jti = x.Jti,
+                    SubjectId = x.SubjectId,
+                    ClientId = x.ClientId,
+                    TokenType = x.TokenType,
+                    ExpirationTime = x.ExpirationTime,
+                    RevokedAt = x.RevokedAt,
+                    Reason = x.Reason,
+                    RevokedBy = x.RevokedBy
+                };
+
+                if (!string.IsNullOrEmpty(x.SubjectId) && userLookup.TryGetValue(x.SubjectId, out var userInfo))
+                {
+                    dto.UserName = userInfo.UserName;
+                    dto.Email = userInfo.Email;
+                }
+
+                if (clientLookup.TryGetValue(x.ClientId, out var clientName))
+                {
+                    dto.ClientName = clientName;
+                }
+
+                return dto;
             });
 
             return new TokenListResponse<RevokedTokenDto>
@@ -354,6 +414,22 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
         }
 
         #region Private Methods
+
+        /// <summary>
+        /// 批次查詢使用者資訊（UserName, Email）
+        /// </summary>
+        private async Task<Dictionary<string, (string? UserName, string? Email)>> GetUserInfoByIdsAsync(IEnumerable<string> userIds)
+        {
+            var idList = userIds.ToList();
+            if (idList.Count == 0)
+                return new Dictionary<string, (string?, string?)>();
+
+            return await _identityDbContext.Users
+                .Where(u => idList.Contains(u.Id))
+                .ToDictionaryAsync(
+                    u => u.Id,
+                    u => (u.UserName, u.Email));
+        }
 
         private async Task<ActiveTokenDto> MapToActiveTokenDto(PersistedGrant grant, DateTime now)
         {
