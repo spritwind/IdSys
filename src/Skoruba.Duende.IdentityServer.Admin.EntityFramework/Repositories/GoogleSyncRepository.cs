@@ -121,9 +121,10 @@ namespace Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories
                 // C. 執行 MERGE 與連動更新
                 var result = await conn.QueryFirstAsync<MergeResult>(@"
                     DECLARE @Created INT = 0, @Updated INT = 0, @Disabled INT = 0;
+                    DECLARE @MergeOutput TABLE (Action NVARCHAR(10));
 
                     -- 1. MERGE 組織
-                    MERGE [dbo].[Organizations] WITH (ROWLOCK) AS T
+                    MERGE [dbo].[Organizations] AS T
                     USING #SourceOrgs AS S ON T.[Id_104] = S.[Id_104] AND T.[TenantId] = @TenantId
                     WHEN MATCHED THEN
                         UPDATE SET
@@ -149,42 +150,36 @@ namespace Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories
                     OUTPUT $action INTO @MergeOutput;
 
                     -- 統計結果
-                    DECLARE @MergeOutput TABLE (Action NVARCHAR(10));
-                    SELECT @Created = 0, @Updated = 0;
+                    SELECT @Created = COUNT(*) FROM @MergeOutput WHERE Action = 'INSERT';
+                    SELECT @Updated = COUNT(*) FROM @MergeOutput WHERE Action = 'UPDATE';
 
                     -- 2. 路徑連動更新
-                    UPDATE Child WITH (ROWLOCK)
+                    UPDATE Child
                     SET [Path]      = Parent.[Path] + SUBSTRING(Child.[Path], LEN(ISNULL(OldPath.[Path], Child.[Path])) + 1, LEN(Child.[Path])),
                         [UpdatedAt] = @SystemNow
                     FROM [dbo].[Organizations] AS Child
-                    INNER JOIN [dbo].[Organizations] AS Parent WITH (NOLOCK) ON Child.[ParentId_104] = Parent.[Id_104]
+                    INNER JOIN [dbo].[Organizations] AS Parent ON Child.[ParentId_104] = Parent.[Id_104]
                     INNER JOIN #SourceOrgs AS OldPath ON OldPath.[Id_104] = Parent.[Id_104]
                     WHERE Child.[TenantId] = @TenantId
                         AND Child.[Path] NOT LIKE Parent.[Path] + '/%';
 
                     -- 3. 範圍內軟刪除
-                    UPDATE T WITH (ROWLOCK)
+                    UPDATE T
                     SET [IsEnabled] = 0,
                         [UpdatedAt] = @SystemNow
                     FROM [dbo].[Organizations] AS T
                     WHERE T.[TenantId] = @TenantId
-                        AND EXISTS (SELECT 1 FROM #SyncScope WITH (NOLOCK) AS SC WHERE T.[Path] = SC.[ScopePath] OR T.[Path] LIKE SC.[ScopePath] + '/%')
-                        AND T.[Id_104] NOT IN (SELECT [Id_104] FROM #SourceOrgs WITH (NOLOCK));
+                        AND EXISTS (SELECT 1 FROM #SyncScope AS SC WHERE T.[Path] = SC.[ScopePath] OR T.[Path] LIKE SC.[ScopePath] + '/%')
+                        AND T.[Id_104] NOT IN (SELECT [Id_104] FROM #SourceOrgs);
                     SET @Disabled = @@ROWCOUNT;
 
                     -- 4. 補齊父層 GUID 關聯
-                    UPDATE O WITH (ROWLOCK)
+                    UPDATE O
                     SET [ParentId] = P.[Id]
                     FROM [dbo].[Organizations] AS O
-                    INNER JOIN [dbo].[Organizations] AS P WITH (NOLOCK) ON O.[ParentId_104] = P.[Id_104]
+                    INNER JOIN [dbo].[Organizations] AS P ON O.[ParentId_104] = P.[Id_104]
                     WHERE O.[TenantId] = @TenantId
                         AND (O.[ParentId] IS NULL OR O.[ParentId] <> P.[Id]);
-
-                    -- 重新統計
-                    SELECT @Created = COUNT(*) FROM #SourceOrgs AS S WHERE NOT EXISTS (
-                        SELECT 1 FROM [dbo].[Organizations] AS T WHERE T.[Id_104] = S.[Id_104] AND T.[TenantId] = @TenantId AND T.[CreatedAt] < @SystemNow
-                    );
-                    SET @Updated = (SELECT COUNT(*) FROM #SourceOrgs) - @Created;
 
                     SELECT @Created AS Created, @Updated AS Updated, @Disabled AS Disabled;",
                     new { TenantId = tenantId, SystemNow = systemNow }, trans);

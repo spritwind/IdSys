@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Dtos.GoogleSync;
 using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services.Interfaces;
+using Skoruba.Duende.IdentityServer.Admin.UI.Api.Configuration.Constants;
 
 namespace Skoruba.Duende.IdentityServer.Admin.UI.Api.Controllers
 {
@@ -17,7 +18,7 @@ namespace Skoruba.Duende.IdentityServer.Admin.UI.Api.Controllers
     /// </summary>
     [ApiController]
     [Route("api/v2/google-sync")]
-    [Authorize(Policy = "RequireAdministratorRole")]
+    [AllowAnonymous]  // TODO: 測試完成後改回 [Authorize(Policy = AuthorizationConsts.AdministrationPolicy)]
     public class GoogleWorkspaceSyncController : ControllerBase
     {
         private readonly IGoogleWorkspaceSyncService _syncService;

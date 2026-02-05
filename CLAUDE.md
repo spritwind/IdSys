@@ -170,3 +170,95 @@ dotnet publish src/Skoruba.Duende.IdentityServer.STS.Identity -c Release -o publ
 ## 驗證與授權
 
 授權使用 appsettings.json 中設定的 `AdministrationRole` 宣告。預設角色為 `SkorubaIdentityAdminAdministrator`。原則透過 `AddAuthorizationPolicies()` 註冊。
+
+## 部署架構（重要）
+
+### 正式環境 — prs.uccapital.com.tw
+
+**正式環境的 API 請求由 Admin MVC（而非 Admin.Api）處理。**
+
+Admin MVC（`Skoruba.Duende.IdentityServer.Admin`）同時引用了 `Admin.UI`（MVC 視圖）和 `Admin.UI.Api`（API Controllers），並在 Startup.cs 中呼叫 `AddMultiTenantServices()`。因此：
+
+- `/api/v2/permissions/*` — 由 Admin MVC 中載入的 `MultiTenantPermissionController` 處理
+- `/api/v2/groups/*` — 由 Admin MVC 中載入的 `GroupController` 處理
+- `/api/v2/organizations/*` — 由 Admin MVC 中載入的 `MultiTenantOrganizationController` 處理
+
+這代表 **任何對 `Admin.UI.Api` 或 `Admin.BusinessLogic` 或 `Admin.EntityFramework` 的程式碼變更，都必須同時 publish `Admin`（MVC）和 `Admin.Api`**。
+
+### 部署必須更新的項目對照表
+
+| 變更範圍 | 必須 publish |
+|----------|-------------|
+| `Admin.UI.Api` (Controllers) | `Admin` + `Admin.Api` |
+| `Admin.BusinessLogic` (Services, DTOs) | `Admin` + `Admin.Api` |
+| `Admin.EntityFramework` (Repositories, Entities, DbContext) | `Admin` + `Admin.Api` |
+| `Admin.UI` (MVC Views, Controllers) | `Admin` |
+| `STS.Identity` | `STS.Identity` |
+| `TwFrontEnd` (React) | `TwFrontEnd` + `app` |
+
+### 發佈指令（完整）
+
+```bash
+# 後端 — 兩個都要 publish
+dotnet publish src/Skoruba.Duende.IdentityServer.Admin -c Release -o publish/Admin
+dotnet publish src/Skoruba.Duende.IdentityServer.Admin.Api -c Release -o publish/Admin.Api
+
+# 前端
+cd TwFrontEnd && npm run build
+cp -r dist/* ../publish/TwFrontEnd/
+cp -r dist/* ../publish/app/
+```
+
+### 部署後
+
+IIS 使用 InProcess hosting（`web.config` 中 `hostingModel="InProcess"`），DLL 載入 w3wp.exe 進程。**檔案複製後必須回收 IIS Application Pool**，否則舊 DLL 仍然在記憶體中運行。
+
+### 專案引用關係（影響部署判斷）
+
+```
+Admin (MVC) ─┬─ Admin.UI (MVC views/controllers)
+             ├─ Admin.UI.Api (API controllers) ← 包含 GroupController, PermissionController 等
+             ├─ Admin.BusinessLogic (Services, DTOs)
+             └─ Admin.EntityFramework (Repositories, Entities, DbContext)
+
+Admin.Api ────┬─ Admin.UI.Api
+              ├─ Admin.BusinessLogic
+              └─ Admin.EntityFramework
+```
+
+兩個 Web 專案共用同一套 `Admin.UI.Api` + `Admin.BusinessLogic` + `Admin.EntityFramework`。**任何共用層的變更，兩邊都要部署。**
+
+## 多租戶權限系統
+
+### 權限繼承模型
+
+使用者的有效權限 = 直接權限 ∪ 組織繼承 ∪ 群組繼承
+
+```
+GetUserEffectivePermissionsAsync(userId):
+  Step 1: Permissions WHERE SubjectType=User AND SubjectId=userId           (直接授權)
+  Step 2: OrganizationMembers → Permissions WHERE SubjectType=Organization  (組織圖繼承，遞迴往上)
+  Step 3: GroupMembers → Permissions WHERE SubjectType=Group                (群組繼承，單層扁平)
+```
+
+- **Organization 繼承**：遞迴向上（child org → parent org → grandparent org...），受 `InheritParentPermissions` 和 `InheritToChildren` 旗標控制
+- **Group 繼承**：單層扁平（User → Group → Permissions），受 `GroupMember.InheritGroupPermissions` 旗標控制（預設 true）
+- **繼承方式**：動態查詢（非靜態複製），權限變更立即對所有成員生效
+
+### 權限 Scope 格式
+
+DB 儲存格式：`@r@c@u@d`（@ 分隔）
+API/前端格式：`["r", "c", "u", "d"]`（JSON array）
+
+### 權限 Scope 變更的正確做法
+
+當 scope 變更時（例如 `@r@c` → `@r@c@u`），前端必須：
+1. 先 revoke 舊 permission（by permissionId）
+2. 再 grant 新 permission（with new scopes）
+
+不可只 grant 不 revoke，否則會產生同一 Subject+Resource 的重複 Permission 記錄。
+
+## EF Core 注意事項
+
+- Permissions 表有 SQL Server trigger，Entity 設定必須包含 `.HasTrigger()` 以避免 EF Core 的 OUTPUT 子句衝突
+- 使用 InMemory provider 測試時不受此限制

@@ -15,11 +15,15 @@ import {
     ZoomIn,
     ZoomOut,
     Maximize2,
+    Minimize2,
     ChevronDown,
     ChevronRight,
     Loader2,
     RefreshCw,
+    FileDown,
 } from 'lucide-react';
+import { toPng } from 'html-to-image';
+import { jsPDF } from 'jspdf';
 import clsx from 'clsx';
 import type {
     OrganizationTreeNode,
@@ -31,6 +35,7 @@ import { OrgTreeNode } from './components/OrgTreeNode';
 import { OrgDetailModal } from './components/OrgDetailModal';
 import { OrgEditModal } from './components/OrgEditModal';
 import { OrgTreeTable } from './components/OrgTreeTable';
+import { GoogleSyncPanel } from './components/GoogleSyncPanel';
 import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'sonner';
 
@@ -138,6 +143,10 @@ export default function OrganizationPage() {
     const [isPanning, setIsPanning] = useState(false);
     const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+    // 全畫面與匯出狀態
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [exporting, setExporting] = useState(false);
 
     const chartRef = useRef<HTMLDivElement>(null);
     const chartContainerRef = useRef<HTMLDivElement>(null);
@@ -263,6 +272,124 @@ export default function OrganizationPage() {
         setZoom(z => Math.min(Math.max(z + delta, 0.3), 2));
     }, []);
 
+    // --- 全畫面控制 ---
+    useEffect(() => {
+        const handler = () => setIsFullscreen(!!document.fullscreenElement);
+        document.addEventListener('fullscreenchange', handler);
+        return () => document.removeEventListener('fullscreenchange', handler);
+    }, []);
+
+    const handleToggleFullscreen = useCallback(() => {
+        const container = chartContainerRef.current;
+        if (!container) return;
+
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        } else {
+            container.requestFullscreen();
+        }
+    }, []);
+
+    // --- PDF 匯出 ---
+    // 將標題以 HTML 注入 DOM 一起截圖，避免 jsPDF 不支援 CJK 字型導致亂碼
+    const handleExportPdf = useCallback(async () => {
+        const chart = chartRef.current;
+        if (!chart || exporting) return;
+
+        setExporting(true);
+
+        // 儲存目前狀態
+        const savedZoom = zoom;
+        const savedPan = { ...panPosition };
+
+        // 重設縮放與平移以取得乾淨的截圖
+        setZoom(1);
+        setPanPosition({ x: 0, y: 0 });
+
+        // 等待 React 渲染 + 瀏覽器繪製
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+        // 額外延遲確保 transition 完成
+        await new Promise(r => setTimeout(r, 350));
+
+        // 建立 HTML 頁首，注入 chart DOM 頂部一起截圖（瀏覽器原生渲染中文）
+        const header = document.createElement('div');
+        header.setAttribute('data-pdf-header', '');
+        header.style.cssText = 'padding: 0 0 20px 0; margin-bottom: 20px; border-bottom: 2px solid rgba(255,255,255,0.12);';
+        const dateStr = new Date().toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        const deptCount = stats?.totalGroups ?? '-';
+        const maxDepth = stats ? stats.maxDepth + 1 : '-';
+        header.innerHTML = `
+            <div style="font-size: 28px; font-weight: 800; color: #ffffff; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; letter-spacing: -0.02em;">
+                UC Capital 組織架構圖
+            </div>
+            <div style="font-size: 13px; color: rgba(255,255,255,0.45); margin-top: 8px; font-family: system-ui, sans-serif;">
+                匯出日期：${dateStr}　｜　部門數：${deptCount}　｜　最大深度：${maxDepth}
+            </div>
+        `;
+        chart.prepend(header);
+
+        // 等瀏覽器繪製 header
+        await new Promise(r => requestAnimationFrame(r));
+
+        try {
+            const dataUrl = await toPng(chart, {
+                quality: 1.0,
+                pixelRatio: 2,
+                backgroundColor: '#0a0a0f',
+                // 排除拖拉提示浮標與全畫面工具列
+                filter: (node: HTMLElement) => !node.classList?.contains('export-exclude'),
+            });
+
+            // 移除臨時 header
+            header.remove();
+
+            const img = new Image();
+            img.src = dataUrl;
+            await new Promise<void>((resolve, reject) => {
+                img.onload = () => resolve();
+                img.onerror = reject;
+            });
+
+            // 計算 PDF 尺寸 (A4)
+            const imgW = img.width / 2;  // pixelRatio=2 補償
+            const imgH = img.height / 2;
+            const isLandscape = imgW > imgH;
+            const pageW = isLandscape ? 841.89 : 595.28;
+            const pageH = isLandscape ? 595.28 : 841.89;
+            const margin = 30;
+            const availW = pageW - margin * 2;
+            const availH = pageH - margin * 2;
+
+            const scale = Math.min(availW / imgW, availH / imgH, 1);
+            const scaledW = imgW * scale;
+            const scaledH = imgH * scale;
+
+            const pdf = new jsPDF({
+                orientation: isLandscape ? 'landscape' : 'portrait',
+                unit: 'pt',
+                format: 'a4',
+            });
+
+            // 整張圖（含 HTML 頁首）置中放入 PDF
+            const xOffset = (pageW - scaledW) / 2;
+            const yOffset = (pageH - scaledH) / 2;
+            pdf.addImage(dataUrl, 'PNG', xOffset, Math.max(margin, yOffset), scaledW, scaledH);
+
+            pdf.save('UC-Capital-Organization-Chart.pdf');
+            toast.success('PDF 匯出成功');
+        } catch (err) {
+            // 確保 header 被移除
+            header.remove();
+            console.error('PDF export failed:', err);
+            toast.error('PDF 匯出失敗');
+        } finally {
+            // 還原狀態
+            setZoom(savedZoom);
+            setPanPosition(savedPan);
+            setExporting(false);
+        }
+    }, [exporting, zoom, panPosition, stats]);
+
     // 節點點擊
     const handleNodeClick = useCallback((node: OrganizationTreeNode) => {
         setSelectedNode(node);
@@ -371,6 +498,9 @@ export default function OrganizationPage() {
                 </div>
             )}
 
+            {/* Google Workspace 同步面板 */}
+            <GoogleSyncPanel onSyncComplete={loadData} />
+
             {/* 工具列 */}
             <div className="glass p-4 rounded-xl border border-white/5">
                 <div className="flex flex-wrap items-center justify-between gap-4">
@@ -457,6 +587,28 @@ export default function OrganizationPage() {
                                         <Maximize2 size={16} />
                                     </button>
                                 </div>
+
+                                {/* 全畫面 & PDF 匯出 */}
+                                <div className="w-px h-6 bg-white/10" />
+                                <div className="flex items-center gap-1">
+                                    <button
+                                        onClick={handleToggleFullscreen}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-[var(--color-text-secondary)] hover:text-white hover:bg-white/5 transition-all"
+                                        title={isFullscreen ? '退出全畫面' : '全畫面'}
+                                    >
+                                        {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                                        {isFullscreen ? '退出' : '全畫面'}
+                                    </button>
+                                    <button
+                                        onClick={handleExportPdf}
+                                        disabled={exporting}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-[var(--color-text-secondary)] hover:text-white hover:bg-white/5 transition-all disabled:opacity-50"
+                                        title="匯出 PDF"
+                                    >
+                                        {exporting ? <Loader2 size={16} className="animate-spin" /> : <FileDown size={16} />}
+                                        {exporting ? '匯出中...' : 'PDF'}
+                                    </button>
+                                </div>
                             </>
                         )}
                     </div>
@@ -511,9 +663,13 @@ export default function OrganizationPage() {
                     ref={chartContainerRef}
                     className={clsx(
                         "glass rounded-xl border border-white/5 overflow-hidden relative",
-                        isPanning ? "cursor-grabbing" : "cursor-grab"
+                        isPanning ? "cursor-grabbing" : "cursor-grab",
+                        isFullscreen && "!rounded-none !border-0 bg-[var(--color-bg-primary)]"
                     )}
-                    style={{ minHeight: '500px', maxHeight: 'calc(100vh - 400px)' }}
+                    style={{
+                        minHeight: isFullscreen ? '100vh' : '500px',
+                        maxHeight: isFullscreen ? '100vh' : 'calc(100vh - 400px)',
+                    }}
                     onMouseDown={handlePanStart}
                     onMouseMove={handlePanMove}
                     onMouseUp={handlePanEnd}
@@ -521,9 +677,42 @@ export default function OrganizationPage() {
                     onWheel={handleWheel}
                 >
                     {/* 拖拉提示 */}
-                    <div className="absolute top-3 left-3 z-10 px-2 py-1 rounded-md bg-black/40 text-xs text-white/50 pointer-events-none">
+                    <div className="export-exclude absolute top-3 left-3 z-10 px-2 py-1 rounded-md bg-black/40 text-xs text-white/50 pointer-events-none">
                         拖拉移動畫面 | 滾輪縮放
+                        {isFullscreen && ' | ESC 退出全畫面'}
                     </div>
+
+                    {/* 全畫面工具列 */}
+                    {isFullscreen && (
+                        <div className="export-exclude absolute top-3 right-3 z-10 flex items-center gap-2">
+                            <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-black/50 backdrop-blur-sm">
+                                <button onClick={handleZoomOut} className="p-1.5 rounded text-white/60 hover:text-white hover:bg-white/10 transition-all" title="縮小">
+                                    <ZoomOut size={16} />
+                                </button>
+                                <span className="px-2 text-xs text-white/50 min-w-[40px] text-center">{Math.round(zoom * 100)}%</span>
+                                <button onClick={handleZoomIn} className="p-1.5 rounded text-white/60 hover:text-white hover:bg-white/10 transition-all" title="放大">
+                                    <ZoomIn size={16} />
+                                </button>
+                                <button onClick={handleZoomReset} className="p-1.5 rounded text-white/60 hover:text-white hover:bg-white/10 transition-all" title="重設">
+                                    <Maximize2 size={16} />
+                                </button>
+                                <div className="w-px h-4 bg-white/20 mx-1" />
+                                <button onClick={handleExpandAll} className="p-1.5 rounded text-white/60 hover:text-white hover:bg-white/10 transition-all" title="全部展開">
+                                    <ChevronDown size={16} />
+                                </button>
+                                <button onClick={handleCollapseAll} className="p-1.5 rounded text-white/60 hover:text-white hover:bg-white/10 transition-all" title="全部收合">
+                                    <ChevronRight size={16} />
+                                </button>
+                                <div className="w-px h-4 bg-white/20 mx-1" />
+                                <button onClick={handleExportPdf} disabled={exporting} className="p-1.5 rounded text-white/60 hover:text-white hover:bg-white/10 transition-all disabled:opacity-50" title="匯出 PDF">
+                                    {exporting ? <Loader2 size={16} className="animate-spin" /> : <FileDown size={16} />}
+                                </button>
+                                <button onClick={handleToggleFullscreen} className="p-1.5 rounded text-white/60 hover:text-white hover:bg-white/10 transition-all" title="退出全畫面">
+                                    <Minimize2 size={16} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
                     <div
                         ref={chartRef}
