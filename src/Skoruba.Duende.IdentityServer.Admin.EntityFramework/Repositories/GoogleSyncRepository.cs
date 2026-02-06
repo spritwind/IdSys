@@ -227,6 +227,9 @@ namespace Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories
                         IsPrimary       BIT,
                         JoinedAt        NVARCHAR(50),
                         NewGuid         UNIQUEIDENTIFIER
+                    );
+                    CREATE TABLE #FailedEmails (
+                        Email           NVARCHAR(255)
                     );", null, trans);
 
                 // B. 注入資料
@@ -257,7 +260,8 @@ namespace Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories
                     LEFT JOIN [dbo].[Positions] AS P WITH (NOLOCK) ON P.[Name] = RM.[PosName];
 
                     -- 找出無法對應的 Email
-                    SELECT RM.[Email] INTO #FailedEmails FROM #RawMembers AS RM
+                    INSERT INTO #FailedEmails (Email)
+                    SELECT RM.[Email] FROM #RawMembers AS RM
                     WHERE NOT EXISTS (SELECT 1 FROM #ConvertedMembers AS C WHERE C.[Email] = RM.[Email]);
 
                     -- 2. 清理舊關係
