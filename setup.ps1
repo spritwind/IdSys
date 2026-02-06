@@ -1,35 +1,33 @@
 #Requires -RunAsAdministrator
 <#
 .SYNOPSIS
-    PRS 身份認證管理系統 - 首次環境設定腳本
+    PRS - First-time Environment Setup Script
 .DESCRIPTION
-    在部署環境首次安裝所需軟體並 Clone 專案
+    Install required software and clone project on deployment server
 .EXAMPLE
     .\setup.ps1
 #>
 
 param(
-    [string]$InstallPath = "C:\Source\PRS",
+    [string]$InstallPath = "C:\Workspace\PRSSource",
     [string]$GitRepo = "https://github.com/spritwind/IdSys.git",
     [string]$GitBranch = "main"
 )
 
 $ErrorActionPreference = "Stop"
 
-# ============================================
-# 函式區
-# ============================================
-
 function Write-Title {
     param([string]$Text)
-    Write-Host "`n$("=" * 60)" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host ("=" * 60) -ForegroundColor Cyan
     Write-Host " $Text" -ForegroundColor Cyan
-    Write-Host "$("=" * 60)" -ForegroundColor Cyan
+    Write-Host ("=" * 60) -ForegroundColor Cyan
 }
 
 function Write-Step {
     param([string]$Text)
-    Write-Host "`n>> $Text" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host ">> $Text" -ForegroundColor Yellow
 }
 
 function Write-Success {
@@ -48,105 +46,100 @@ function Test-Command {
     return $?
 }
 
+function Refresh-Path {
+    $machinePath = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
+    $userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
+    $env:Path = $machinePath + ";" + $userPath
+}
+
 function Install-Chocolatey {
-    Write-Step "檢查 Chocolatey"
+    Write-Step "Check Chocolatey"
 
     if (Test-Command "choco") {
-        Write-Success "Chocolatey 已安裝"
+        Write-Success "Chocolatey already installed"
         return
     }
 
-    Write-Info "安裝 Chocolatey..."
+    Write-Info "Installing Chocolatey..."
     Set-ExecutionPolicy Bypass -Scope Process -Force
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
     Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
-    # 重新載入 PATH
-    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
-
-    Write-Success "Chocolatey 安裝完成"
+    Refresh-Path
+    Write-Success "Chocolatey installed"
 }
 
 function Install-Git {
-    Write-Step "檢查 Git"
+    Write-Step "Check Git"
 
     if (Test-Command "git") {
         $version = git --version
-        Write-Success "Git 已安裝: $version"
+        Write-Success "Git already installed: $version"
         return
     }
 
-    Write-Info "安裝 Git..."
+    Write-Info "Installing Git..."
     choco install git -y --no-progress
 
-    # 重新載入 PATH
-    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
-
-    Write-Success "Git 安裝完成"
+    Refresh-Path
+    Write-Success "Git installed"
 }
 
 function Install-DotNet {
-    Write-Step "檢查 .NET SDK"
+    Write-Step "Check .NET SDK"
 
     if (Test-Command "dotnet") {
         $version = dotnet --version
-        Write-Success ".NET SDK 已安裝: $version"
+        Write-Success ".NET SDK already installed: $version"
 
-        # 檢查是否為 .NET 9
         if ($version -match "^9\.") {
             return
         }
-        Write-Info "需要 .NET 9，將安裝..."
+        Write-Info "Need .NET 9, installing..."
     }
 
-    Write-Info "安裝 .NET 9 SDK..."
+    Write-Info "Installing .NET 9 SDK..."
     choco install dotnet-sdk --version=9.0.100 -y --no-progress
 
-    # 重新載入 PATH
-    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
-
-    Write-Success ".NET SDK 安裝完成"
+    Refresh-Path
+    Write-Success ".NET SDK installed"
 }
 
 function Install-NodeJS {
-    Write-Step "檢查 Node.js"
+    Write-Step "Check Node.js"
 
     if (Test-Command "node") {
         $version = node --version
-        Write-Success "Node.js 已安裝: $version"
+        Write-Success "Node.js already installed: $version"
         return
     }
 
-    Write-Info "安裝 Node.js LTS..."
+    Write-Info "Installing Node.js LTS..."
     choco install nodejs-lts -y --no-progress
 
-    # 重新載入 PATH
-    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
-
-    Write-Success "Node.js 安裝完成"
+    Refresh-Path
+    Write-Success "Node.js installed"
 }
 
 function Clone-Repository {
-    Write-Step "Clone 專案"
+    Write-Step "Clone Project"
 
     $parentPath = Split-Path $InstallPath -Parent
     $folderName = Split-Path $InstallPath -Leaf
 
-    # 建立父目錄
     if (-not (Test-Path $parentPath)) {
         New-Item -ItemType Directory -Path $parentPath -Force | Out-Null
-        Write-Info "建立目錄: $parentPath"
+        Write-Info "Created directory: $parentPath"
     }
 
-    # 檢查專案是否已存在
     if (Test-Path $InstallPath) {
-        Write-Info "專案目錄已存在，執行 git pull..."
+        Write-Info "Project directory exists, running git pull..."
         Push-Location $InstallPath
         try {
             git fetch origin
             git checkout $GitBranch
             git pull origin $GitBranch
-            Write-Success "已更新至最新版本"
+            Write-Success "Updated to latest version"
         }
         finally {
             Pop-Location
@@ -154,17 +147,13 @@ function Clone-Repository {
         return
     }
 
-    # Clone 專案
-    Write-Info "Clone 從 $GitRepo ..."
+    Write-Info "Cloning from $GitRepo ..."
     Push-Location $parentPath
     try {
         git clone $GitRepo $folderName
-
-        # 切換分支
         Set-Location $InstallPath
         git checkout $GitBranch
-
-        Write-Success "Clone 完成: $InstallPath"
+        Write-Success "Clone completed: $InstallPath"
     }
     finally {
         Pop-Location
@@ -172,28 +161,25 @@ function Clone-Repository {
 }
 
 function Setup-GitCredential {
-    Write-Step "設定 Git 認證管理"
-
+    Write-Step "Setup Git Credential Manager"
     git config --global credential.helper manager
-    Write-Success "已設定 Windows 認證管理員"
+    Write-Success "Windows Credential Manager configured"
 }
 
 function Restore-Dependencies {
-    Write-Step "還原相依套件"
+    Write-Step "Restore Dependencies"
 
     Push-Location $InstallPath
     try {
-        # .NET 套件
-        Write-Info "還原 NuGet 套件..."
+        Write-Info "Restoring NuGet packages..."
         dotnet restore --verbosity quiet
-        Write-Success "NuGet 套件還原完成"
+        Write-Success "NuGet packages restored"
 
-        # npm 套件
-        Write-Info "還原 npm 套件..."
+        Write-Info "Restoring npm packages..."
         Push-Location "TwFrontEnd"
         npm install --silent
         Pop-Location
-        Write-Success "npm 套件還原完成"
+        Write-Success "npm packages restored"
     }
     finally {
         Pop-Location
@@ -201,41 +187,39 @@ function Restore-Dependencies {
 }
 
 function Update-DeployScript {
-    Write-Step "更新部署腳本路徑"
+    Write-Step "Update Deploy Script Path"
 
     $deployScript = Join-Path $InstallPath "deploy.ps1"
 
     if (Test-Path $deployScript) {
         $content = Get-Content $deployScript -Raw
-
-        # 更新 SourceRoot 路徑
-        $content = $content -replace '\$SourceRoot = "C:\\Users\\User\\SideProject\\Duende\.IdentityServer\.Admin"', "`$SourceRoot = `"$($InstallPath -replace '\\', '\\')`""
-
+        $escapedPath = $InstallPath -replace "\\", "\\"
+        $content = $content -replace '\$SourceRoot = "C:\\Users\\User\\SideProject\\Duende\.IdentityServer\.Admin"', "`$SourceRoot = `"$escapedPath`""
         $content | Set-Content $deployScript -NoNewline
-        Write-Success "已更新 deploy.ps1 中的路徑"
+        Write-Success "Updated deploy.ps1 path"
     }
 }
 
 function Test-Build {
-    Write-Step "測試建置"
+    Write-Step "Test Build"
 
-    $confirm = Read-Host "是否執行測試建置？(Y/n)"
+    $confirm = Read-Host "Run test build? (Y/n)"
     if ($confirm -eq "n") {
-        Write-Info "跳過測試建置"
+        Write-Info "Skipped test build"
         return
     }
 
     Push-Location $InstallPath
     try {
-        Write-Info "建置後端..."
+        Write-Info "Building backend..."
         dotnet build --verbosity quiet
-        Write-Success "後端建置成功"
+        Write-Success "Backend build succeeded"
 
-        Write-Info "建置前端..."
+        Write-Info "Building frontend..."
         Push-Location "TwFrontEnd"
         npm run build
         Pop-Location
-        Write-Success "前端建置成功"
+        Write-Success "Frontend build succeeded"
     }
     finally {
         Pop-Location
@@ -243,9 +227,10 @@ function Test-Build {
 }
 
 function Show-Summary {
-    Write-Title "設定完成"
+    Write-Title "Setup Complete"
 
-    Write-Host "`n已安裝的軟體：" -ForegroundColor White
+    Write-Host ""
+    Write-Host "Installed Software:" -ForegroundColor White
 
     if (Test-Command "git") {
         Write-Host "  Git:     $(git --version)" -ForegroundColor Green
@@ -260,14 +245,17 @@ function Show-Summary {
         Write-Host "  npm:     $(npm --version)" -ForegroundColor Green
     }
 
-    Write-Host "`n專案位置：" -ForegroundColor White
+    Write-Host ""
+    Write-Host "Project Location:" -ForegroundColor White
     Write-Host "  $InstallPath" -ForegroundColor Cyan
 
-    Write-Host "`n下一步：" -ForegroundColor White
+    Write-Host ""
+    Write-Host "Next Steps:" -ForegroundColor White
     Write-Host "  cd $InstallPath" -ForegroundColor Gray
     Write-Host "  .\deploy.ps1" -ForegroundColor Gray
 
-    Write-Host "`n部署目標：" -ForegroundColor White
+    Write-Host ""
+    Write-Host "Deploy Targets:" -ForegroundColor White
     Write-Host "  Admin      -> C:\Workspace\PRSWeb\Admin" -ForegroundColor Gray
     Write-Host "  AdminApi   -> C:\Workspace\PRSWeb\admin-api" -ForegroundColor Gray
     Write-Host "  STS        -> C:\Workspace\PRSWeb\STS" -ForegroundColor Gray
@@ -275,46 +263,34 @@ function Show-Summary {
 }
 
 # ============================================
-# 主程式
+# Main
 # ============================================
 
-Write-Title "PRS 身份認證管理系統 - 首次環境設定"
-Write-Host "安裝路徑: $InstallPath" -ForegroundColor Gray
-Write-Host "Git 倉庫: $GitRepo" -ForegroundColor Gray
-Write-Host "分支:     $GitBranch" -ForegroundColor Gray
+Write-Title "PRS Identity Admin - First-time Setup"
+Write-Host "Install Path: $InstallPath" -ForegroundColor Gray
+Write-Host "Git Repo:     $GitRepo" -ForegroundColor Gray
+Write-Host "Branch:       $GitBranch" -ForegroundColor Gray
 
-$confirm = Read-Host "`n開始設定？(Y/n)"
+$confirm = Read-Host "Start setup? (Y/n)"
 if ($confirm -eq "n") {
-    Write-Host "已取消。" -ForegroundColor Yellow
+    Write-Host "Cancelled." -ForegroundColor Yellow
     exit 0
 }
 
 try {
-    # 1. 安裝必要軟體
     Install-Chocolatey
     Install-Git
     Install-DotNet
     Install-NodeJS
-
-    # 2. 設定 Git
     Setup-GitCredential
-
-    # 3. Clone 專案
     Clone-Repository
-
-    # 4. 還原相依套件
     Restore-Dependencies
-
-    # 5. 更新部署腳本
     Update-DeployScript
-
-    # 6. 測試建置
     Test-Build
-
-    # 7. 顯示摘要
     Show-Summary
 }
 catch {
-    Write-Host "`n[ERROR] 設定失敗: $_" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "[ERROR] Setup failed: $_" -ForegroundColor Red
     exit 1
 }
