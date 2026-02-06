@@ -399,7 +399,7 @@ export function GoogleSyncPanel({ onSyncComplete }: { onSyncComplete?: () => voi
                                         {lastResult.success ? '同步成功' : '同步失敗'}
                                     </h4>
                                     <p className="text-sm text-white/80 mb-3">{lastResult.message}</p>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
                                         <div>
                                             <p className="text-[var(--color-text-muted)]">新增組織</p>
                                             <p className="text-lg font-bold text-emerald-400">+{lastResult.organizationsCreated}</p>
@@ -413,10 +413,34 @@ export function GoogleSyncPanel({ onSyncComplete }: { onSyncComplete?: () => voi
                                             <p className="text-lg font-bold text-white">{lastResult.membersSynced}</p>
                                         </div>
                                         <div>
+                                            <p className="text-[var(--color-text-muted)]">失敗人員</p>
+                                            <p className={`text-lg font-bold ${lastResult.membersFailed > 0 ? 'text-red-400' : 'text-white/50'}`}>
+                                                {lastResult.membersFailed}
+                                            </p>
+                                        </div>
+                                        <div>
                                             <p className="text-[var(--color-text-muted)]">耗時</p>
                                             <p className="text-lg font-bold text-white">{lastResult.durationMs}ms</p>
                                         </div>
                                     </div>
+
+                                    {/* 顯示失敗的 Email 清單 */}
+                                    {lastResult.failedEmails && lastResult.failedEmails.length > 0 && (
+                                        <div className="mt-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                                            <p className="text-sm text-red-400 flex items-center gap-2 mb-2">
+                                                <XCircle size={14} />
+                                                {lastResult.failedEmails.length} 位人員同步失敗
+                                                <span className="text-red-300/60 text-xs">（Email 在 Users 表中不存在或未啟用）</span>
+                                            </p>
+                                            <div className="max-h-32 overflow-auto rounded bg-black/20 p-2">
+                                                <ul className="text-xs text-red-300/80 space-y-1 font-mono">
+                                                    {lastResult.failedEmails.map((email, i) => (
+                                                        <li key={i}>• {email}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
