@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Dtos.MultiTenant;
 using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services.Interfaces;
 using Skoruba.Duende.IdentityServer.Admin.UI.Api.Configuration.Constants;
@@ -24,10 +25,14 @@ namespace Skoruba.Duende.IdentityServer.Admin.UI.Api.Controllers
     public class MultiTenantPermissionController : ControllerBase
     {
         private readonly IMultiTenantPermissionService _permissionService;
+        private readonly ILogger<MultiTenantPermissionController> _logger;
 
-        public MultiTenantPermissionController(IMultiTenantPermissionService permissionService)
+        public MultiTenantPermissionController(
+            IMultiTenantPermissionService permissionService,
+            ILogger<MultiTenantPermissionController> logger)
         {
             _permissionService = permissionService;
+            _logger = logger;
         }
 
         #region PermissionResource
@@ -171,6 +176,21 @@ namespace Skoruba.Duende.IdentityServer.Admin.UI.Api.Controllers
 
         #endregion
 
+        #region Group Permissions
+
+        /// <summary>
+        /// 取得群組的權限
+        /// </summary>
+        [HttpGet("groups/{groupId:guid}")]
+        [ProducesResponseType(typeof(List<PermissionDto>), 200)]
+        public async Task<ActionResult<List<PermissionDto>>> GetGroupPermissions(Guid groupId)
+        {
+            var permissions = await _permissionService.GetGroupPermissionsAsync(groupId);
+            return Ok(permissions);
+        }
+
+        #endregion
+
         #region Resource Permissions
 
         /// <summary>
@@ -221,10 +241,27 @@ namespace Skoruba.Duende.IdentityServer.Admin.UI.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var grantedBy = User.FindFirst("sub")?.Value ?? User.Identity?.Name ?? "system";
+            try
+            {
+                var grantedBy = User.FindFirst("sub")?.Value ?? User.Identity?.Name ?? "system";
 
-            var permissions = await _permissionService.BatchGrantPermissionsAsync(dto, grantedBy);
-            return CreatedAtAction(nameof(GetUserPermissions), new { userId = dto.SubjectId }, permissions);
+                _logger.LogInformation("BatchGrantPermissions called for subject {SubjectType}/{SubjectId} with {Count} resource scopes",
+                    dto.SubjectType, dto.SubjectId, dto.ResourceScopes?.Count ?? 0);
+
+                var permissions = await _permissionService.BatchGrantPermissionsAsync(dto, grantedBy);
+                return CreatedAtAction(nameof(GetUserPermissions), new { userId = dto.SubjectId }, permissions);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "BatchGrantPermissions failed for subject {SubjectType}/{SubjectId}",
+                    dto.SubjectType, dto.SubjectId);
+                return StatusCode(500, new OperationResultDto
+                {
+                    Success = false,
+                    Message = $"授予失敗: {ex.Message}",
+                    Data = new { detail = ex.InnerException?.Message, stackTrace = ex.StackTrace }
+                });
+            }
         }
 
         /// <summary>
@@ -255,8 +292,25 @@ namespace Skoruba.Duende.IdentityServer.Admin.UI.Api.Controllers
                 return BadRequest(new { message = "請提供要撤銷的權限 ID" });
             }
 
-            var result = await _permissionService.BatchRevokePermissionsAsync(permissionIds);
-            return Ok(result);
+            try
+            {
+                _logger.LogInformation("BatchRevokePermissions called with {Count} IDs: {Ids}",
+                    permissionIds.Count, string.Join(", ", permissionIds));
+
+                var result = await _permissionService.BatchRevokePermissionsAsync(permissionIds);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "BatchRevokePermissions failed for IDs: {Ids}",
+                    string.Join(", ", permissionIds));
+                return StatusCode(500, new OperationResultDto
+                {
+                    Success = false,
+                    Message = $"撤銷失敗: {ex.Message}",
+                    Data = new { detail = ex.InnerException?.Message, stackTrace = ex.StackTrace }
+                });
+            }
         }
 
         /// <summary>

@@ -67,6 +67,11 @@ namespace Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories.Inter
         Task<List<Permission>> GetOrganizationPermissionsAsync(Guid organizationId, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// 取得群組的權限
+        /// </summary>
+        Task<List<Permission>> GetGroupPermissionsAsync(Guid groupId, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// 取得資源的權限列表
         /// </summary>
         Task<List<Permission>> GetResourcePermissionsAsync(Guid resourceId, CancellationToken cancellationToken = default);

@@ -5,13 +5,15 @@
  * 頂部導航列 - 整合認證系統
  */
 
-import { Bell, Search, ChevronDown, LogOut, Settings, User } from 'lucide-react';
+import { Bell, Search, ChevronDown, LogOut, Settings, User, Sun, Moon } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export function Header() {
     const { user, logout } = useAuth();
+    const { theme, toggleTheme } = useTheme();
     const [showUserMenu, setShowUserMenu] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -64,6 +66,19 @@ export function Header() {
 
             {/* Right Actions */}
             <div className="flex items-center gap-6">
+                {/* Theme Toggle */}
+                <button
+                    onClick={toggleTheme}
+                    className="relative p-2 rounded-full hover:bg-[rgba(255,255,255,0.05)] transition-colors group"
+                    title={theme === 'dark' ? '切換至淺色模式' : '切換至深色模式'}
+                >
+                    {theme === 'dark' ? (
+                        <Sun size={20} className="text-[var(--color-text-secondary)] group-hover:text-white transition-colors" />
+                    ) : (
+                        <Moon size={20} className="text-[var(--color-text-secondary)] group-hover:text-white transition-colors" />
+                    )}
+                </button>
+
                 {/* Notifications */}
                 <button className="relative p-2 rounded-full hover:bg-[rgba(255,255,255,0.05)] transition-colors group">
                     <Bell

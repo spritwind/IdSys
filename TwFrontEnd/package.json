@@ -13,6 +13,8 @@
     "axios": "^1.13.2",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.26",
+    "html-to-image": "^1.11.13",
+    "jspdf": "^4.1.0",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.562.0",
     "oidc-client-ts": "^3.4.1",

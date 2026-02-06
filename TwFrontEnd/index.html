@@ -10,6 +10,10 @@
     <title>優式資本 UC Capital - Identity Admin</title>
   </head>
   <body>
+    <script>
+      document.documentElement.setAttribute('data-theme',
+        localStorage.getItem('uc-admin-theme') || 'dark');
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

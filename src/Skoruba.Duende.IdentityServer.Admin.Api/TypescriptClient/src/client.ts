@@ -3348,6 +3348,905 @@ export class DashboardClient extends WebApiClientBase implements IDashboardClien
     }
 }
 
+export interface IGoogleWorkspaceSyncClient {
+
+    /**
+     * 預覽同步內容（不寫入資料庫）
+     * @param tenantId (optional) 租戶 ID（可選）
+     * @return 預覽結果
+     */
+    preview(tenantId: string | null | undefined): Promise<GoogleSyncPreviewDto>;
+
+    /**
+     * 同步組織架構
+     * @param tenantId (optional) 租戶 ID（可選）
+     * @return 同步結果
+     */
+    syncOrganizations(tenantId: string | null | undefined): Promise<GoogleSyncResultDto>;
+
+    /**
+     * 同步人員對應
+     * @param tenantId (optional) 租戶 ID（可選）
+     * @param targetEmails (optional) 指定同步的 Email（可選，以逗號分隔）
+     * @return 同步結果
+     */
+    syncMembers(tenantId: string | null | undefined, targetEmails: string | null | undefined): Promise<GoogleSyncResultDto>;
+
+    /**
+     * 完整同步（組織架構 + 人員對應）
+     * @param request 同步請求參數
+     * @return 同步結果
+     */
+    fullSync(request: GoogleSyncRequestDto): Promise<GoogleSyncResultDto>;
+
+    /**
+     * 健康檢查（測試 Google API 連線）
+     * @return 連線狀態
+     */
+    healthCheck(): Promise<void>;
+}
+
+export class GoogleWorkspaceSyncClient extends WebApiClientBase implements IGoogleWorkspaceSyncClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super();
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * 預覽同步內容（不寫入資料庫）
+     * @param tenantId (optional) 租戶 ID（可選）
+     * @return 預覽結果
+     */
+    preview(tenantId: string | null | undefined): Promise<GoogleSyncPreviewDto> {
+        let url_ = this.baseUrl + "/api/v2/google-sync/preview?";
+        if (tenantId !== undefined && tenantId !== null)
+            url_ += "tenantId=" + encodeURIComponent("" + tenantId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processPreview(_response);
+        });
+    }
+
+    protected processPreview(response: Response): Promise<GoogleSyncPreviewDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = GoogleSyncPreviewDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            return throwException("A server side error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GoogleSyncPreviewDto>(null as any);
+    }
+
+    /**
+     * 同步組織架構
+     * @param tenantId (optional) 租戶 ID（可選）
+     * @return 同步結果
+     */
+    syncOrganizations(tenantId: string | null | undefined): Promise<GoogleSyncResultDto> {
+        let url_ = this.baseUrl + "/api/v2/google-sync/organizations?";
+        if (tenantId !== undefined && tenantId !== null)
+            url_ += "tenantId=" + encodeURIComponent("" + tenantId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "POST",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processSyncOrganizations(_response);
+        });
+    }
+
+    protected processSyncOrganizations(response: Response): Promise<GoogleSyncResultDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = GoogleSyncResultDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            return throwException("A server side error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GoogleSyncResultDto>(null as any);
+    }
+
+    /**
+     * 同步人員對應
+     * @param tenantId (optional) 租戶 ID（可選）
+     * @param targetEmails (optional) 指定同步的 Email（可選，以逗號分隔）
+     * @return 同步結果
+     */
+    syncMembers(tenantId: string | null | undefined, targetEmails: string | null | undefined): Promise<GoogleSyncResultDto> {
+        let url_ = this.baseUrl + "/api/v2/google-sync/members?";
+        if (tenantId !== undefined && tenantId !== null)
+            url_ += "tenantId=" + encodeURIComponent("" + tenantId) + "&";
+        if (targetEmails !== undefined && targetEmails !== null)
+            url_ += "targetEmails=" + encodeURIComponent("" + targetEmails) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "POST",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processSyncMembers(_response);
+        });
+    }
+
+    protected processSyncMembers(response: Response): Promise<GoogleSyncResultDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = GoogleSyncResultDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            return throwException("A server side error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GoogleSyncResultDto>(null as any);
+    }
+
+    /**
+     * 完整同步（組織架構 + 人員對應）
+     * @param request 同步請求參數
+     * @return 同步結果
+     */
+    fullSync(request: GoogleSyncRequestDto): Promise<GoogleSyncResultDto> {
+        let url_ = this.baseUrl + "/api/v2/google-sync/full";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processFullSync(_response);
+        });
+    }
+
+    protected processFullSync(response: Response): Promise<GoogleSyncResultDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = GoogleSyncResultDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            return throwException("A server side error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GoogleSyncResultDto>(null as any);
+    }
+
+    /**
+     * 健康檢查（測試 Google API 連線）
+     * @return 連線狀態
+     */
+    healthCheck(): Promise<void> {
+        let url_ = this.baseUrl + "/api/v2/google-sync/health";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processHealthCheck(_response);
+        });
+    }
+
+    protected processHealthCheck(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 500) {
+            return response.text().then((_responseText) => {
+            return throwException("A server side error occurred.", status, _responseText, _headers);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+}
+
+export interface IGroupClient {
+
+    /**
+     * 取得所有群組 (可依 GroupType 篩選)
+     * @param groupType (optional) 
+     */
+    getAll(groupType: string | null | undefined): Promise<GroupDto[]>;
+
+    /**
+     * 新增群組
+     */
+    create(dto: CreateGroupDto): Promise<GroupDto>;
+
+    /**
+     * 取得群組統計
+     */
+    getStats(): Promise<GroupStatsDto>;
+
+    /**
+     * 依 ID 取得群組
+     */
+    getById(id: string): Promise<GroupDto>;
+
+    /**
+     * 更新群組
+     */
+    update(id: string, dto: UpdateGroupDto): Promise<GroupDto>;
+
+    /**
+     * 刪除群組 (soft delete)
+     */
+    delete(id: string): Promise<OperationResultDto>;
+
+    /**
+     * 取得群組成員
+     */
+    getMembers(id: string): Promise<GroupMemberDetailDto[]>;
+
+    /**
+     * 新增群組成員
+     */
+    addMember(id: string, dto: AddGroupMemberDto): Promise<GroupMemberDetailDto>;
+
+    /**
+     * 移除群組成員
+     */
+    removeMember(id: string, userId: string): Promise<OperationResultDto>;
+}
+
+export class GroupClient extends WebApiClientBase implements IGroupClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super();
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * 取得所有群組 (可依 GroupType 篩選)
+     * @param groupType (optional) 
+     */
+    getAll(groupType: string | null | undefined): Promise<GroupDto[]> {
+        let url_ = this.baseUrl + "/api/v2/groups?";
+        if (groupType !== undefined && groupType !== null)
+            url_ += "groupType=" + encodeURIComponent("" + groupType) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetAll(_response);
+        });
+    }
+
+    protected processGetAll(response: Response): Promise<GroupDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(GroupDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GroupDto[]>(null as any);
+    }
+
+    /**
+     * 新增群組
+     */
+    create(dto: CreateGroupDto): Promise<GroupDto> {
+        let url_ = this.baseUrl + "/api/v2/groups";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processCreate(_response);
+        });
+    }
+
+    protected processCreate(response: Response): Promise<GroupDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result201 = GroupDto.fromJS(resultData201);
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GroupDto>(null as any);
+    }
+
+    /**
+     * 取得群組統計
+     */
+    getStats(): Promise<GroupStatsDto> {
+        let url_ = this.baseUrl + "/api/v2/groups/stats";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetStats(_response);
+        });
+    }
+
+    protected processGetStats(response: Response): Promise<GroupStatsDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = GroupStatsDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GroupStatsDto>(null as any);
+    }
+
+    /**
+     * 依 ID 取得群組
+     */
+    getById(id: string): Promise<GroupDto> {
+        let url_ = this.baseUrl + "/api/v2/groups/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetById(_response);
+        });
+    }
+
+    protected processGetById(response: Response): Promise<GroupDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = GroupDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GroupDto>(null as any);
+    }
+
+    /**
+     * 更新群組
+     */
+    update(id: string, dto: UpdateGroupDto): Promise<GroupDto> {
+        let url_ = this.baseUrl + "/api/v2/groups/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processUpdate(_response);
+        });
+    }
+
+    protected processUpdate(response: Response): Promise<GroupDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = GroupDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GroupDto>(null as any);
+    }
+
+    /**
+     * 刪除群組 (soft delete)
+     */
+    delete(id: string): Promise<OperationResultDto> {
+        let url_ = this.baseUrl + "/api/v2/groups/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processDelete(_response);
+        });
+    }
+
+    protected processDelete(response: Response): Promise<OperationResultDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = OperationResultDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OperationResultDto>(null as any);
+    }
+
+    /**
+     * 取得群組成員
+     */
+    getMembers(id: string): Promise<GroupMemberDetailDto[]> {
+        let url_ = this.baseUrl + "/api/v2/groups/{id}/members";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetMembers(_response);
+        });
+    }
+
+    protected processGetMembers(response: Response): Promise<GroupMemberDetailDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(GroupMemberDetailDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GroupMemberDetailDto[]>(null as any);
+    }
+
+    /**
+     * 新增群組成員
+     */
+    addMember(id: string, dto: AddGroupMemberDto): Promise<GroupMemberDetailDto> {
+        let url_ = this.baseUrl + "/api/v2/groups/{id}/members";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processAddMember(_response);
+        });
+    }
+
+    protected processAddMember(response: Response): Promise<GroupMemberDetailDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result201 = GroupMemberDetailDto.fromJS(resultData201);
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GroupMemberDetailDto>(null as any);
+    }
+
+    /**
+     * 移除群組成員
+     */
+    removeMember(id: string, userId: string): Promise<OperationResultDto> {
+        let url_ = this.baseUrl + "/api/v2/groups/{id}/members/{userId}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        if (userId === undefined || userId === null)
+            throw new Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processRemoveMember(_response);
+        });
+    }
+
+    protected processRemoveMember(response: Response): Promise<OperationResultDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = OperationResultDto.fromJS(resultData200);
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<OperationResultDto>(null as any);
+    }
+}
+
 export interface IIdentityProvidersClient {
 
     get(searchText: string | null | undefined, page: number | undefined, pageSize: number | undefined): Promise<IdentityProvidersApiDto>;
@@ -5544,6 +6443,11 @@ export interface IMultiTenantPermissionClient {
     getOrganizationPermissions(organizationId: string): Promise<PermissionDto[]>;
 
     /**
+     * 取得群組的權限
+     */
+    getGroupPermissions(groupId: string): Promise<PermissionDto[]>;
+
+    /**
      * 取得資源的權限
      */
     getResourcePermissions(resourceId: string): Promise<PermissionDto[]>;
@@ -6037,6 +6941,63 @@ export class MultiTenantPermissionClient extends WebApiClientBase implements IMu
     }
 
     /**
+     * 取得群組的權限
+     */
+    getGroupPermissions(groupId: string): Promise<PermissionDto[]> {
+        let url_ = this.baseUrl + "/api/v2/permissions/groups/{groupId}";
+        if (groupId === undefined || groupId === null)
+            throw new Error("The parameter 'groupId' must be defined.");
+        url_ = url_.replace("{groupId}", encodeURIComponent("" + groupId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.processGetGroupPermissions(_response);
+        });
+    }
+
+    protected processGetGroupPermissions(response: Response): Promise<PermissionDto[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(PermissionDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            return throwException("Forbidden", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PermissionDto[]>(null as any);
+    }
+
+    /**
      * 取得資源的權限
      */
     getResourcePermissions(resourceId: string): Promise<PermissionDto[]> {
@@ -6345,14 +7306,14 @@ export class MultiTenantPermissionClient extends WebApiClientBase implements IMu
      * 批次撤銷權限
      */
     batchRevokePermissions(permissionIds: string[]): Promise<OperationResultDto> {
-        let url_ = this.baseUrl + "/api/v2/permissions/batch";
+        let url_ = this.baseUrl + "/api/v2/permissions/revoke/batch";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(permissionIds);
 
         let options_: RequestInit = {
             body: content_,
-            method: "DELETE",
+            method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Accept": "application/json"
@@ -16115,6 +17076,658 @@ export interface IDashboardIdentityDto {
     rolesTotal: number;
 }
 
+export class GoogleSyncPreviewDto implements IGoogleSyncPreviewDto {
+    organizationsFromGoogle!: number;
+    membersFromGoogle!: number;
+    membersWithMissingOrg!: number;
+    existingOrganizations!: number;
+    existingMembers!: number;
+    organizationPaths!: string[] | undefined;
+    warnings!: string[] | undefined;
+    previewedAt!: Date;
+
+    constructor(data?: IGoogleSyncPreviewDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.organizationsFromGoogle = _data["organizationsFromGoogle"];
+            this.membersFromGoogle = _data["membersFromGoogle"];
+            this.membersWithMissingOrg = _data["membersWithMissingOrg"];
+            this.existingOrganizations = _data["existingOrganizations"];
+            this.existingMembers = _data["existingMembers"];
+            if (Array.isArray(_data["organizationPaths"])) {
+                this.organizationPaths = [] as any;
+                for (let item of _data["organizationPaths"])
+                    this.organizationPaths!.push(item);
+            }
+            if (Array.isArray(_data["warnings"])) {
+                this.warnings = [] as any;
+                for (let item of _data["warnings"])
+                    this.warnings!.push(item);
+            }
+            this.previewedAt = _data["previewedAt"] ? new Date(_data["previewedAt"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): GoogleSyncPreviewDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new GoogleSyncPreviewDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["organizationsFromGoogle"] = this.organizationsFromGoogle;
+        data["membersFromGoogle"] = this.membersFromGoogle;
+        data["membersWithMissingOrg"] = this.membersWithMissingOrg;
+        data["existingOrganizations"] = this.existingOrganizations;
+        data["existingMembers"] = this.existingMembers;
+        if (Array.isArray(this.organizationPaths)) {
+            data["organizationPaths"] = [];
+            for (let item of this.organizationPaths)
+                data["organizationPaths"].push(item);
+        }
+        if (Array.isArray(this.warnings)) {
+            data["warnings"] = [];
+            for (let item of this.warnings)
+                data["warnings"].push(item);
+        }
+        data["previewedAt"] = this.previewedAt ? this.previewedAt.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IGoogleSyncPreviewDto {
+    organizationsFromGoogle: number;
+    membersFromGoogle: number;
+    membersWithMissingOrg: number;
+    existingOrganizations: number;
+    existingMembers: number;
+    organizationPaths: string[] | undefined;
+    warnings: string[] | undefined;
+    previewedAt: Date;
+}
+
+export class GoogleSyncResultDto implements IGoogleSyncResultDto {
+    success!: boolean;
+    message!: string | undefined;
+    organizationsCreated!: number;
+    organizationsUpdated!: number;
+    organizationsDisabled!: number;
+    membersSynced!: number;
+    membersFailed!: number;
+    failedEmails!: string[] | undefined;
+    warnings!: string[] | undefined;
+    syncedAt!: Date;
+    durationMs!: number;
+
+    constructor(data?: IGoogleSyncResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.success = _data["success"];
+            this.message = _data["message"];
+            this.organizationsCreated = _data["organizationsCreated"];
+            this.organizationsUpdated = _data["organizationsUpdated"];
+            this.organizationsDisabled = _data["organizationsDisabled"];
+            this.membersSynced = _data["membersSynced"];
+            this.membersFailed = _data["membersFailed"];
+            if (Array.isArray(_data["failedEmails"])) {
+                this.failedEmails = [] as any;
+                for (let item of _data["failedEmails"])
+                    this.failedEmails!.push(item);
+            }
+            if (Array.isArray(_data["warnings"])) {
+                this.warnings = [] as any;
+                for (let item of _data["warnings"])
+                    this.warnings!.push(item);
+            }
+            this.syncedAt = _data["syncedAt"] ? new Date(_data["syncedAt"].toString()) : <any>undefined;
+            this.durationMs = _data["durationMs"];
+        }
+    }
+
+    static fromJS(data: any): GoogleSyncResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new GoogleSyncResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["success"] = this.success;
+        data["message"] = this.message;
+        data["organizationsCreated"] = this.organizationsCreated;
+        data["organizationsUpdated"] = this.organizationsUpdated;
+        data["organizationsDisabled"] = this.organizationsDisabled;
+        data["membersSynced"] = this.membersSynced;
+        data["membersFailed"] = this.membersFailed;
+        if (Array.isArray(this.failedEmails)) {
+            data["failedEmails"] = [];
+            for (let item of this.failedEmails)
+                data["failedEmails"].push(item);
+        }
+        if (Array.isArray(this.warnings)) {
+            data["warnings"] = [];
+            for (let item of this.warnings)
+                data["warnings"].push(item);
+        }
+        data["syncedAt"] = this.syncedAt ? this.syncedAt.toISOString() : <any>undefined;
+        data["durationMs"] = this.durationMs;
+        return data;
+    }
+}
+
+export interface IGoogleSyncResultDto {
+    success: boolean;
+    message: string | undefined;
+    organizationsCreated: number;
+    organizationsUpdated: number;
+    organizationsDisabled: number;
+    membersSynced: number;
+    membersFailed: number;
+    failedEmails: string[] | undefined;
+    warnings: string[] | undefined;
+    syncedAt: Date;
+    durationMs: number;
+}
+
+export class GoogleSyncRequestDto implements IGoogleSyncRequestDto {
+    tenantId!: string | undefined;
+    targetEmails!: string[] | undefined;
+    syncOrganizations!: boolean;
+    syncMembers!: boolean;
+    dryRun!: boolean;
+
+    constructor(data?: IGoogleSyncRequestDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.tenantId = _data["tenantId"];
+            if (Array.isArray(_data["targetEmails"])) {
+                this.targetEmails = [] as any;
+                for (let item of _data["targetEmails"])
+                    this.targetEmails!.push(item);
+            }
+            this.syncOrganizations = _data["syncOrganizations"];
+            this.syncMembers = _data["syncMembers"];
+            this.dryRun = _data["dryRun"];
+        }
+    }
+
+    static fromJS(data: any): GoogleSyncRequestDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new GoogleSyncRequestDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["tenantId"] = this.tenantId;
+        if (Array.isArray(this.targetEmails)) {
+            data["targetEmails"] = [];
+            for (let item of this.targetEmails)
+                data["targetEmails"].push(item);
+        }
+        data["syncOrganizations"] = this.syncOrganizations;
+        data["syncMembers"] = this.syncMembers;
+        data["dryRun"] = this.dryRun;
+        return data;
+    }
+}
+
+export interface IGoogleSyncRequestDto {
+    tenantId: string | undefined;
+    targetEmails: string[] | undefined;
+    syncOrganizations: boolean;
+    syncMembers: boolean;
+    dryRun: boolean;
+}
+
+export class GroupDto implements IGroupDto {
+    id!: string;
+    tenantId!: string;
+    code!: string | undefined;
+    name!: string | undefined;
+    description!: string | undefined;
+    groupType!: string | undefined;
+    organizationId!: string | undefined;
+    organizationName!: string | undefined;
+    sourceId!: number | undefined;
+    ownerUserId!: string | undefined;
+    ownerUserName!: string | undefined;
+    isEnabled!: boolean;
+    memberCount!: number;
+    createdAt!: Date;
+    updatedAt!: Date | undefined;
+
+    constructor(data?: IGroupDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.tenantId = _data["tenantId"];
+            this.code = _data["code"];
+            this.name = _data["name"];
+            this.description = _data["description"];
+            this.groupType = _data["groupType"];
+            this.organizationId = _data["organizationId"];
+            this.organizationName = _data["organizationName"];
+            this.sourceId = _data["sourceId"];
+            this.ownerUserId = _data["ownerUserId"];
+            this.ownerUserName = _data["ownerUserName"];
+            this.isEnabled = _data["isEnabled"];
+            this.memberCount = _data["memberCount"];
+            this.createdAt = _data["createdAt"] ? new Date(_data["createdAt"].toString()) : <any>undefined;
+            this.updatedAt = _data["updatedAt"] ? new Date(_data["updatedAt"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): GroupDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new GroupDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["tenantId"] = this.tenantId;
+        data["code"] = this.code;
+        data["name"] = this.name;
+        data["description"] = this.description;
+        data["groupType"] = this.groupType;
+        data["organizationId"] = this.organizationId;
+        data["organizationName"] = this.organizationName;
+        data["sourceId"] = this.sourceId;
+        data["ownerUserId"] = this.ownerUserId;
+        data["ownerUserName"] = this.ownerUserName;
+        data["isEnabled"] = this.isEnabled;
+        data["memberCount"] = this.memberCount;
+        data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : <any>undefined;
+        data["updatedAt"] = this.updatedAt ? this.updatedAt.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IGroupDto {
+    id: string;
+    tenantId: string;
+    code: string | undefined;
+    name: string | undefined;
+    description: string | undefined;
+    groupType: string | undefined;
+    organizationId: string | undefined;
+    organizationName: string | undefined;
+    sourceId: number | undefined;
+    ownerUserId: string | undefined;
+    ownerUserName: string | undefined;
+    isEnabled: boolean;
+    memberCount: number;
+    createdAt: Date;
+    updatedAt: Date | undefined;
+}
+
+export class GroupStatsDto implements IGroupStatsDto {
+    totalGroups!: number;
+    countByType!: { [key: string]: number; } | undefined;
+    totalMembers!: number;
+
+    constructor(data?: IGroupStatsDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.totalGroups = _data["totalGroups"];
+            if (_data["countByType"]) {
+                this.countByType = {} as any;
+                for (let key in _data["countByType"]) {
+                    if (_data["countByType"].hasOwnProperty(key))
+                        (<any>this.countByType)![key] = _data["countByType"][key];
+                }
+            }
+            this.totalMembers = _data["totalMembers"];
+        }
+    }
+
+    static fromJS(data: any): GroupStatsDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new GroupStatsDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["totalGroups"] = this.totalGroups;
+        if (this.countByType) {
+            data["countByType"] = {};
+            for (let key in this.countByType) {
+                if (this.countByType.hasOwnProperty(key))
+                    (<any>data["countByType"])[key] = (<any>this.countByType)[key];
+            }
+        }
+        data["totalMembers"] = this.totalMembers;
+        return data;
+    }
+}
+
+export interface IGroupStatsDto {
+    totalGroups: number;
+    countByType: { [key: string]: number; } | undefined;
+    totalMembers: number;
+}
+
+export class CreateGroupDto implements ICreateGroupDto {
+    code!: string | undefined;
+    name!: string | undefined;
+    description!: string | undefined;
+    groupType!: string | undefined;
+    organizationId!: string | undefined;
+    ownerUserId!: string | undefined;
+
+    constructor(data?: ICreateGroupDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.code = _data["code"];
+            this.name = _data["name"];
+            this.description = _data["description"];
+            this.groupType = _data["groupType"];
+            this.organizationId = _data["organizationId"];
+            this.ownerUserId = _data["ownerUserId"];
+        }
+    }
+
+    static fromJS(data: any): CreateGroupDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateGroupDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["code"] = this.code;
+        data["name"] = this.name;
+        data["description"] = this.description;
+        data["groupType"] = this.groupType;
+        data["organizationId"] = this.organizationId;
+        data["ownerUserId"] = this.ownerUserId;
+        return data;
+    }
+}
+
+export interface ICreateGroupDto {
+    code: string | undefined;
+    name: string | undefined;
+    description: string | undefined;
+    groupType: string | undefined;
+    organizationId: string | undefined;
+    ownerUserId: string | undefined;
+}
+
+export class UpdateGroupDto implements IUpdateGroupDto {
+    code!: string | undefined;
+    name!: string | undefined;
+    description!: string | undefined;
+    groupType!: string | undefined;
+    organizationId!: string | undefined;
+    ownerUserId!: string | undefined;
+    isEnabled!: boolean;
+
+    constructor(data?: IUpdateGroupDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.code = _data["code"];
+            this.name = _data["name"];
+            this.description = _data["description"];
+            this.groupType = _data["groupType"];
+            this.organizationId = _data["organizationId"];
+            this.ownerUserId = _data["ownerUserId"];
+            this.isEnabled = _data["isEnabled"];
+        }
+    }
+
+    static fromJS(data: any): UpdateGroupDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateGroupDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["code"] = this.code;
+        data["name"] = this.name;
+        data["description"] = this.description;
+        data["groupType"] = this.groupType;
+        data["organizationId"] = this.organizationId;
+        data["ownerUserId"] = this.ownerUserId;
+        data["isEnabled"] = this.isEnabled;
+        return data;
+    }
+}
+
+export interface IUpdateGroupDto {
+    code: string | undefined;
+    name: string | undefined;
+    description: string | undefined;
+    groupType: string | undefined;
+    organizationId: string | undefined;
+    ownerUserId: string | undefined;
+    isEnabled: boolean;
+}
+
+export class OperationResultDto implements IOperationResultDto {
+    success!: boolean;
+    message!: string | undefined;
+    data!: any | undefined;
+
+    constructor(data?: IOperationResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.success = _data["success"];
+            this.message = _data["message"];
+            this.data = _data["data"];
+        }
+    }
+
+    static fromJS(data: any): OperationResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new OperationResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["success"] = this.success;
+        data["message"] = this.message;
+        data["data"] = this.data;
+        return data;
+    }
+}
+
+export interface IOperationResultDto {
+    success: boolean;
+    message: string | undefined;
+    data: any | undefined;
+}
+
+export class GroupMemberDetailDto implements IGroupMemberDetailDto {
+    id!: string;
+    groupId!: string;
+    userId!: string | undefined;
+    userName!: string | undefined;
+    displayName!: string | undefined;
+    email!: string | undefined;
+    memberRole!: string | undefined;
+    inheritGroupPermissions!: boolean;
+    joinedAt!: Date;
+
+    constructor(data?: IGroupMemberDetailDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.groupId = _data["groupId"];
+            this.userId = _data["userId"];
+            this.userName = _data["userName"];
+            this.displayName = _data["displayName"];
+            this.email = _data["email"];
+            this.memberRole = _data["memberRole"];
+            this.inheritGroupPermissions = _data["inheritGroupPermissions"];
+            this.joinedAt = _data["joinedAt"] ? new Date(_data["joinedAt"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): GroupMemberDetailDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new GroupMemberDetailDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["groupId"] = this.groupId;
+        data["userId"] = this.userId;
+        data["userName"] = this.userName;
+        data["displayName"] = this.displayName;
+        data["email"] = this.email;
+        data["memberRole"] = this.memberRole;
+        data["inheritGroupPermissions"] = this.inheritGroupPermissions;
+        data["joinedAt"] = this.joinedAt ? this.joinedAt.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IGroupMemberDetailDto {
+    id: string;
+    groupId: string;
+    userId: string | undefined;
+    userName: string | undefined;
+    displayName: string | undefined;
+    email: string | undefined;
+    memberRole: string | undefined;
+    inheritGroupPermissions: boolean;
+    joinedAt: Date;
+}
+
+export class AddGroupMemberDto implements IAddGroupMemberDto {
+    userId!: string | undefined;
+    memberRole!: string | undefined;
+    inheritGroupPermissions!: boolean;
+
+    constructor(data?: IAddGroupMemberDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.userId = _data["userId"];
+            this.memberRole = _data["memberRole"];
+            this.inheritGroupPermissions = _data["inheritGroupPermissions"];
+        }
+    }
+
+    static fromJS(data: any): AddGroupMemberDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new AddGroupMemberDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["userId"] = this.userId;
+        data["memberRole"] = this.memberRole;
+        data["inheritGroupPermissions"] = this.inheritGroupPermissions;
+        return data;
+    }
+}
+
+export interface IAddGroupMemberDto {
+    userId: string | undefined;
+    memberRole: string | undefined;
+    inheritGroupPermissions: boolean;
+}
+
 export class IdentityProvidersApiDto implements IIdentityProvidersApiDto {
     pageSize!: number;
     totalCount!: number;
@@ -17065,50 +18678,6 @@ export interface IUpdateOrganizationDto {
     description: string | undefined;
     sortOrder: number;
     inheritParentPermissions: boolean;
-}
-
-export class OperationResultDto implements IOperationResultDto {
-    success!: boolean;
-    message!: string | undefined;
-    data!: any | undefined;
-
-    constructor(data?: IOperationResultDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.success = _data["success"];
-            this.message = _data["message"];
-            this.data = _data["data"];
-        }
-    }
-
-    static fromJS(data: any): OperationResultDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new OperationResultDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["success"] = this.success;
-        data["message"] = this.message;
-        data["data"] = this.data;
-        return data;
-    }
-}
-
-export interface IOperationResultDto {
-    success: boolean;
-    message: string | undefined;
-    data: any | undefined;
 }
 
 export class OrganizationMemberDto implements IOrganizationMemberDto {
@@ -21122,6 +22691,7 @@ export class ActiveTokenDto implements IActiveTokenDto {
     type!: string | undefined;
     subjectId!: string | undefined;
     userName!: string | undefined;
+    email!: string | undefined;
     sessionId!: string | undefined;
     clientId!: string | undefined;
     clientName!: string | undefined;
@@ -21150,6 +22720,7 @@ export class ActiveTokenDto implements IActiveTokenDto {
             this.type = _data["type"];
             this.subjectId = _data["subjectId"];
             this.userName = _data["userName"];
+            this.email = _data["email"];
             this.sessionId = _data["sessionId"];
             this.clientId = _data["clientId"];
             this.clientName = _data["clientName"];
@@ -21178,6 +22749,7 @@ export class ActiveTokenDto implements IActiveTokenDto {
         data["type"] = this.type;
         data["subjectId"] = this.subjectId;
         data["userName"] = this.userName;
+        data["email"] = this.email;
         data["sessionId"] = this.sessionId;
         data["clientId"] = this.clientId;
         data["clientName"] = this.clientName;
@@ -21199,6 +22771,7 @@ export interface IActiveTokenDto {
     type: string | undefined;
     subjectId: string | undefined;
     userName: string | undefined;
+    email: string | undefined;
     sessionId: string | undefined;
     clientId: string | undefined;
     clientName: string | undefined;
@@ -21278,6 +22851,7 @@ export class RevokedTokenDto implements IRevokedTokenDto {
     jti!: string | undefined;
     subjectId!: string | undefined;
     userName!: string | undefined;
+    email!: string | undefined;
     clientId!: string | undefined;
     clientName!: string | undefined;
     tokenType!: string | undefined;
@@ -21301,6 +22875,7 @@ export class RevokedTokenDto implements IRevokedTokenDto {
             this.jti = _data["jti"];
             this.subjectId = _data["subjectId"];
             this.userName = _data["userName"];
+            this.email = _data["email"];
             this.clientId = _data["clientId"];
             this.clientName = _data["clientName"];
             this.tokenType = _data["tokenType"];
@@ -21324,6 +22899,7 @@ export class RevokedTokenDto implements IRevokedTokenDto {
         data["jti"] = this.jti;
         data["subjectId"] = this.subjectId;
         data["userName"] = this.userName;
+        data["email"] = this.email;
         data["clientId"] = this.clientId;
         data["clientName"] = this.clientName;
         data["tokenType"] = this.tokenType;
@@ -21340,6 +22916,7 @@ export interface IRevokedTokenDto {
     jti: string | undefined;
     subjectId: string | undefined;
     userName: string | undefined;
+    email: string | undefined;
     clientId: string | undefined;
     clientName: string | undefined;
     tokenType: string | undefined;

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Dtos.MultiTenant;
 using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services.Interfaces;
 using Skoruba.Duende.IdentityServer.Admin.EntityFramework.Entities;
@@ -16,10 +17,17 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
     public class MultiTenantOrganizationService : IMultiTenantOrganizationService
     {
         private readonly IMultiTenantOrganizationRepository _repository;
+        private readonly IGroupService _groupService;
+        private readonly ILogger<MultiTenantOrganizationService> _logger;
 
-        public MultiTenantOrganizationService(IMultiTenantOrganizationRepository repository)
+        public MultiTenantOrganizationService(
+            IMultiTenantOrganizationRepository repository,
+            IGroupService groupService,
+            ILogger<MultiTenantOrganizationService> logger)
         {
             _repository = repository;
+            _groupService = groupService;
+            _logger = logger;
         }
 
         #region Organization
@@ -92,6 +100,10 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
             };
 
             var created = await _repository.CreateAsync(organization, cancellationToken);
+
+            // Sync: 自動建立對應的 Organization Group
+            await SyncGroupSafeAsync(created.Id, created.Code, created.Name, created.TenantId, cancellationToken);
+
             return MapToDto(created);
         }
 
@@ -119,6 +131,10 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
             existing.InheritParentPermissions = dto.InheritParentPermissions;
 
             var updated = await _repository.UpdateAsync(existing, cancellationToken);
+
+            // Sync: 同步更新對應的 Organization Group (Code 或 Name 可能變更)
+            await SyncGroupSafeAsync(updated.Id, updated.Code, updated.Name, updated.TenantId, cancellationToken);
+
             return MapToDto(updated);
         }
 
@@ -133,6 +149,12 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
             {
                 var success = await _repository.DeleteAsync(id, cancellationToken);
                 count = success ? 1 : 0;
+            }
+
+            // Sync: 停用對應的 Organization Group
+            if (count > 0)
+            {
+                await RemoveGroupSafeAsync(id, cancellationToken);
             }
 
             return new OperationResultDto
@@ -225,6 +247,40 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
                 Permissions = p.Permissions,
                 IsEnabled = p.IsEnabled
             }).ToList();
+        }
+
+        #endregion
+
+        #region Organization ↔ Group Sync Helpers
+
+        /// <summary>
+        /// 安全地同步 Organization 對應的 Group，失敗不影響主流程
+        /// </summary>
+        private async Task SyncGroupSafeAsync(Guid organizationId, string code, string name, Guid tenantId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _groupService.SyncOrganizationGroupAsync(organizationId, code, name, tenantId, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to sync Organization Group for OrgId={OrganizationId}. This does not affect the Organization operation.", organizationId);
+            }
+        }
+
+        /// <summary>
+        /// 安全地停用 Organization 對應的 Group，失敗不影響主流程
+        /// </summary>
+        private async Task RemoveGroupSafeAsync(Guid organizationId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _groupService.RemoveOrganizationGroupAsync(organizationId, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to remove Organization Group for OrgId={OrganizationId}. This does not affect the Organization operation.", organizationId);
+            }
         }
 
         #endregion

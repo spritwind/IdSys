@@ -34,9 +34,19 @@ namespace Skoruba.Duende.IdentityServer.Admin.EntityFramework.Entities
         public string Description { get; set; }
 
         /// <summary>
-        /// 群組類型 (General, Project, Team, etc.)
+        /// 群組類型 (Organization, Leader, DeputyLeader, Personal, Special, Project, General)
         /// </summary>
         public string GroupType { get; set; } = "General";
+
+        /// <summary>
+        /// 關聯組織 ID (弱關聯，僅 GroupType=Organization 時有值)
+        /// </summary>
+        public Guid? OrganizationId { get; set; }
+
+        /// <summary>
+        /// 來源 prs_group.Id (資料遷移追蹤用)
+        /// </summary>
+        public int? SourceId { get; set; }
 
         /// <summary>
         /// 群組擁有者 UserId

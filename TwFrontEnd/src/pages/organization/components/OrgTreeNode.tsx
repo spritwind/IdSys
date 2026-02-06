@@ -3,7 +3,7 @@
  * UC Capital Identity Admin
  */
 
-import { memo } from 'react';
+import { memo, useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronRight, User, Crown, Building2, Users } from 'lucide-react';
 import clsx from 'clsx';
@@ -102,109 +102,157 @@ function OrgTreeNodeComponent({
             node.deptZhName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             node.manager?.toLowerCase().includes(searchQuery.toLowerCase()));
 
+    // --- 子節點置中偏移計算 ---
+    // 當子樹寬度不均時，父節點需偏移至首尾子節點中心的中點
+    const childrenRowRef = useRef<HTMLDivElement>(null);
+    const [centerOffset, setCenterOffset] = useState(0);
+
+    useEffect(() => {
+        const el = childrenRowRef.current;
+        if (!el || !hasChildren || !isExpanded) {
+            setCenterOffset(0);
+            return;
+        }
+
+        const measure = () => {
+            const cols = Array.from(el.children) as HTMLElement[];
+            if (cols.length < 2) {
+                setCenterOffset(0);
+                return;
+            }
+
+            const rowRect = el.getBoundingClientRect();
+            const firstRect = cols[0].getBoundingClientRect();
+            const lastRect = cols[cols.length - 1].getBoundingClientRect();
+
+            const firstCenter = firstRect.left + firstRect.width / 2 - rowRect.left;
+            const lastCenter = lastRect.left + lastRect.width / 2 - rowRect.left;
+            const childMidpoint = (firstCenter + lastCenter) / 2;
+            const containerCenter = rowRect.width / 2;
+
+            const offset = childMidpoint - containerCenter;
+            setCenterOffset(prev => Math.abs(prev - offset) > 0.5 ? offset : prev);
+        };
+
+        const rafId = requestAnimationFrame(measure);
+        const observer = new ResizeObserver(measure);
+        observer.observe(el);
+
+        return () => {
+            cancelAnimationFrame(rafId);
+            observer.disconnect();
+        };
+    }, [hasChildren, isExpanded, expandedNodes]);
+
+    const offsetStyle = centerOffset !== 0
+        ? { transform: `translateX(${centerOffset}px)`, transition: 'transform 0.3s ease' } as const
+        : undefined;
+
     return (
         <div className="flex flex-col items-center">
-            {/* 節點本體 */}
-            <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, delay: level * 0.05 }}
-                className={clsx(
-                    'org-node-card', // 用於拖拉平移時的識別
-                    'relative group cursor-pointer',
-                    'min-w-[200px] max-w-[280px]',
-                    'rounded-xl border backdrop-blur-sm',
-                    'transition-all duration-300',
-                    style.bg,
-                    style.border,
-                    style.glow,
-                    isMatch && 'ring-2 ring-amber-500 ring-offset-2 ring-offset-[var(--color-bg-primary)]'
-                )}
-                onClick={() => onNodeClick?.(node)}
-            >
-                {/* 展開/收合按鈕 */}
-                {hasChildren && (
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onToggleExpand(node.id);
-                        }}
-                        className={clsx(
-                            'absolute -left-3 top-1/2 -translate-y-1/2',
-                            'w-6 h-6 rounded-full',
-                            'bg-[var(--color-bg-tertiary)] border border-white/20',
-                            'flex items-center justify-center',
-                            'text-white/60 hover:text-white hover:border-white/40',
-                            'transition-all duration-200',
-                            'z-10'
-                        )}
-                    >
-                        {isExpanded ? (
-                            <ChevronDown size={14} />
-                        ) : (
-                            <ChevronRight size={14} />
-                        )}
-                    </button>
-                )}
-
-                <div className="p-4">
-                    {/* 頂部：圖標與部門代碼 */}
-                    <div className="flex items-center gap-3 mb-3">
-                        <div
+            {/* 節點本體 - 偏移至子節點中心 */}
+            <div style={offsetStyle}>
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: level * 0.05 }}
+                    className={clsx(
+                        'org-node-card', // 用於拖拉平移時的識別
+                        'relative group cursor-pointer',
+                        'min-w-[200px] max-w-[280px]',
+                        'rounded-xl border backdrop-blur-sm',
+                        'transition-all duration-300',
+                        style.bg,
+                        style.border,
+                        style.glow,
+                        isMatch && 'ring-2 ring-amber-500 ring-offset-2 ring-offset-[var(--color-bg-primary)]'
+                    )}
+                    onClick={() => onNodeClick?.(node)}
+                >
+                    {/* 展開/收合按鈕 */}
+                    {hasChildren && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onToggleExpand(node.id);
+                            }}
                             className={clsx(
-                                'w-10 h-10 rounded-lg flex items-center justify-center',
-                                'shadow-lg',
-                                style.iconBg
+                                'absolute -left-3 top-1/2 -translate-y-1/2',
+                                'w-6 h-6 rounded-full',
+                                'bg-[var(--color-bg-tertiary)] border border-white/20',
+                                'flex items-center justify-center',
+                                'text-white/60 hover:text-white hover:border-white/40',
+                                'transition-all duration-200',
+                                'z-10'
                             )}
                         >
-                            <Icon size={20} className="text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            {node.deptCode && (
-                                <span className="text-[10px] font-mono text-white/40 uppercase tracking-wider">
-                                    {highlightText(node.deptCode, searchQuery)}
-                                </span>
+                            {isExpanded ? (
+                                <ChevronDown size={14} />
+                            ) : (
+                                <ChevronRight size={14} />
                             )}
-                            <h4 className="text-sm font-bold text-white truncate">
-                                {highlightText(node.deptZhName || node.name, searchQuery)}
-                            </h4>
+                        </button>
+                    )}
+
+                    <div className="p-4">
+                        {/* 頂部：圖標與部門代碼 */}
+                        <div className="flex items-center gap-3 mb-3">
+                            <div
+                                className={clsx(
+                                    'w-10 h-10 rounded-lg flex items-center justify-center',
+                                    'shadow-lg',
+                                    style.iconBg
+                                )}
+                            >
+                                <Icon size={20} className="text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                {node.deptCode && (
+                                    <span className="text-[10px] font-mono text-white/40 uppercase tracking-wider">
+                                        {highlightText(node.deptCode, searchQuery)}
+                                    </span>
+                                )}
+                                <h4 className="text-sm font-bold text-white truncate">
+                                    {highlightText(node.deptZhName || node.name, searchQuery)}
+                                </h4>
+                            </div>
                         </div>
+
+                        {/* 英文名稱 */}
+                        {node.deptEName && (
+                            <p className="text-xs text-white/50 mb-2 truncate">
+                                {node.deptEName}
+                            </p>
+                        )}
+
+                        {/* 主管資訊 */}
+                        {node.manager && (
+                            <div className="flex items-center gap-2 mt-2 pt-2 border-t border-white/10">
+                                <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center">
+                                    <User size={12} className="text-white/60" />
+                                </div>
+                                <span className="text-xs text-white/70">
+                                    {highlightText(node.manager, searchQuery)}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* 子部門數量標籤 */}
+                        {hasChildren && (
+                            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
+                                <span className="px-2 py-0.5 text-[10px] rounded-full bg-[var(--color-bg-tertiary)] border border-white/10 text-white/60">
+                                    {node.children.length} 個子部門
+                                </span>
+                            </div>
+                        )}
                     </div>
 
-                    {/* 英文名稱 */}
-                    {node.deptEName && (
-                        <p className="text-xs text-white/50 mb-2 truncate">
-                            {node.deptEName}
-                        </p>
-                    )}
-
-                    {/* 主管資訊 */}
-                    {node.manager && (
-                        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-white/10">
-                            <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center">
-                                <User size={12} className="text-white/60" />
-                            </div>
-                            <span className="text-xs text-white/70">
-                                {highlightText(node.manager, searchQuery)}
-                            </span>
-                        </div>
-                    )}
-
-                    {/* 子部門數量標籤 */}
-                    {hasChildren && (
-                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
-                            <span className="px-2 py-0.5 text-[10px] rounded-full bg-[var(--color-bg-tertiary)] border border-white/10 text-white/60">
-                                {node.children.length} 個子部門
-                            </span>
-                        </div>
-                    )}
-                </div>
-
-                {/* Hover 光暈效果 */}
-                <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-                </div>
-            </motion.div>
+                    {/* Hover 光暈效果 */}
+                    <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+                    </div>
+                </motion.div>
+            </div>
 
             {/* 連接線與子節點 */}
             <AnimatePresence>
@@ -216,13 +264,16 @@ function OrgTreeNodeComponent({
                         transition={{ duration: 0.3 }}
                         className="flex flex-col items-center"
                     >
-                        {/* 父節點到分支點的垂直連接線 */}
-                        <div className="w-0.5 h-6 bg-gradient-to-b from-white/40 to-white/20" />
+                        {/* 父節點到分支點的垂直連接線 - 同步偏移 */}
+                        <div
+                            className="w-0.5 h-6 bg-gradient-to-b from-white/40 to-white/20"
+                            style={offsetStyle}
+                        />
 
                         {/* 子節點容器 */}
                         <div className="relative">
                             {/* 子節點列表 */}
-                            <div className="flex items-start gap-3">
+                            <div ref={childrenRowRef} className="flex items-start gap-3">
                                 {node.children.map((child, index) => {
                                     const isFirst = index === 0;
                                     const isLast = index === node.children.length - 1;

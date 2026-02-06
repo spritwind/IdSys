@@ -91,11 +91,19 @@ namespace Skoruba.Duende.IdentityServer.Admin.EntityFramework.DbContexts
                 entity.ToTable("Groups");
                 entity.HasKey(e => e.Id);
                 entity.HasIndex(e => e.TenantId);
+                entity.HasIndex(e => e.OrganizationId);
+                entity.HasIndex(e => e.SourceId);
+                entity.HasIndex(e => e.GroupType);
+
+                entity.Property(e => e.OrganizationId).IsRequired(false);
+                entity.Property(e => e.SourceId).IsRequired(false);
 
                 entity.HasOne(e => e.Tenant)
                     .WithMany(t => t.Groups)
                     .HasForeignKey(e => e.TenantId)
                     .OnDelete(DeleteBehavior.Restrict);
+
+                // OrganizationId 為弱關聯，不建立 FK constraint
             });
 
             // GroupMember
@@ -168,7 +176,9 @@ namespace Skoruba.Duende.IdentityServer.Admin.EntityFramework.DbContexts
             // Permission
             modelBuilder.Entity<Permission>(entity =>
             {
-                entity.ToTable("Permissions");
+                // 使用 HasTrigger 告知 EF Core 此表有觸發程序，
+                // 讓 SaveChanges 使用 OUTPUT INTO 而非直接 OUTPUT
+                entity.ToTable("Permissions", tb => tb.HasTrigger("Permissions_Triggers"));
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.SubjectName).HasMaxLength(200);
                 entity.HasIndex(e => new { e.SubjectType, e.SubjectId });

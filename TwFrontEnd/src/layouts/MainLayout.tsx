@@ -30,9 +30,9 @@ export function MainLayout() {
     return (
         <SidebarProvider>
             <ToastProvider>
-                <div className="min-h-screen bg-[var(--color-bg-primary)] text-white font-sans selection:bg-[var(--color-accent-primary)] selection:text-white">
-                    {/* Background Effects */}
-                    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+                <div className="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] font-sans selection:bg-[var(--color-accent-primary)] selection:text-white">
+                    {/* Background Effects - hidden in light mode via opacity */}
+                    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden dark-bg-effects">
                         <div className="absolute top-[-20%] right-[-10%] w-[60vw] h-[60vw] rounded-full blur-[150px] opacity-20 bg-[radial-gradient(circle,var(--color-accent-primary)_0%,transparent_70%)]" />
                         <div className="absolute bottom-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full blur-[150px] opacity-10 bg-[radial-gradient(circle,var(--color-accent-secondary)_0%,transparent_70%)]" />
                     </div>

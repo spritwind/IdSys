@@ -17,6 +17,7 @@ import {
     ChevronRight,
     Settings2,
     Lock,
+    FolderTree,
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import clsx from 'clsx';
@@ -72,6 +73,11 @@ const menuItems: MenuItem[] = [
         icon: Building2,
         label: '組織架構',
         path: '/organization',
+    },
+    {
+        icon: FolderTree,
+        label: '群組管理',
+        path: '/groups',
     },
 ];
 

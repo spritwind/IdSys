@@ -101,7 +101,7 @@ namespace Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories
             var userPermissions = await GetUserPermissionsAsync(userId, cancellationToken);
             permissions.AddRange(userPermissions);
 
-            // 2. 使用者所屬組織的權限（包含 Organization 和 Group SubjectType）
+            // 2. 使用者所屬組織的權限 (透過 OrganizationMembers — 組織圖)
             var userOrganizations = await DbContext.OrganizationMembers
                 .Include(m => m.Organization)
                 .Where(m => m.UserId == userId)
@@ -109,17 +109,29 @@ namespace Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories
 
             foreach (var membership in userOrganizations)
             {
-                // 組織繼承權限
+                // 組織繼承權限 (SubjectType = Organization)
                 var orgPermissions = await GetOrganizationPermissionsWithInheritanceAsync(
                     membership.OrganizationId, cancellationToken);
                 permissions.AddRange(orgPermissions);
+            }
 
-                // Group SubjectType 的權限（SubjectId = OrganizationId）
+            // 3. 使用者所屬群組的權限 (透過 GroupMembers — 群組系統)
+            //    只有 InheritGroupPermissions = true 的成員才繼承群組權限
+            var userGroupIds = await DbContext.GroupMembers
+                .Where(m => m.UserId == userId && m.InheritGroupPermissions)
+                .Join(DbContext.Groups.Where(g => g.IsEnabled),
+                    m => m.GroupId, g => g.Id,
+                    (m, g) => m.GroupId)
+                .ToListAsync(cancellationToken);
+
+            if (userGroupIds.Count > 0)
+            {
+                var groupIdStrings = userGroupIds.Select(id => id.ToString()).ToList();
                 var groupPermissions = await DbContext.Permissions
                     .Include(p => p.Resource)
                     .Where(p => p.IsEnabled &&
                                p.SubjectType == PermissionSubjectType.Group &&
-                               p.SubjectId == membership.OrganizationId.ToString() &&
+                               groupIdStrings.Contains(p.SubjectId) &&
                                (p.ExpiresAt == null || p.ExpiresAt > DateTime.UtcNow))
                     .ToListAsync(cancellationToken);
                 permissions.AddRange(groupPermissions);
@@ -181,6 +193,17 @@ namespace Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories
                 .Where(p => p.IsEnabled &&
                            p.SubjectType == PermissionSubjectType.Organization &&
                            p.SubjectId == organizationId.ToString() &&
+                           (p.ExpiresAt == null || p.ExpiresAt > DateTime.UtcNow))
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<Permission>> GetGroupPermissionsAsync(Guid groupId, CancellationToken cancellationToken = default)
+        {
+            return await DbContext.Permissions
+                .Include(p => p.Resource)
+                .Where(p => p.IsEnabled &&
+                           p.SubjectType == PermissionSubjectType.Group &&
+                           p.SubjectId == groupId.ToString() &&
                            (p.ExpiresAt == null || p.ExpiresAt > DateTime.UtcNow))
                 .ToListAsync(cancellationToken);
         }

@@ -114,10 +114,12 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Extensions
             // Repositories
             services.AddTransient<IMultiTenantOrganizationRepository, MultiTenantOrganizationRepository>();
             services.AddTransient<IMultiTenantPermissionRepository, MultiTenantPermissionRepository>();
+            services.AddTransient<IGroupRepository, GroupRepository>();
 
             // Services
             services.AddTransient<IMultiTenantOrganizationService, MultiTenantOrganizationService>();
             services.AddTransient<IMultiTenantPermissionService, MultiTenantPermissionService>();
+            services.AddTransient<IGroupService, GroupService>();
 
             return services;
         }

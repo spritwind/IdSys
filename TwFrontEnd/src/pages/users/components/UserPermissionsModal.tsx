@@ -5,7 +5,7 @@
  * 顯示使用者的有效權限（含從角色繼承）+ 管理個人權限
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
     X,
@@ -223,6 +223,7 @@ export default function UserPermissionsModal({ user, onClose, onSave }: Props) {
     // 編輯狀態
     const [selectedScopes, setSelectedScopes] = useState<Record<string, string[]>>({});
     const [originalScopes, setOriginalScopes] = useState<Record<string, string[]>>({});
+    const savedRef = useRef(false);
 
     // 從其他來源繼承的權限（僅在該 scope 沒有直接授權時才標記為不可編輯）
     const inheritedScopes = useMemo(() => {
@@ -284,51 +285,52 @@ export default function UserPermissionsModal({ user, onClose, onSave }: Props) {
     }, [resources]);
 
     // 載入資料
-    useEffect(() => {
-        async function loadData() {
-            setLoading(true);
-            try {
-                const [resourcesData, scopesData, effectiveData, directData] = await Promise.all([
-                    permissionV2Api.getResources(),
-                    permissionV2Api.getScopes(),
-                    permissionV2Api.getUserEffectivePermissions(user.id),
-                    permissionV2Api.getUserPermissions(user.id),
-                ]);
+    const loadData = useCallback(async () => {
+        setLoading(true);
+        try {
+            const [resourcesData, scopesData, effectiveData, directData] = await Promise.all([
+                permissionV2Api.getResources(),
+                permissionV2Api.getScopes(),
+                permissionV2Api.getUserEffectivePermissions(user.id),
+                permissionV2Api.getUserPermissions(user.id),
+            ]);
 
-                setResources(resourcesData);
-                setScopes(scopesData);
-                setEffectivePermissions(effectiveData.permissions || []);
-                setDirectPermissions(directData);
+            setResources(resourcesData);
+            setScopes(scopesData);
+            setEffectivePermissions(effectiveData.permissions || []);
+            setDirectPermissions(directData);
 
-                // 解析直接權限為選中狀態
-                const scopeMap: Record<string, string[]> = {};
-                directData.forEach((p) => {
-                    let scopeList: string[] = [];
-                    if (p.scopes.startsWith('@')) {
-                        scopeList = p.scopes.split('@').filter(Boolean);
-                    } else if (p.scopes.startsWith('[')) {
-                        try {
-                            scopeList = JSON.parse(p.scopes);
-                        } catch {
-                            scopeList = [];
-                        }
-                    } else {
-                        scopeList = p.scopeList || [];
+            // 解析直接權限為選中狀態
+            const scopeMap: Record<string, string[]> = {};
+            directData.forEach((p) => {
+                let scopeList: string[] = [];
+                if (p.scopes.startsWith('@')) {
+                    scopeList = p.scopes.split('@').filter(Boolean);
+                } else if (p.scopes.startsWith('[')) {
+                    try {
+                        scopeList = JSON.parse(p.scopes);
+                    } catch {
+                        scopeList = [];
                     }
-                    scopeMap[p.resourceId] = scopeList;
-                });
+                } else {
+                    scopeList = p.scopeList || [];
+                }
+                scopeMap[p.resourceId] = scopeList;
+            });
 
-                setSelectedScopes(scopeMap);
-                setOriginalScopes(JSON.parse(JSON.stringify(scopeMap)));
-            } catch (error) {
-                console.error('Failed to load permission data:', error);
-                toast.error('載入權限資料失敗');
-            } finally {
-                setLoading(false);
-            }
+            setSelectedScopes(scopeMap);
+            setOriginalScopes(JSON.parse(JSON.stringify(scopeMap)));
+        } catch (error) {
+            console.error('Failed to load permission data:', error);
+            toast.error('載入權限資料失敗');
+        } finally {
+            setLoading(false);
         }
-        loadData();
     }, [user.id]);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
 
     // 切換權限範圍
     const handleToggleScope = (resourceId: string, scope: string) => {
@@ -425,12 +427,18 @@ export default function UserPermissionsModal({ user, onClose, onSave }: Props) {
         return false;
     }, [selectedScopes, originalScopes]);
 
+    // 關閉 Modal（若有儲存過則通知父元件重新整理）
+    const handleClose = () => {
+        if (savedRef.current) {
+            onSave();
+        } else {
+            onClose();
+        }
+    };
+
     // 儲存
     const handleSave = async () => {
-        if (!hasChanges) {
-            onClose();
-            return;
-        }
+        if (!hasChanges) return;
 
         setSaving(true);
         try {
@@ -455,6 +463,11 @@ export default function UserPermissionsModal({ user, onClose, onSave }: Props) {
                     const currentSorted = [...current].sort().join(',');
                     const originalSorted = [...original].sort().join(',');
                     if (currentSorted !== originalSorted) {
+                        // Scope 變更：先撤銷舊權限再授予新權限，避免重複記錄
+                        if (original.length > 0) {
+                            const permission = directPermissions.find((p) => p.resourceId === resourceId);
+                            if (permission) toRevoke.push(permission.id);
+                        }
                         toGrant.push({ resourceId, scopes: current });
                     }
                 }
@@ -474,11 +487,16 @@ export default function UserPermissionsModal({ user, onClose, onSave }: Props) {
                 });
             }
 
-            toast.success('權限已更新');
-            onSave();
+            toast.success('權限已儲存完成');
+            savedRef.current = true;
+            // 重新載入資料以反映最新狀態（不關閉視窗）
+            await loadData();
         } catch (error: any) {
-            console.error('Failed to save permissions:', error);
-            toast.error(error.response?.data?.message || '儲存失敗');
+            const errData = error.response?.data;
+            const errMsg = errData?.message || errData?.Message || error.message || '儲存失敗';
+            const errDetail = errData?.data?.detail || errData?.Data?.detail || '';
+            console.error('Failed to save permissions:', errMsg, errDetail, error);
+            toast.error(errDetail ? `${errMsg} (${errDetail})` : errMsg);
         } finally {
             setSaving(false);
         }
@@ -507,7 +525,7 @@ export default function UserPermissionsModal({ user, onClose, onSave }: Props) {
                         </div>
                     </div>
                     <button
-                        onClick={onClose}
+                        onClick={handleClose}
                         className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                     >
                         <X className="w-5 h-5 text-gray-400" />
@@ -646,7 +664,7 @@ export default function UserPermissionsModal({ user, onClose, onSave }: Props) {
                 {/* Footer */}
                 <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/10">
                     <button
-                        onClick={onClose}
+                        onClick={handleClose}
                         className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
                     >
                         {activeTab === 'effective' ? '關閉' : '取消'}

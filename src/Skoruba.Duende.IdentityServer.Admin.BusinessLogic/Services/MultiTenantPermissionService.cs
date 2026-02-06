@@ -145,6 +145,12 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Services
             return permissions.Select(MapPermissionToDto).ToList();
         }
 
+        public async Task<List<PermissionDto>> GetGroupPermissionsAsync(Guid groupId, CancellationToken cancellationToken = default)
+        {
+            var permissions = await _repository.GetGroupPermissionsAsync(groupId, cancellationToken);
+            return permissions.Select(MapPermissionToDto).ToList();
+        }
+
         public async Task<List<PermissionDto>> GetResourcePermissionsAsync(Guid resourceId, CancellationToken cancellationToken = default)
         {
             var permissions = await _repository.GetResourcePermissionsAsync(resourceId, cancellationToken);

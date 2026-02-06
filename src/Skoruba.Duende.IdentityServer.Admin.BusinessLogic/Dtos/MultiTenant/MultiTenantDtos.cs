@@ -272,6 +272,95 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Dtos.MultiTenant
 
     #endregion
 
+    #region Group DTOs
+
+    /// <summary>
+    /// 群組 DTO
+    /// </summary>
+    public class GroupDto
+    {
+        public Guid Id { get; set; }
+        public Guid TenantId { get; set; }
+        public string Code { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string GroupType { get; set; }
+        public Guid? OrganizationId { get; set; }
+        public string OrganizationName { get; set; }
+        public int? SourceId { get; set; }
+        public string OwnerUserId { get; set; }
+        public string OwnerUserName { get; set; }
+        public bool IsEnabled { get; set; }
+        public int MemberCount { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+    }
+
+    /// <summary>
+    /// 新增群組 DTO
+    /// </summary>
+    public class CreateGroupDto
+    {
+        public string Code { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string GroupType { get; set; } = "General";
+        public Guid? OrganizationId { get; set; }
+        public string OwnerUserId { get; set; }
+    }
+
+    /// <summary>
+    /// 更新群組 DTO
+    /// </summary>
+    public class UpdateGroupDto
+    {
+        public string Code { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string GroupType { get; set; }
+        public Guid? OrganizationId { get; set; }
+        public string OwnerUserId { get; set; }
+        public bool IsEnabled { get; set; }
+    }
+
+    /// <summary>
+    /// 群組成員 DTO
+    /// </summary>
+    public class GroupMemberDetailDto
+    {
+        public Guid Id { get; set; }
+        public Guid GroupId { get; set; }
+        public string UserId { get; set; }
+        public string UserName { get; set; }
+        public string DisplayName { get; set; }
+        public string Email { get; set; }
+        public string MemberRole { get; set; }
+        public bool InheritGroupPermissions { get; set; }
+        public DateTime JoinedAt { get; set; }
+    }
+
+    /// <summary>
+    /// 新增群組成員 DTO
+    /// </summary>
+    public class AddGroupMemberDto
+    {
+        public string UserId { get; set; }
+        public string MemberRole { get; set; } = "Member";
+        public bool InheritGroupPermissions { get; set; } = true;
+    }
+
+    /// <summary>
+    /// 群組統計 DTO
+    /// </summary>
+    public class GroupStatsDto
+    {
+        public int TotalGroups { get; set; }
+        public Dictionary<string, int> CountByType { get; set; } = new Dictionary<string, int>();
+        public int TotalMembers { get; set; }
+    }
+
+    #endregion
+
     #region Common DTOs
 
     /// <summary>

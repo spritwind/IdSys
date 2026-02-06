@@ -5,6 +5,7 @@
 
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { MainLayout } from './layouts/MainLayout';
 import Overview from './pages/dashboard/Overview';
@@ -25,6 +26,7 @@ import {
     IdentityResourceEditPage,
 } from './pages/identity-server';
 import TokenManagementPage from './pages/token-management/TokenManagementPage';
+import GroupsPage from './pages/groups/GroupsPage';
 import './index.css';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
@@ -42,7 +44,7 @@ import {
 /* Landing Page Component */
 function LandingPage() {
     return (
-        <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-[#0a0a0f]">
+        <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-[var(--color-bg-primary)]">
             {/* Dynamic Background Elements */}
             <motion.div
                 animate={{
@@ -224,6 +226,7 @@ function ProtectedLayout() {
 function App() {
     return (
         <AuthProvider>
+            <ThemeProvider>
             <BrowserRouter basename={import.meta.env.BASE_URL}>
                 {/* Debug Panel - 只在開發模式顯示 */}
                 <DebugPanel />
@@ -284,6 +287,9 @@ function App() {
                         {/* Organization */}
                         <Route path="/organization" element={<OrganizationPage />} />
 
+                        {/* Groups */}
+                        <Route path="/groups" element={<GroupsPage />} />
+
                         {/* Permission Management */}
                         <Route path="/permissions" element={<PermissionPage />} />
                     </Route>
@@ -292,6 +298,7 @@ function App() {
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </BrowserRouter>
+            </ThemeProvider>
         </AuthProvider>
     );
 }

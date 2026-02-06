@@ -112,6 +112,18 @@ export async function getOrganizationPermissions(organizationId: string): Promis
 }
 
 // =====================
+// Group Permissions 群組權限
+// =====================
+
+/**
+ * 取得群組的權限
+ */
+export async function getGroupPermissions(groupId: string): Promise<PermissionDto[]> {
+    const response = await api.get<PermissionDto[]>(`${BASE_URL}/groups/${groupId}`);
+    return response.data;
+}
+
+// =====================
 // Role Permissions 角色權限
 // =====================
 
@@ -192,14 +204,14 @@ export async function updatePermission(permissionId: string, dto: UpdatePermissi
  * 取得主體類型的權限 (通用)
  */
 export async function getSubjectPermissions(subjectType: SubjectType, subjectId: string): Promise<PermissionDto[]> {
-    // 根據主體類型選擇不同的端點
     switch (subjectType) {
         case 'User':
             return getUserPermissions(subjectId);
         case 'Organization':
             return getOrganizationPermissions(subjectId);
+        case 'Group':
+            return getGroupPermissions(subjectId);
         default:
-            // 對於 Role 和 Group，使用通用查詢
             return getUserPermissions(subjectId);
     }
 }
@@ -259,6 +271,8 @@ export const permissionV2Api = {
     checkUserPermission,
     // Organization Permissions
     getOrganizationPermissions,
+    // Group Permissions
+    getGroupPermissions,
     // Role Permissions
     getRolePermissions,
     // Resource Permissions
