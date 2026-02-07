@@ -1,10 +1,14 @@
 // Copyright (c) Jan Škoruba. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0.
 
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -51,6 +55,30 @@ namespace Skoruba.Duende.IdentityServer.Admin
 
         public void ConfigureServices(IServiceCollection services)
         {
+            // UC Capital: 配置 Forwarded Headers（Load Balancer SSL termination 環境必須）
+            // 這讓 ASP.NET Core 信任 nginx 傳來的 X-Forwarded-* headers
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                // 清除預設限制，信任所有 proxy（在內網環境安全）
+                options.KnownNetworks.Clear();
+                options.KnownProxies.Clear();
+            });
+
+            // UC Capital: 強制 Cookie 使用 Secure 標誌（Load Balancer SSL termination 環境必須）
+            // 只對 uccapital.com.tw 網域生效，避免影響其他環境
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                options.OnAppendCookie = cookieContext =>
+                {
+                    if (cookieContext.Context.Request.Host.Host.EndsWith("uccapital.com.tw", StringComparison.OrdinalIgnoreCase))
+                    {
+                        cookieContext.CookieOptions.Secure = true;
+                        cookieContext.CookieOptions.SameSite = SameSiteMode.None;
+                    }
+                };
+            });
+
             // UC Capital: 讀取 React SPA API 配置
             var reactSpaConfig = Configuration.GetSection("ReactSpaApiConfiguration").Get<ReactSpaApiConfiguration>()
                 ?? new ReactSpaApiConfiguration();
@@ -79,6 +107,18 @@ namespace Skoruba.Duende.IdentityServer.Admin
                 IdentityUserDto, IdentityRoleDto, IdentityUsersDto, IdentityRolesDto, IdentityUserRolesDto,
                 IdentityUserClaimsDto, IdentityUserProviderDto, IdentityUserProvidersDto, IdentityUserChangePasswordDto,
                 IdentityRoleClaimsDto, IdentityUserClaimDto, IdentityRoleClaimDto>(ConfigureUIOptions);
+
+            // UC Capital: 直接配置 OIDC 的 CorrelationCookie 和 NonceCookie（Load Balancer SSL termination 環境必須）
+            // CookiePolicyOptions 對 OIDC middleware 的內部 cookie 可能無效，需要直接設定
+            services.Configure<OpenIdConnectOptions>(
+                Skoruba.Duende.IdentityServer.Admin.UI.Configuration.Constants.AuthenticationConsts.OidcAuthenticationScheme,
+                options =>
+                {
+                    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.CorrelationCookie.SameSite = SameSiteMode.None;
+                    options.NonceCookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.NonceCookie.SameSite = SameSiteMode.None;
+                });
 
             // Monitor changes in Admin UI views
             services.AddAdminUIRazorRuntimeCompilation(HostingEnvironment);
@@ -127,6 +167,28 @@ namespace Skoruba.Duende.IdentityServer.Admin
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
+            var logger = loggerFactory.CreateLogger<Startup>();
+
+            // UC Capital: 使用 Forwarded Headers（必須在最前面）
+            // 這會讓 ASP.NET Core 從 X-Forwarded-Proto header 正確識別 HTTPS
+            app.UseForwardedHeaders();
+
+            // UC Capital: 備用方案 - 如果 ForwardedHeaders 不生效，強制設定 HTTPS scheme
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Host.Host.EndsWith("uccapital.com.tw", StringComparison.OrdinalIgnoreCase) &&
+                    context.Request.Scheme == "http")
+                {
+                    context.Request.Scheme = "https";
+                    logger.LogWarning("[ADMIN-HTTPS-FORCE] Forced HTTPS for {Path}", context.Request.Path);
+                }
+                await next();
+            });
+
+            // UC Capital: 啟用 Cookie Policy（Load Balancer SSL termination 環境必須）
+            // 這會套用 ConfigureServices 中設定的 CookiePolicyOptions，確保 OIDC correlation cookie 正確設定
+            app.UseCookiePolicy();
+
             // UC Capital: 啟用 CORS 支持 React SPA
             var reactSpaConfig = app.ApplicationServices.GetService<ReactSpaApiConfiguration>();
             if (reactSpaConfig?.Enabled == true)

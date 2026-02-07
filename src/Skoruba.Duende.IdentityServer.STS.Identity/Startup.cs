@@ -335,6 +335,18 @@ JWT Token 是**無狀態 (Stateless)** 的：
                 settings.DocExpansion = "list";
             });
 
+            // Force HTTPS scheme BEFORE authentication (critical for OAuth callbacks)
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Host.Host.EndsWith("uccapital.com.tw", StringComparison.OrdinalIgnoreCase) &&
+                    context.Request.Scheme == "http")
+                {
+                    context.Request.Scheme = "https";
+                    logger.LogWarning("[HTTPS-FORCE-EARLY] Forced HTTPS for {Path}", context.Request.Path);
+                }
+                await next();
+            });
+
             UseAuthentication(app);
 
             // Add custom security headers

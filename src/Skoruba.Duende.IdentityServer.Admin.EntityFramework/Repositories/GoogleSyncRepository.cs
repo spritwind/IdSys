@@ -49,7 +49,7 @@ namespace Skoruba.Duende.IdentityServer.Admin.EntityFramework.Repositories
 
             var memberCount = await conn.ExecuteScalarAsync<int>(@"
                 SELECT COUNT(*) FROM [dbo].[OrganizationMembers] AS M
-                INNER JOIN [dbo].[Organizations] AS O ON M.[OrganizationId] = O.[Id_104]
+                INNER JOIN [dbo].[Organizations] AS O ON M.[OrganizationId] = O.[Id]
                 WHERE O.[TenantId] = @TenantId AND O.[IsEnabled] = 1",
                 new { TenantId = tenantId });
 

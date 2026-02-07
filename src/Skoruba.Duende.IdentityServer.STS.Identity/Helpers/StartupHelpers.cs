@@ -20,6 +20,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Tokens;
@@ -111,6 +112,20 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.Helpers
             forwardingOptions.KnownProxies.Clear();
 
             app.UseForwardedHeaders(forwardingOptions);
+
+            // Force HTTPS scheme for domains behind Load Balancer without X-Forwarded-Proto
+            app.Use(async (context, next) =>
+            {
+                var originalScheme = context.Request.Scheme;
+                if (context.Request.Host.Host.EndsWith("uccapital.com.tw", StringComparison.OrdinalIgnoreCase))
+                {
+                    context.Request.Scheme = "https";
+                }
+                var logger = context.RequestServices.GetService<ILoggerFactory>()?.CreateLogger("HttpsForceMiddleware");
+                logger?.LogWarning("[HTTPS-FORCE] Host={Host}, OriginalScheme={OriginalScheme}, NewScheme={NewScheme}, Path={Path}",
+                    context.Request.Host.Host, originalScheme, context.Request.Scheme, context.Request.Path);
+                await next();
+            });
 
             app.UseReferrerPolicy(options => options.NoReferrer());
 
