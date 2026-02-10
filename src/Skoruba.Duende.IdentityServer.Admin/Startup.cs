@@ -159,6 +159,26 @@ namespace Skoruba.Duende.IdentityServer.Admin
             services.AddScoped<IGoogleSyncRepository, GoogleSyncRepository>();
             services.AddScoped<IGoogleWorkspaceSyncService, GoogleWorkspaceSyncService>();
 
+            // UC Capital: 註冊 PRS 權限查詢 API 所需服務
+            // 這些服務原本只在 Admin.Api 註冊，但正式環境 API 由 Admin MVC 處理
+            var permQueryConnectionString = Configuration.GetConnectionString("ConfigurationDbConnection");
+            services.AddDbContext<PermissionQueryDbContext>(options =>
+                options.UseSqlServer(permQueryConnectionString));
+            services.AddHttpClient();
+            services.AddMemoryCache();
+            services.Configure<JwtTokenValidatorOptions>(options =>
+            {
+                var adminConfig = Configuration.GetSection("AdminConfiguration")
+                    .Get<Skoruba.Duende.IdentityServer.Admin.UI.Configuration.AdminConfiguration>();
+                options.Authority = adminConfig?.IdentityServerBaseUrl ?? "https://localhost:44310";
+                options.ValidateAudience = false;
+                options.CheckRevocation = true;
+                options.JwksCacheMinutes = 60;
+            });
+            services.AddScoped<IJwtTokenValidator, JwtTokenValidator>();
+            services.AddScoped<IPermissionQueryRepository, PermissionQueryRepository>();
+            services.AddScoped<IPermissionQueryService, PermissionQueryService>();
+
             // UC Capital: 註冊 Admin.UI.Api 控制器 (REST API)
             // 讓 MVC 能夠發現 Admin.UI.Api 程序集中的控制器
             services.AddControllers()
